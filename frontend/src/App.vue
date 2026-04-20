@@ -82,6 +82,9 @@
         <el-menu-item index="/news">
           <el-icon><Cpu /></el-icon><span>资讯 AI 分析</span>
         </el-menu-item>
+        <el-menu-item index="/lineage">
+          <el-icon><Share /></el-icon><span>数据血缘</span>
+        </el-menu-item>
 
         <div class="menu-group-title">系统</div>
         <el-menu-item index="/config">
