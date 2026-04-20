@@ -1,0 +1,38 @@
+INFO:     Will watch for changes in these directories: ['/Users/yujia/Desktop/workspace/bank-cdp-doris4']
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     Started reloader process [83145] using StatReload
+INFO:     Started server process [83151]
+INFO:     Waiting for application startup.
+2026-04-20 18:53:07,059 [INFO] backend.app: ℹ️ 跳过启动预热，Doris 连接池改为按需初始化
+2026-04-20 18:53:07,059 [INFO] backend.app: ℹ️ Telemetry writer 已关闭
+INFO:     Application startup complete.
+INFO:     127.0.0.1:50524 - "GET /api/lineage/sync-logs?limit=20 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50521 - "GET /api/system/health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50542 - "GET /api/system/health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50545 - "GET /api/lineage/sync-logs?limit=20 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50559 - "GET /api/lineage/assets?keyword= HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50561 - "GET /api/lineage/asset/ads_inventory_alarm HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50569 - "GET /api/lineage/om-lineage?table_name=ads_inventory_alarm HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50570 - "GET /api/lineage/field-lineage?table_name=ads_inventory_alarm HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50571 - "GET /api/lineage/impact?asset_id=ads_inventory_alarm HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50580 - "POST /api/lineage/sync-from-audit?start_date=&end_date=&limit=0 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50743 - "GET /api/lineage/sync-logs?limit=20 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50749 - "GET /api/lineage/assets?keyword= HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50793 - "GET /api/lineage/assets?keyword=dws HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50796 - "GET /api/lineage/assets?keyword=dws HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50809 - "GET /api/lineage/asset/dws_product_sales HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50820 - "GET /api/lineage/field-lineage?table_name=dws_product_sales HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50821 - "GET /api/lineage/om-lineage?table_name=dws_product_sales HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50823 - "GET /api/lineage/impact?asset_id=dws_product_sales HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51874 - "GET /api/lineage/sync-logs?limit=20 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51877 - "GET /api/lineage/assets?keyword= HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51883 - "GET /api/lineage/asset/ads_inventory_alarm HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51889 - "GET /api/lineage/om-lineage?table_name=ads_inventory_alarm HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51891 - "GET /api/lineage/field-lineage?table_name=ads_inventory_alarm HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51892 - "GET /api/lineage/impact?asset_id=ads_inventory_alarm HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51947 - "GET /api/lineage/assets?keyword=dws HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51950 - "GET /api/lineage/assets?keyword=dws HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51965 - "GET /api/lineage/asset/dws_product_sales HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51971 - "GET /api/lineage/om-lineage?table_name=dws_product_sales HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51973 - "GET /api/lineage/field-lineage?table_name=dws_product_sales HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51974 - "GET /api/lineage/impact?asset_id=dws_product_sales HTTP/1.1" 200 OK

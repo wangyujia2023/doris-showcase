@@ -6,7 +6,7 @@ import re
 import urllib.error
 import urllib.request
 from datetime import datetime
-from typing import Dict, List
+from typing import Dict, List, Tuple
 import uuid
 
 from backend.doris.connect import execute_query, execute_one
@@ -78,13 +78,14 @@ class RetailLineageService:
                 skipped.append(f"dup:{parsed['target']}")
                 continue
             seen.add(sig)
-            ok, err = await self._push_to_openmetadata(parsed["sources"], parsed["target"], stmt)
+            ok, err = await self._push_to_openmetadata(parsed, stmt)
             record = {
                 "time": row.get("time"),
                 "stmt_type": row.get("stmt_type"),
                 "user": row.get("user"),
                 "target": parsed["target"],
                 "sources": parsed["sources"],
+                "mapped_fields": len(parsed.get("field_lineage") or []),
                 "success": ok,
                 "stmt": stmt[:280],
             }
@@ -113,24 +114,25 @@ class RetailLineageService:
             return None
 
         target = ""
-        m = re.search(r"INSERT\s+INTO\s+([`\w.]+)", text, re.I)
+        target_columns: List[str] = []
+        m = re.search(r"INSERT\s+INTO\s+([`\w.]+)\s*(\((.*?)\))?", text, re.I)
         if m:
             target = m.group(1).replace("`", "")
+            if m.group(3):
+                target_columns = self._split_csv_columns(m.group(3))
         else:
-            m = re.search(r"CREATE\s+VIEW\s+([`\w.]+)", text, re.I)
+            m = re.search(r"CREATE\s+(?:TABLE|VIEW)\s+([`\w.]+)", text, re.I)
             if m:
                 target = m.group(1).replace("`", "")
         if not target:
             return None
 
-        sources = []
-        for m in re.finditer(r"(?:FROM|JOIN)\s+([`\w.]+)", text, re.I):
-            src = m.group(1).replace("`", "")
-            if src.lower() != target.lower() and src not in sources:
-                sources.append(src)
+        alias_map = self._extract_source_aliases(text)
+        sources = list(dict.fromkeys(alias_map.values()))
         if not sources:
             return None
-        return {"target": target, "sources": sources}
+        field_lineage = self._parse_column_lineage(text, target, target_columns, alias_map)
+        return {"target": target, "sources": sources, "field_lineage": field_lineage}
 
     @staticmethod
     def _lineage_signature(sources: List[str], target: str) -> str:
@@ -202,22 +204,89 @@ class RetailLineageService:
                 continue
         return {}
 
-    async def _push_to_openmetadata(self, sources: List[str], target: str, stmt: str) -> tuple[bool, str | None]:
+    async def get_field_lineage(self, table_name: str, depth: int = 3) -> Dict:
+        lineage = await self.get_openmetadata_lineage(table_name, depth=depth)
+        if not lineage:
+            return {"table_name": table_name, "upstream_fields": [], "downstream_fields": [], "raw": {}, "message": "未获取到 OpenMetadata 字段级血缘"}
+
+        node_map = {}
+        entity = lineage.get("entity") or {}
+        if entity.get("id"):
+            node_map[entity["id"]] = entity
+        for node in lineage.get("nodes") or []:
+            if node.get("id"):
+                node_map[node["id"]] = node
+
+        entity_name = self._entity_label(entity)
+        upstream_rows = []
+        downstream_rows = []
+
+        for edge in lineage.get("upstreamEdges") or []:
+            mappings = self._extract_column_lineage(edge, node_map)
+            if not mappings:
+                continue
+            src_table = self._entity_label(node_map.get(edge.get("fromEntity")) or edge.get("fromEntity"))
+            dst_table = self._entity_label(node_map.get(edge.get("toEntity")) or edge.get("toEntity"))
+            for item in mappings:
+                upstream_rows.append({
+                    "source_table": src_table,
+                    "source_fields": item["from_columns"],
+                    "target_table": dst_table or entity_name,
+                    "target_field": item["to_column"],
+                })
+
+        for edge in lineage.get("downstreamEdges") or []:
+            mappings = self._extract_column_lineage(edge, node_map)
+            if not mappings:
+                continue
+            src_table = self._entity_label(node_map.get(edge.get("fromEntity")) or edge.get("fromEntity"))
+            dst_table = self._entity_label(node_map.get(edge.get("toEntity")) or edge.get("toEntity"))
+            for item in mappings:
+                downstream_rows.append({
+                    "source_table": src_table or entity_name,
+                    "source_fields": item["from_columns"],
+                    "target_table": dst_table,
+                    "target_field": item["to_column"],
+                })
+
+        return {
+            "table_name": table_name,
+            "entity": entity,
+            "upstream_fields": upstream_rows,
+            "downstream_fields": downstream_rows,
+            "raw": lineage,
+            "message": "" if (upstream_rows or downstream_rows) else "OpenMetadata 当前未返回 columnsLineage",
+        }
+
+    async def _push_to_openmetadata(self, parsed: Dict, stmt: str) -> tuple[bool, str | None]:
         try:
+            target = parsed["target"]
+            sources = parsed["sources"]
+            field_lineage = parsed.get("field_lineage") or []
             target_entity, target_fqn = self._find_table_entity(target)
             if not target_entity:
                 return False, f"target_not_found:{'|'.join(self._candidate_fqns(target))}"
 
             pushed = 0
+            source_entities: Dict[str, Tuple[Dict, str]] = {}
             for src in sources:
                 src_entity, src_fqn = self._find_table_entity(src)
                 if not src_entity:
                     continue
+                source_entities[src] = (src_entity, src_fqn)
+
+            for src, (src_entity, src_fqn) in source_entities.items():
+                columns_lineage = self._build_edge_columns_lineage(field_lineage, src, src_fqn, target_fqn)
                 payload = {
                     "edge": {
                         "fromEntity": {"id": src_entity["id"], "type": "table"},
                         "toEntity": {"id": target_entity["id"], "type": "table"},
                         "description": f"Auto lineage from Doris audit log: {stmt[:180]}",
+                        "lineageDetails": {
+                            "source": "QueryLineage",
+                            "sqlQuery": stmt[:4000],
+                            "columnsLineage": columns_lineage,
+                        },
                     }
                 }
                 self._http_json("PUT", "/v1/lineage", payload)
@@ -260,6 +329,211 @@ class RetailLineageService:
         if candidate not in candidates:
             candidates.append(candidate)
         return candidates
+
+    def _entity_label(self, entity: Dict | str | None) -> str:
+        if not entity:
+            return ""
+        if isinstance(entity, str):
+            return entity.split(".")[-1] if "." in entity else entity
+        return entity.get("displayName") or entity.get("name") or (entity.get("fullyQualifiedName", "").split(".")[-1] if entity.get("fullyQualifiedName") else "") or entity.get("id", "")
+
+    def _column_label(self, value: Dict | str | None) -> str:
+        if not value:
+            return ""
+        if isinstance(value, str):
+            return value.split(".")[-1] if "." in value else value
+        return value.get("name") or value.get("displayName") or (value.get("fullyQualifiedName", "").split(".")[-1] if value.get("fullyQualifiedName") else "") or value.get("id", "")
+
+    def _extract_column_lineage(self, edge: Dict, node_map: Dict) -> List[Dict]:
+        details = edge.get("lineageDetails") or {}
+        rows = []
+        for item in details.get("columnsLineage") or []:
+            from_cols = [self._column_label(col) for col in item.get("fromColumns") or []]
+            from_cols = [c for c in from_cols if c]
+            to_col = self._column_label(item.get("toColumn"))
+            if not to_col:
+                continue
+            rows.append({
+                "from_columns": from_cols,
+                "to_column": to_col,
+            })
+        return rows
+
+    @staticmethod
+    def _split_csv_columns(text: str) -> List[str]:
+        return [part.strip().replace("`", "") for part in RetailLineageService._split_top_level(text, ",") if part.strip()]
+
+    @staticmethod
+    def _split_top_level(text: str, delimiter: str = ",") -> List[str]:
+        parts = []
+        buf = []
+        depth = 0
+        quote = ""
+        i = 0
+        while i < len(text):
+            ch = text[i]
+            if quote:
+                buf.append(ch)
+                if ch == quote and (i == 0 or text[i - 1] != "\\"):
+                    quote = ""
+                i += 1
+                continue
+            if ch in ("'", '"'):
+                quote = ch
+                buf.append(ch)
+                i += 1
+                continue
+            if ch == "(":
+                depth += 1
+            elif ch == ")" and depth > 0:
+                depth -= 1
+            if ch == delimiter and depth == 0:
+                parts.append("".join(buf).strip())
+                buf = []
+            else:
+                buf.append(ch)
+            i += 1
+        if buf:
+            parts.append("".join(buf).strip())
+        return parts
+
+    @staticmethod
+    def _find_keyword_pos(text: str, keyword: str, start: int = 0) -> int:
+        upper = text.upper()
+        kw = keyword.upper()
+        depth = 0
+        quote = ""
+        i = start
+        while i < len(text):
+            ch = text[i]
+            if quote:
+                if ch == quote and (i == 0 or text[i - 1] != "\\"):
+                    quote = ""
+                i += 1
+                continue
+            if ch in ("'", '"'):
+                quote = ch
+                i += 1
+                continue
+            if ch == "(":
+                depth += 1
+                i += 1
+                continue
+            if ch == ")" and depth > 0:
+                depth -= 1
+                i += 1
+                continue
+            if depth == 0 and upper.startswith(kw, i):
+                left_ok = i == 0 or not (upper[i - 1].isalnum() or upper[i - 1] == "_")
+                right = i + len(kw)
+                right_ok = right >= len(text) or not (upper[right].isalnum() or upper[right] == "_")
+                if left_ok and right_ok:
+                    return i
+            i += 1
+        return -1
+
+    def _extract_source_aliases(self, text: str) -> Dict[str, str]:
+        alias_map: Dict[str, str] = {}
+        for m in re.finditer(r"(?:FROM|JOIN)\s+([`\w.]+)(?:\s+(?:AS\s+)?([`\w]+))?", text, re.I):
+            table_name = m.group(1).replace("`", "")
+            alias = (m.group(2) or "").replace("`", "")
+            if table_name:
+                alias_map[table_name] = table_name
+                alias_map[table_name.split(".")[-1]] = table_name
+            if alias:
+                alias_map[alias] = table_name
+        return alias_map
+
+    def _parse_column_lineage(self, text: str, target: str, target_columns: List[str], alias_map: Dict[str, str]) -> List[Dict]:
+        select_pos = self._find_keyword_pos(text, "SELECT")
+        from_pos = self._find_keyword_pos(text, "FROM", select_pos + 6)
+        if select_pos < 0 or from_pos < 0 or from_pos <= select_pos:
+            return []
+        select_clause = text[select_pos + 6:from_pos].strip()
+        select_fields = [field for field in self._split_top_level(select_clause, ",") if field]
+        result = []
+        single_source = None
+        source_tables = sorted(set(alias_map.values()))
+        if len(source_tables) == 1:
+            single_source = source_tables[0]
+        for idx, expr in enumerate(select_fields):
+            target_field = self._extract_target_field(expr, target_columns, idx)
+            if not target_field:
+                continue
+            source_columns = self._extract_source_columns(expr, alias_map, single_source)
+            if not source_columns:
+                continue
+            result.append({
+                "target_table": target,
+                "target_field": target_field,
+                "expression": expr.strip(),
+                "source_columns": source_columns,
+            })
+        return result
+
+    @staticmethod
+    def _extract_target_field(expr: str, target_columns: List[str], idx: int) -> str:
+        if idx < len(target_columns):
+            return target_columns[idx]
+        m = re.search(r"\s+AS\s+([`\w]+)$", expr, re.I)
+        if m:
+            return m.group(1).replace("`", "")
+        m = re.search(r"([`\w]+)$", expr)
+        if m:
+            return m.group(1).replace("`", "")
+        return ""
+
+    @staticmethod
+    def _extract_source_columns(expr: str, alias_map: Dict[str, str], single_source: str | None) -> List[Dict]:
+        source_columns = []
+        seen = set()
+        for alias, col in re.findall(r"([A-Za-z_]\w*)\.([A-Za-z_]\w*)", expr):
+            table_name = alias_map.get(alias, alias_map.get(alias.split(".")[-1]))
+            if not table_name:
+                continue
+            key = (table_name, col)
+            if key in seen:
+                continue
+            seen.add(key)
+            source_columns.append({"table": table_name, "column": col})
+        if source_columns or not single_source:
+            return source_columns
+
+        expr_wo_literals = re.sub(r"'[^']*'|\"[^\"]*\"", " ", expr)
+        tokens = re.findall(r"\b([A-Za-z_]\w*)\b", expr_wo_literals)
+        blacklist = {
+            "as", "case", "when", "then", "else", "end", "sum", "avg", "count", "max", "min",
+            "over", "partition", "by", "order", "desc", "asc", "distinct", "row_number",
+            "dense_rank", "rank", "coalesce", "ifnull", "null", "date", "cast", "round",
+            "and", "or", "not", "in", "is", "like", "between", "on",
+        }
+        for token in tokens:
+            low = token.lower()
+            if low in blacklist or token.isdigit():
+                continue
+            key = (single_source, token)
+            if key in seen:
+                continue
+            seen.add(key)
+            source_columns.append({"table": single_source, "column": token})
+        return source_columns
+
+    @staticmethod
+    def _build_edge_columns_lineage(field_lineage: List[Dict], source_table: str, source_fqn: str, target_fqn: str) -> List[Dict]:
+        rows = []
+        for item in field_lineage:
+            cols = [
+                f"{source_fqn}.{col['column']}"
+                for col in item.get("source_columns", [])
+                if col.get("table", "").lower() == source_table.lower() and col.get("column")
+            ]
+            if not cols:
+                continue
+            rows.append({
+                "fromColumns": cols,
+                "toColumn": f"{target_fqn}.{item['target_field']}",
+            })
+        return rows
 
     def _find_table_entity(self, table_name: str) -> tuple[Dict | None, str | None]:
         last_err = None

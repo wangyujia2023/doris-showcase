@@ -49,3 +49,8 @@ async def lineage_sync_logs(limit: int = 50):
 @router.get("/lineage/om-lineage")
 async def lineage_om_lineage(table_name: str, depth: int = 3):
     return await get_lineage_svc().get_openmetadata_lineage(table_name, depth=depth)
+
+
+@router.get("/lineage/field-lineage")
+async def lineage_field_lineage(table_name: str):
+    return await get_lineage_svc().get_field_lineage(table_name)

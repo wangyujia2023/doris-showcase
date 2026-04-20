@@ -203,6 +203,7 @@ export const lineageApi = {
     http.post('/lineage/sync-from-audit', null, { params: { start_date, end_date, limit } }),
   syncLogs: (limit = 50) => http.get('/lineage/sync-logs', { params: { limit } }),
   omLineage: (tableName) => http.get('/lineage/om-lineage', { params: { table_name: tableName } }),
+  fieldLineage: (tableName) => http.get('/lineage/field-lineage', { params: { table_name: tableName } }),
 }
 
 // ── 基金数字沙盘 ──────────────────────────────────────────────────

@@ -154,6 +154,12 @@
               </div>
               <!-- 血缘关系图 -->
               <div class="card">
+                  <el-tabs v-model="lineageViewMode" class="lineage-subtabs">
+                    <el-tab-pane label="表级血缘" name="table" />
+                    <el-tab-pane label="字段级血缘" name="field" />
+                  </el-tabs>
+
+                  <template v-if="lineageViewMode === 'table'">
                   <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:10px">
                     <div>
                       <div style="font-size:13px;font-weight:600">🔗 血缘关系</div>
@@ -239,6 +245,76 @@
                     <summary style="cursor:pointer;font-size:12px;color:#0050b3;font-weight:600;user-select:none">📄 查看原始 JSON</summary>
                     <pre style="background:#f5f5f5;padding:10px;border-radius:4px;font-size:11px;overflow-x:auto;color:#333;line-height:1.4;margin-top:8px">{{ omLineageText }}</pre>
                   </details>
+                  </template>
+
+                  <template v-else>
+                    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:10px">
+                      <div>
+                        <div style="font-size:13px;font-weight:600">🧬 字段级血缘</div>
+                        <div style="font-size:12px;color:#909399;margin-top:4px">直接读取 OpenMetadata `columnsLineage` 的上游/下游字段映射</div>
+                      </div>
+                      <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">
+                        <div style="font-size:12px;padding:4px 10px;background:#f0f9ff;border:1px solid #b3d8ff;border-radius:4px;color:#0050b3">
+                          上游映射：{{ fieldUpstreamRows.length }}
+                        </div>
+                        <div style="font-size:12px;padding:4px 10px;background:#f6ffed;border:1px solid #b7eb8f;border-radius:4px;color:#274e2b">
+                          下游映射：{{ fieldDownstreamRows.length }}
+                        </div>
+                      </div>
+                    </div>
+
+                    <el-tabs v-model="fieldDirectionTab" class="lineage-subtabs">
+                      <el-tab-pane :label="`上游(${fieldUpstreamRows.length})`" name="upstream" />
+                      <el-tab-pane :label="`下游(${fieldDownstreamRows.length})`" name="downstream" />
+                    </el-tabs>
+
+                    <div style="border:1px solid #f0f0f0;border-radius:8px;padding:10px;background:#f9f9f9">
+                      <div style="font-size:12px;font-weight:600;margin-bottom:10px">
+                        {{ fieldDirectionTab === 'upstream' ? '📥 上游字段映射' : '📤 下游字段映射' }}
+                      </div>
+
+                      <el-table
+                        v-if="fieldDirectionTab === 'upstream'"
+                        :data="fieldUpstreamRows"
+                        size="small"
+                        border
+                        max-height="360"
+                        empty-text="OpenMetadata 未返回上游字段级血缘"
+                      >
+                        <el-table-column prop="source_table" label="来源表" min-width="140" show-overflow-tooltip />
+                        <el-table-column label="来源字段" min-width="220" show-overflow-tooltip>
+                          <template #default="{ row }">
+                            <span>{{ (row.source_fields || []).join(', ') || '-' }}</span>
+                          </template>
+                        </el-table-column>
+                        <el-table-column prop="target_table" label="目标表" min-width="140" show-overflow-tooltip />
+                        <el-table-column prop="target_field" label="目标字段" min-width="140" show-overflow-tooltip />
+                      </el-table>
+
+                      <el-table
+                        v-else
+                        :data="fieldDownstreamRows"
+                        size="small"
+                        border
+                        max-height="360"
+                        empty-text="OpenMetadata 未返回下游字段级血缘"
+                      >
+                        <el-table-column prop="source_table" label="来源表" min-width="140" show-overflow-tooltip />
+                        <el-table-column label="来源字段" min-width="220" show-overflow-tooltip>
+                          <template #default="{ row }">
+                            <span>{{ (row.source_fields || []).join(', ') || '-' }}</span>
+                          </template>
+                        </el-table-column>
+                        <el-table-column prop="target_table" label="目标表" min-width="140" show-overflow-tooltip />
+                        <el-table-column prop="target_field" label="目标字段" min-width="140" show-overflow-tooltip />
+                      </el-table>
+                    </div>
+
+                    <details style="margin-top:12px;border-top:1px solid #f0f0f0;padding-top:12px">
+                      <summary style="cursor:pointer;font-size:12px;color:#0050b3;font-weight:600;user-select:none">📄 查看 OpenMetadata 原始字段血缘</summary>
+                      <pre style="background:#f5f5f5;padding:10px;border-radius:4px;font-size:11px;overflow-x:auto;color:#333;line-height:1.4;margin-top:8px">{{ fieldLineageText }}</pre>
+                    </details>
+                  </template>
                 </div>
 
                 <!-- 影响分析 -->
@@ -293,11 +369,15 @@ const selectedTable = ref('')
 const selectedTableInfo = ref({})
 const omLineage = ref({})
 const omLineageText = ref('')
+const fieldLineage = ref({})
+const fieldLineageText = ref('')
 const upstreamList = ref([])
 const downstreamList = ref([])
 const impactRows = ref([])
 const nodeNameMap = ref({})
 const flowPanel = ref([])
+const lineageViewMode = ref('table')
+const fieldDirectionTab = ref('upstream')
 let loadSeq = 0
 let tableTimer = null
 const graphBox = { width: 2200, height: 980 }
@@ -415,13 +495,19 @@ function edgeText(edge) {
 async function chooseTable(tableId) {
   selectedTable.value = tableId
   selectedTableInfo.value = await lineageApi.asset(tableId)
-  const res = await lineageApi.omLineage(tableId)
+  const [res, fieldRes, impactRes] = await Promise.all([
+    lineageApi.omLineage(tableId),
+    lineageApi.fieldLineage(tableId),
+    lineageApi.impact(tableId)
+  ])
   omLineage.value = res || {}
+  fieldLineage.value = fieldRes || {}
+  fieldLineageText.value = JSON.stringify(fieldRes || {}, null, 2)
   nodeNameMap.value = Object.fromEntries((res?.nodes || []).map(n => [n.id, n.name || n.fullyQualifiedName || n.id]))
   upstreamList.value = res?.upstreamEdges || []
   downstreamList.value = res?.downstreamEdges || []
   omLineageText.value = JSON.stringify(res, null, 2)
-  impactRows.value = await lineageApi.impact(tableId)
+  impactRows.value = impactRes || []
 
   tableQuality.value = {
     score: Math.floor(Math.random() * 20) + 75,
@@ -438,6 +524,8 @@ async function chooseTable(tableId) {
 
 const upstreamEdgesView = computed(() => (upstreamList.value || []).map(edgeText).filter(Boolean))
 const downstreamEdgesView = computed(() => (downstreamList.value || []).map(edgeText).filter(Boolean))
+const fieldUpstreamRows = computed(() => fieldLineage.value?.upstream_fields || [])
+const fieldDownstreamRows = computed(() => fieldLineage.value?.downstream_fields || [])
 
 // SVG 血缘关系图
 const graphNodes = computed(() => {

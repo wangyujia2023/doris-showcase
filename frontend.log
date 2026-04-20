@@ -1,0 +1,13 @@
+
+> bank-cdp-frontend@2.0.0 dev
+> vite --host
+
+[33mThe CJS build of Vite's Node API is deprecated. See https://vite.dev/guide/troubleshooting.html#vite-cjs-node-api-deprecated for more details.[39m
+
+  VITE v5.4.21  ready in 248 ms
+
+  ➜  Local:   http://localhost:5173/
+  ➜  Network: http://192.168.3.30:5173/
+  ➜  Network: http://192.168.0.46:5173/
+6:55:52 PM [vite] hmr update /src/views/Lineage.vue
+6:56:23 PM [vite] hmr update /src/views/Lineage.vue
