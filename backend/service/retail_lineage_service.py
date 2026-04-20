@@ -86,6 +86,13 @@ class RetailLineageService:
                 "target": parsed["target"],
                 "sources": parsed["sources"],
                 "mapped_fields": len(parsed.get("field_lineage") or []),
+                "expressions": [
+                    {
+                        "target_field": item.get("target_field"),
+                        "expression": item.get("expression", "")[:160],
+                    }
+                    for item in (parsed.get("field_lineage") or [])[:12]
+                ],
                 "success": ok,
                 "stmt": stmt[:280],
             }
@@ -218,6 +225,7 @@ class RetailLineageService:
                 node_map[node["id"]] = node
 
         entity_name = self._entity_label(entity)
+        parsed_sql_map = await self._recent_parsed_sql_map()
         upstream_rows = []
         downstream_rows = []
 
@@ -227,12 +235,15 @@ class RetailLineageService:
                 continue
             src_table = self._entity_label(node_map.get(edge.get("fromEntity")) or edge.get("fromEntity"))
             dst_table = self._entity_label(node_map.get(edge.get("toEntity")) or edge.get("toEntity"))
+            expr_items = self._field_expr_rows(parsed_sql_map, dst_table or entity_name, src_table)
             for item in mappings:
+                expr = self._match_expression(expr_items, item["to_column"], item["from_columns"])
                 upstream_rows.append({
                     "source_table": src_table,
                     "source_fields": item["from_columns"],
                     "target_table": dst_table or entity_name,
                     "target_field": item["to_column"],
+                    "expression": expr,
                 })
 
         for edge in lineage.get("downstreamEdges") or []:
@@ -241,12 +252,15 @@ class RetailLineageService:
                 continue
             src_table = self._entity_label(node_map.get(edge.get("fromEntity")) or edge.get("fromEntity"))
             dst_table = self._entity_label(node_map.get(edge.get("toEntity")) or edge.get("toEntity"))
+            expr_items = self._field_expr_rows(parsed_sql_map, dst_table, src_table or entity_name)
             for item in mappings:
+                expr = self._match_expression(expr_items, item["to_column"], item["from_columns"])
                 downstream_rows.append({
                     "source_table": src_table or entity_name,
                     "source_fields": item["from_columns"],
                     "target_table": dst_table,
                     "target_field": item["to_column"],
+                    "expression": expr,
                 })
 
         return {
@@ -545,6 +559,66 @@ class RetailLineageService:
             except Exception as e:
                 last_err = str(e)
         return None, last_err
+
+    async def _recent_parsed_sql_map(self, limit: int = 300) -> Dict[str, List[Dict]]:
+        rows = await execute_query(
+            """
+            SELECT stmt
+            FROM __internal_schema.audit_log
+            WHERE db = %s
+              AND stmt IS NOT NULL
+              AND stmt <> ''
+              AND (stmt LIKE 'INSERT INTO%%' OR stmt LIKE 'CREATE TABLE AS%%' OR stmt LIKE 'CREATE VIEW%%')
+            ORDER BY `time` DESC
+            LIMIT %s
+            """,
+            (self.db, limit),
+        )
+        result: Dict[str, List[Dict]] = {}
+        for row in rows:
+            stmt = (row.get("stmt") or "").strip()
+            parsed = self._parse_sql_lineage(stmt)
+            if not parsed:
+                continue
+            target = parsed.get("target") or ""
+            full_key = target.lower()
+            short_key = target.split(".")[-1].lower()
+            for key in {full_key, short_key}:
+                result.setdefault(key, [])
+                if not result[key]:
+                    result[key] = parsed.get("field_lineage") or []
+        return result
+
+    @staticmethod
+    def _field_expr_rows(parsed_sql_map: Dict[str, List[Dict]], target_table: str, source_table: str = "") -> List[Dict]:
+        candidates = []
+        for name in (target_table, target_table.split(".")[-1] if target_table else ""):
+            if name:
+                candidates.extend(parsed_sql_map.get(name.lower(), []))
+        if not source_table:
+            return candidates
+        src_short = source_table.split(".")[-1].lower()
+        filtered = []
+        for item in candidates:
+            cols = item.get("source_columns") or []
+            if any((col.get("table", "").split(".")[-1].lower() == src_short) for col in cols):
+                filtered.append(item)
+        return filtered or candidates
+
+    @staticmethod
+    def _match_expression(expr_items: List[Dict], target_field: str, from_columns: List[str]) -> str:
+        target_key = (target_field or "").lower()
+        from_set = {col.lower() for col in (from_columns or [])}
+        for item in expr_items:
+            if (item.get("target_field") or "").lower() != target_key:
+                continue
+            item_from = {col.get("column", "").lower() for col in (item.get("source_columns") or []) if col.get("column")}
+            if not from_set or not item_from or item_from == from_set or item_from.issuperset(from_set) or from_set.issuperset(item_from):
+                return item.get("expression", "")
+        for item in expr_items:
+            if (item.get("target_field") or "").lower() == target_key:
+                return item.get("expression", "")
+        return ""
 
     async def list_domains(self) -> List[Dict]:
         rows = await execute_query(

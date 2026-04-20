@@ -64,7 +64,7 @@
 
             <div style="margin-top:12px">
               <div style="font-size:13px;font-weight:600;margin-bottom:10px">同步结果 ({{ syncRows.length }} 条)</div>
-              <el-table :data="syncRows" size="small" border max-height="360" empty-text="同步后在这里查看每条 SQL 的结果">
+              <el-table :data="syncRows" size="small" border max-height="360" empty-text="同步后在这里查看每条 SQL 的结果" class="lineage-compact-table">
             <el-table-column prop="time" label="时间" width="180" />
             <el-table-column prop="stmt_type" label="类型" width="110" />
             <el-table-column prop="user" label="用户" width="120" />
@@ -81,6 +81,11 @@
                 </el-tag>
               </template>
             </el-table-column>
+            <el-table-column label="计算方式" min-width="260" show-overflow-tooltip>
+              <template #default="{ row }">
+                <span>{{ formatExpressionSummary(row.expressions) }}</span>
+              </template>
+            </el-table-column>
             <el-table-column prop="error" label="错误信息" min-width="200" show-overflow-tooltip />
               </el-table>
             </div>
@@ -88,7 +93,7 @@
             <!-- 同步历史 -->
             <div style="margin-top:20px">
               <div style="font-size:13px;font-weight:600;margin-bottom:10px">同步历史</div>
-              <el-table :data="syncLogs" size="small" border max-height="280">
+              <el-table :data="syncLogs" size="small" border max-height="280" class="lineage-compact-table">
                 <el-table-column prop="sync_time" label="同步时间" width="180" />
                 <el-table-column prop="start_date" label="开始日期" width="120" />
                 <el-table-column prop="end_date" label="结束日期" width="120" />
@@ -155,8 +160,8 @@
               <!-- 血缘关系图 -->
               <div class="card">
                   <el-tabs v-model="lineageViewMode" class="lineage-subtabs">
-                    <el-tab-pane label="表级血缘" name="table" />
-                    <el-tab-pane label="字段级血缘" name="field" />
+                    <el-tab-pane label="table 血缘" name="table" />
+                    <el-tab-pane label="column 血缘" name="field" />
                   </el-tabs>
 
                   <template v-if="lineageViewMode === 'table'">
@@ -277,36 +282,66 @@
                         v-if="fieldDirectionTab === 'upstream'"
                         :data="fieldUpstreamRows"
                         size="small"
-                        border
-                        max-height="360"
+                        max-height="380"
                         empty-text="OpenMetadata 未返回上游字段级血缘"
+                        class="lineage-merged-table"
+                        :span-method="spanMethod"
                       >
-                        <el-table-column prop="source_table" label="来源表" min-width="140" show-overflow-tooltip />
-                        <el-table-column label="来源字段" min-width="220" show-overflow-tooltip>
+                        <el-table-column prop="source_table" label="📦 来源表" width="160" show-overflow-tooltip />
+                        <el-table-column label="📝 来源字段" min-width="180">
                           <template #default="{ row }">
-                            <span>{{ (row.source_fields || []).join(', ') || '-' }}</span>
+                            <div class="field-badge upstream">{{ (row.source_fields || []).join(', ') || '-' }}</div>
                           </template>
                         </el-table-column>
-                        <el-table-column prop="target_table" label="目标表" min-width="140" show-overflow-tooltip />
-                        <el-table-column prop="target_field" label="目标字段" min-width="140" show-overflow-tooltip />
+                        <el-table-column label="" width="50" align="center">
+                          <template>
+                            <div class="flow-arrow-icon upstream">→</div>
+                          </template>
+                        </el-table-column>
+                        <el-table-column prop="target_table" label="📦 目标表" width="160" show-overflow-tooltip />
+                        <el-table-column label="📝 目标字段" min-width="140">
+                          <template #default="{ row }">
+                            <span class="target-field">{{ row.target_field || '-' }}</span>
+                          </template>
+                        </el-table-column>
+                        <el-table-column label="⚙️ 计算方式" min-width="240" show-overflow-tooltip>
+                          <template #default="{ row }">
+                            <span>{{ row.expression || '-' }}</span>
+                          </template>
+                        </el-table-column>
                       </el-table>
 
                       <el-table
                         v-else
                         :data="fieldDownstreamRows"
                         size="small"
-                        border
-                        max-height="360"
+                        max-height="380"
                         empty-text="OpenMetadata 未返回下游字段级血缘"
+                        class="lineage-merged-table"
+                        :span-method="spanMethod"
                       >
-                        <el-table-column prop="source_table" label="来源表" min-width="140" show-overflow-tooltip />
-                        <el-table-column label="来源字段" min-width="220" show-overflow-tooltip>
+                        <el-table-column prop="source_table" label="📦 来源表" width="160" show-overflow-tooltip />
+                        <el-table-column label="📝 来源字段" min-width="180">
                           <template #default="{ row }">
-                            <span>{{ (row.source_fields || []).join(', ') || '-' }}</span>
+                            <div class="field-badge downstream">{{ (row.source_fields || []).join(', ') || '-' }}</div>
                           </template>
                         </el-table-column>
-                        <el-table-column prop="target_table" label="目标表" min-width="140" show-overflow-tooltip />
-                        <el-table-column prop="target_field" label="目标字段" min-width="140" show-overflow-tooltip />
+                        <el-table-column label="" width="50" align="center">
+                          <template>
+                            <div class="flow-arrow-icon downstream">→</div>
+                          </template>
+                        </el-table-column>
+                        <el-table-column prop="target_table" label="📦 目标表" width="160" show-overflow-tooltip />
+                        <el-table-column label="📝 目标字段" min-width="140">
+                          <template #default="{ row }">
+                            <span class="target-field">{{ row.target_field || '-' }}</span>
+                          </template>
+                        </el-table-column>
+                        <el-table-column label="⚙️ 计算方式" min-width="240" show-overflow-tooltip>
+                          <template #default="{ row }">
+                            <span>{{ row.expression || '-' }}</span>
+                          </template>
+                        </el-table-column>
                       </el-table>
                     </div>
 
@@ -392,6 +427,10 @@ const shortText = (v, n = 34) => {
   const s = String(v || '')
   if (!s) return ''
   return s.length > n ? `${s.slice(0, n - 1)}…` : s
+}
+const formatExpressionSummary = (items) => {
+  if (!items?.length) return '-'
+  return items.map(item => `${item.target_field || '-'} = ${item.expression || '-'}`).join(' ; ')
 }
 
 const qualityTooltip = `质量评分 = 新鲜度×40% + 完整度×40% + 覆盖度×20%
@@ -480,6 +519,47 @@ const getEntityName = (entity) => {
     return entity.id
   }
   return ''
+}
+
+function spanMethod({ row, rowIndex, column, columnIndex }) {
+  // 获取当前数据，用于合并单元格
+  const data = fieldDirectionTab.value === 'upstream' ? fieldUpstreamRows.value : fieldDownstreamRows.value
+
+  // 第0列（来源表）和第3列（目标表）进行合并
+  if (columnIndex === 0 || columnIndex === 3) {
+    // 从当前行开始，往后找相同的表名
+    if (rowIndex === 0) {
+      // 第一行，需要计算连续相同的行数
+      let rowspan = 1
+      const currentTable = row[columnIndex === 0 ? 'source_table' : 'target_table']
+      for (let i = rowIndex + 1; i < data.length; i++) {
+        if (data[i][columnIndex === 0 ? 'source_table' : 'target_table'] === currentTable) {
+          rowspan++
+        } else {
+          break
+        }
+      }
+      return { rowspan, colspan: 1 }
+    } else {
+      // 检查是否应该隐藏这一行（被合并了）
+      const currentTable = row[columnIndex === 0 ? 'source_table' : 'target_table']
+      const prevRow = data[rowIndex - 1]
+      const prevTable = prevRow[columnIndex === 0 ? 'source_table' : 'target_table']
+      if (currentTable === prevTable) {
+        return { rowspan: 0, colspan: 0 }
+      }
+      // 否则计算rowspan
+      let rowspan = 1
+      for (let i = rowIndex + 1; i < data.length; i++) {
+        if (data[i][columnIndex === 0 ? 'source_table' : 'target_table'] === currentTable) {
+          rowspan++
+        } else {
+          break
+        }
+      }
+      return { rowspan, colspan: 1 }
+    }
+  }
 }
 
 function edgeText(edge) {
@@ -1157,6 +1237,125 @@ watch(tableKeyword, () => {
 
 @keyframes dash {
   to { stroke-dashoffset: -180; }
+}
+
+/* ===== 血缘合并表格 ===== */
+:deep(.lineage-compact-table .el-table__header th) {
+  padding: 8px 8px !important;
+  font-size: 12px;
+}
+
+:deep(.lineage-compact-table .el-table__body td) {
+  padding: 7px 8px !important;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+:deep(.lineage-compact-table .el-table__cell) {
+  padding: 7px 8px !important;
+}
+
+:deep(.lineage-merged-table) {
+  border-collapse: collapse !important;
+}
+
+:deep(.lineage-merged-table .el-table__header) {
+  background: linear-gradient(90deg, #f0f7ff 0%, #f6ffed 100%);
+}
+
+:deep(.lineage-merged-table .el-table__header th) {
+  background: transparent !important;
+  color: #1f2937 !important;
+  font-weight: 700 !important;
+  border-bottom: 2px solid #d9d9d9 !important;
+  padding: 8px 8px !important;
+  font-size: 12px;
+}
+
+:deep(.lineage-merged-table .el-table__body) {
+  background: #fff;
+}
+
+:deep(.lineage-merged-table .el-table__body tr) {
+  transition: all 0.2s ease;
+}
+
+:deep(.lineage-merged-table .el-table__body tr:hover) {
+  background-color: #fafafa !important;
+}
+
+:deep(.lineage-merged-table .el-table__body td) {
+  border-bottom: 1px solid #f0f0f0 !important;
+  padding: 7px 8px !important;
+  color: #595959;
+  font-size: 12px;
+  line-height: 1.35;
+  vertical-align: middle;
+}
+
+:deep(.lineage-merged-table .el-table__body tr:last-child td) {
+  border-bottom: none !important;
+}
+
+:deep(.lineage-merged-table .el-table__cell) {
+  vertical-align: middle;
+  padding: 7px 8px;
+}
+
+.flow-arrow-icon {
+  font-size: 20px;
+  font-weight: 700;
+  animation: arrow-pulse 1.5s ease-in-out infinite;
+}
+
+.flow-arrow-icon.upstream {
+  color: #52c41a;
+  text-shadow: 0 0 8px rgba(82, 196, 26, 0.3);
+}
+
+.flow-arrow-icon.downstream {
+  color: #faad14;
+  text-shadow: 0 0 8px rgba(250, 173, 20, 0.3);
+}
+
+@keyframes arrow-pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  50% {
+    opacity: 0.5;
+    transform: translateX(4px);
+  }
+}
+
+.field-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 500;
+  word-break: break-word;
+  background: rgba(24, 144, 255, 0.08);
+  color: #0050b3;
+  border-left: 3px solid #1890ff;
+}
+
+.field-badge.upstream {
+  background: rgba(82, 196, 26, 0.1);
+  color: #274e2b;
+  border-left: 3px solid #52c41a;
+}
+
+.field-badge.downstream {
+  background: rgba(250, 173, 20, 0.1);
+  color: #5c4a1a;
+  border-left: 3px solid #faad14;
+}
+
+.target-field {
+  color: #1f2937;
+  font-weight: 500;
 }
 
 </style>
