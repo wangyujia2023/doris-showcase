@@ -15,8 +15,7 @@ from backend.settings import settings
 
 class RetailLineageService:
     def __init__(self) -> None:
-        self.base_url = "http://10.26.20.3:8585"
-        self.db = "retail_lineage"
+        self.db = settings.RETAIL_LINEAGE_DB
 
     def _t(self, name: str) -> str:
         return f"{self.db}.{name}"
@@ -368,7 +367,7 @@ class RetailLineageService:
             """,
             (asset_id,),
         )
-        # 如果没有影响分析数据，基于下游关系生成虚拟数据
+        # 如果没有影响分析数据，基于下游关系补全影响分析
         if not rows:
             edges = await execute_query(
                 f"""

@@ -7,8 +7,13 @@ from typing import List
 
 
 def _load_dotenv_file(path: str = ".env") -> None:
-    env_path = Path(path)
-    if not env_path.exists():
+    candidates = [
+        Path(path),
+        Path.cwd() / path,
+        Path(__file__).resolve().parents[1] / path,
+    ]
+    env_path = next((p for p in candidates if p.exists()), None)
+    if not env_path:
         return
     for line in env_path.read_text(encoding="utf-8").splitlines():
         line = line.strip()
@@ -62,6 +67,7 @@ class Settings:
         self.OPENMETADATA_BASE_URL: str = os.getenv("OPENMETADATA_BASE_URL", "http://10.26.20.3:8585/api")
         self.OPENMETADATA_JWT_TOKEN: str = os.getenv("OPENMETADATA_JWT_TOKEN", "")
         self.OPENMETADATA_TABLE_FQN_PREFIX: str = os.getenv("OPENMETADATA_TABLE_FQN_PREFIX", "")
+        self.RETAIL_LINEAGE_DB: str = os.getenv("RETAIL_LINEAGE_DB", "retail_lineage")
 
         # 数据安全（脱敏）
         self.MASK_ID_CARD: bool = True

@@ -1,14 +1,51 @@
 <template>
   <div>
-    <!-- 页面标题 -->
-    <div class="page-title">
-      <h1>⛓️ 数据血缘查询</h1>
-      <p>追踪数据表间的依赖关系，查看上游源头和下游影响</p>
+    <div class="card flow-card">
+      <el-collapse v-model="flowPanel" accordion>
+        <el-collapse-item name="flow">
+          <template #title>
+            <div class="flow-title">
+              <span>📚 血缘流程说明</span>
+              <span class="flow-hint">默认折叠，展开查看 Doris -> 程序 -> OpenMetadata -> 程序查询链路</span>
+            </div>
+          </template>
+          <div class="flow-diagram">
+            <div class="flow-lane doris" style="grid-column:1">Doris</div>
+            <div class="flow-lane app" style="grid-column:3">导入血缘</div>
+            <div class="flow-lane om" style="grid-column:5">OpenMetadata</div>
+            <div class="flow-lane app" style="grid-column:7">查询血缘</div>
+
+            <div class="flow-node doris" style="grid-column:1">
+              <div class="flow-step-no">1</div>
+              <div class="flow-step-title">审计日志表</div>
+              <div class="flow-step-desc">读取 `__internal_schema.audit_log`</div>
+            </div>
+            <div class="flow-arrow" style="grid-column:2">→</div>
+            <div class="flow-node app" style="grid-column:3">
+              <div class="flow-step-no">2</div>
+              <div class="flow-step-title">同步按钮</div>
+              <div class="flow-step-desc">解析 SQL，提取源表 / 目标表 / 关系</div>
+            </div>
+            <div class="flow-arrow" style="grid-column:4">→</div>
+            <div class="flow-node om" style="grid-column:5">
+              <div class="flow-step-no">3</div>
+              <div class="flow-step-title">血缘写入</div>
+              <div class="flow-step-desc">推送 lineage 到 OpenMetadata</div>
+            </div>
+            <div class="flow-arrow" style="grid-column:6">→</div>
+            <div class="flow-node app" style="grid-column:7">
+              <div class="flow-step-no">4</div>
+              <div class="flow-step-title">API 查询</div>
+              <div class="flow-step-desc">回读 OpenMetadata 血缘并展示图谱</div>
+            </div>
+          </div>
+        </el-collapse-item>
+      </el-collapse>
     </div>
 
     <!-- Tab 切换 -->
     <el-tabs v-model="activeTab" type="card" style="margin-bottom:0">
-        <el-tab-pane label="📥 同步记录" name="sync">
+        <el-tab-pane label="📥 导入记录" name="sync">
           <div class="card" style="border-top-left-radius:0">
             <el-form inline>
               <el-form-item label="开始日期">
@@ -21,7 +58,7 @@
                 <el-input v-model="auditLimit" type="number" min="0" max="5000" placeholder="0=全量" style="width:120px" />
               </el-form-item>
               <el-form-item>
-                <el-button type="primary" :loading="syncing" @click="syncFromAudit">🔄 开始同步</el-button>
+                <el-button type="primary" :loading="syncing" @click="syncFromAudit">🔄 导入血缘</el-button>
               </el-form-item>
             </el-form>
 
@@ -114,66 +151,7 @@
                   </div>
                 <div class="current-table">{{ selectedTable || '未选择' }}</div>
                 <div class="current-sub">{{ selectedTableInfo.asset_name || '' }} {{ selectedTableInfo.description || '' }}</div>
-
-                <!-- 质量评分 -->
-                <div class="quality-section" v-if="selectedTable">
-                  <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">
-                    <span class="quality-label">数据质量评分</span>
-                    <el-tooltip :content="qualityTooltip" placement="top" style="cursor:help">
-                      <span style="color:#1890ff;font-weight:600;font-size:12px">❓</span>
-                    </el-tooltip>
-                  </div>
-                  <div class="quality-score">{{ tableQuality.score }}/100</div>
-                  <div class="score-bars">
-                    <div class="score-bar">
-                      <el-tooltip content="数据更新的及时性。0天100分，每多1天递减，超过30天为0分" placement="left">
-                        <span class="bar-name">新鲜度</span>
-                      </el-tooltip>
-                      <div class="bar-container">
-                        <div class="bar-fill" :style="{ width: tableQuality.freshness + '%' }"></div>
-                      </div>
-                      <span class="bar-val">{{ tableQuality.freshness }}%</span>
-                    </div>
-                    <div class="score-bar">
-                      <el-tooltip content="表中非空值的比例。计算所有列的平均非空率" placement="left">
-                        <span class="bar-name">完整度</span>
-                      </el-tooltip>
-                      <div class="bar-container">
-                        <div class="bar-fill" :style="{ width: tableQuality.completeness + '%' }"></div>
-                      </div>
-                      <span class="bar-val">{{ tableQuality.completeness }}%</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="metadata-section">
-                  <div class="meta-item">
-                    <span class="meta-key">FQN</span>
-                    <span class="meta-val">{{ omLineage?.entity?.fullyQualifiedName || '-' }}</span>
-                  </div>
-                  <div class="meta-item">
-                    <span class="meta-key">拥有者</span>
-                    <span class="meta-val">{{ selectedTableInfo.owner || '-' }}</span>
-                  </div>
-                  <div class="meta-item">
-                    <span class="meta-key">类型</span>
-                    <span class="meta-val">{{ selectedTableInfo.asset_type || '-' }}</span>
-                  </div>
-                  <div class="meta-item">
-                    <span class="meta-key">行数</span>
-                    <span class="meta-val">{{ fmt(tableStats.row_count) }}</span>
-                  </div>
-                  <div class="meta-item">
-                    <span class="meta-key">域</span>
-                    <span class="meta-val">{{ selectedTableInfo.domain_id || '-' }}</span>
-                  </div>
-                  <div class="meta-item">
-                    <span class="meta-key">更新频率</span>
-                    <span class="meta-val">{{ tableStats.update_frequency || '-' }}</span>
-                  </div>
-                </div>
               </div>
-
               <!-- 血缘关系图 -->
               <div class="card">
                   <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:10px">
@@ -319,13 +297,13 @@ const upstreamList = ref([])
 const downstreamList = ref([])
 const impactRows = ref([])
 const nodeNameMap = ref({})
+const flowPanel = ref([])
 let loadSeq = 0
 let tableTimer = null
 const graphBox = { width: 2200, height: 980 }
 const graphViewport = ref({ scale: 1, x: 0, y: 0 })
 const graphDrag = ref({ active: false, startX: 0, startY: 0, baseX: 0, baseY: 0 })
 
-// 虚拟表统计数据
 const tableStats = ref({ row_count: null, update_frequency: '' })
 const tableQuality = ref({ score: 87, freshness: 95, completeness: 85 })
 
@@ -445,7 +423,6 @@ async function chooseTable(tableId) {
   omLineageText.value = JSON.stringify(res, null, 2)
   impactRows.value = await lineageApi.impact(tableId)
 
-  // 虚拟更新质量评分
   tableQuality.value = {
     score: Math.floor(Math.random() * 20) + 75,
     freshness: Math.floor(Math.random() * 15) + 80,
@@ -665,6 +642,159 @@ watch(tableKeyword, () => {
   margin: 0;
   font-size: 13px;
   color: #6b7280;
+}
+
+.flow-card {
+  margin-bottom: 16px;
+}
+
+.flow-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.flow-hint {
+  font-size: 12px;
+  color: #6b7280;
+  font-weight: 400;
+}
+
+.flow-diagram {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 12px;
+  align-items: stretch;
+  margin-top: 16px;
+}
+
+.flow-lane {
+  grid-row: 1;
+  font-size: 12px;
+  font-weight: 700;
+  text-align: center;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 2px solid;
+  color: #fff;
+  background: linear-gradient(135deg);
+}
+
+.flow-lane.doris {
+  border-color: #faad14;
+  background: linear-gradient(135deg, #ffd666 0%, #faad14 100%);
+  color: #5c4a1a;
+}
+
+.flow-lane.app {
+  border-color: #1890ff;
+  background: linear-gradient(135deg, #69b1ff 0%, #1890ff 100%);
+  color: #fff;
+}
+
+.flow-lane.om {
+  border-color: #52c41a;
+  background: linear-gradient(135deg, #95de64 0%, #52c41a 100%);
+  color: #274e2b;
+}
+
+.flow-node {
+  grid-row: 2;
+  padding: 16px;
+  border-radius: 12px;
+  border: 2px solid;
+  background: linear-gradient(135deg);
+  color: #fff;
+  min-height: 100px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+}
+
+.flow-node:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+}
+
+.flow-node.doris {
+  border-color: #faad14;
+  background: linear-gradient(135deg, #fffbe6 0%, #fff7e6 100%);
+  color: #1f2937;
+}
+
+.flow-node.app {
+  border-color: #1890ff;
+  background: linear-gradient(135deg, #e6f7ff 0%, #f0f5ff 100%);
+  color: #0050b3;
+}
+
+.flow-node.om {
+  border-color: #52c41a;
+  background: linear-gradient(135deg, #f6ffed 0%, #f9ffef 100%);
+  color: #274e2b;
+}
+
+.flow-step-no {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.flow-node.doris .flow-step-no {
+  background: rgba(250, 173, 20, 0.15);
+  border: 2px solid #faad14;
+  color: #d48806;
+}
+
+.flow-node.app .flow-step-no {
+  background: rgba(24, 144, 255, 0.15);
+  border: 2px solid #1890ff;
+  color: #0050b3;
+}
+
+.flow-node.om .flow-step-no {
+  background: rgba(82, 196, 26, 0.15);
+  border: 2px solid #52c41a;
+  color: #274e2b;
+}
+
+.flow-step-title {
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.flow-step-desc {
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.flow-node.doris .flow-step-desc { color: #595959; }
+.flow-node.app .flow-step-desc { color: #1f2937; }
+.flow-node.om .flow-step-desc { color: #1f2937; }
+
+.flow-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  font-weight: 700;
+  align-self: center;
+  color: #1890ff;
+  animation: flow-arrow-blink 2s ease-in-out infinite;
+}
+
+@keyframes flow-arrow-blink {
+  0%, 100% { opacity: 1; transform: translateX(0); }
+  50% { opacity: 0.6; transform: translateX(4px); }
 }
 
 /* ===== 卡片和通用 ===== */
