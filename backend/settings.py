@@ -52,15 +52,21 @@ class Settings:
         self.DORIS_PASSWORD: str = os.getenv("DORIS_PASSWORD", "")
         self.DORIS_DATABASE: str = os.getenv("DORIS_DATABASE", "bank_cdp")
         self.DB_WARMUP_ON_START: bool = _env_bool("DB_WARMUP_ON_START", "false")
+        self.BACKEND_HOST: str = os.getenv("BACKEND_HOST", "0.0.0.0")
+        self.BACKEND_PORT: int = _env_int("BACKEND_PORT", "8000")
+        self.FRONTEND_HOST: str = os.getenv("FRONTEND_HOST", "0.0.0.0")
+        self.FRONTEND_PORT: int = _env_int("FRONTEND_PORT", "5173")
+        self.APP_ENV: str = os.getenv("APP_ENV", "dev")
+        self.PROJECT_ROOT: str = os.getenv("PROJECT_ROOT", str(Path(__file__).resolve().parents[1]))
 
         # Doris 4.0 HASP 配置
         self.DORIS_HASP_ENABLED: bool = True
 
         # CORS / 运行开关
         self.CORS_ORIGINS: List[str] = [
-            "http://localhost:5173",
+            f"http://localhost:{self.FRONTEND_PORT}",
             "http://localhost:3000",
-            "http://127.0.0.1:5173",
+            f"http://127.0.0.1:{self.FRONTEND_PORT}",
         ]
         self.TELEMETRY_ENABLED: bool = _env_bool("TELEMETRY_ENABLED", "false")
         self.BEHAVIOR_SCAN_DAYS: int = _env_int("BEHAVIOR_SCAN_DAYS", "120")

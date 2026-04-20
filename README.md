@@ -1,77 +1,151 @@
 # Doris 4.0 演示平台
 
-基于 Apache Doris 4.0 的多场景演示系统，覆盖银行 CDP、证券经营与风控、基金投研、智能制造等业务。
+## 一键部署
 
-## 开发规范（必读）
+所有部署参数统一放在项目根目录 `.env`。
 
-后续功能开发统一按以下规范执行：  
-[DEVELOPMENT_SPEC.md](./DEVELOPMENT_SPEC.md)
+第一次部署：
 
-新项目复用模板：  
-[DEVELOPMENT_SPEC_TEMPLATE.md](./DEVELOPMENT_SPEC_TEMPLATE.md)
+```bash
+cp .env.example .env
+```
 
-重点：先检索后读取、批量修改、最小验证、短结果输出。
+然后只改这一个文件里的参数：
 
-## 项目结构
+- `BACKEND_HOST` / `BACKEND_PORT`
+- `FRONTEND_HOST` / `FRONTEND_PORT`
+- `DORIS_HOST` / `DORIS_PORT` / `DORIS_USER` / `DORIS_PASSWORD` / `DORIS_DATABASE`
+- `RETAIL_LINEAGE_DB`
+- `OPENMETADATA_BASE_URL`
+- `OPENMETADATA_JWT_TOKEN`
+- `OPENMETADATA_TABLE_FQN_PREFIX`
 
-- `backend/`：FastAPI 后端（API、Service、Doris 访问层）
-- `frontend/`：Vue 3 + Vite 前端
-- `sql/`：初始化 SQL 脚本
-- `start_all.sh`：本地一键启动脚本
+## 统一配置文件
+
+根目录 `.env` 是唯一配置入口。
+
+后端读取：
+
+- `backend/settings.py`
+
+前端读取：
+
+- `frontend/vite.config.js`
+
+启动脚本读取：
+
+- `start_all.sh`
 
 ## 快速启动
 
-### 1) 后端
+### 1. 安装依赖
+
+后端：
 
 ```bash
-cd backend
-pip install -r ../requirements.txt
-uvicorn backend.app:app --host 0.0.0.0 --port 8000 --reload
+python3 -m venv .venv
+. .venv/bin/activate
+pip install -r requirements.txt
 ```
 
-### 2) 前端
+前端：
 
 ```bash
 cd frontend
 npm install
-npm run dev
+cd ..
 ```
 
-### 3) 一键启动
+### 2. 一键启动
 
 ```bash
 bash start_all.sh
 ```
 
-## 环境变量
+默认：
 
-参考 `.env.example`：
+- 后端：`http://127.0.0.1:8000`
+- 前端：`http://127.0.0.1:5173`
 
-- `DORIS_HOST` / `DORIS_PORT` / `DORIS_USER` / `DORIS_PASSWORD` / `DORIS_DATABASE`
-- `DB_WARMUP_ON_START`：是否启动时预热连接池（默认 `false`）
-- `TELEMETRY_ENABLED`：是否启用 telemetry writer（默认 `false`）
-- `BEHAVIOR_SCAN_DAYS`：行为分析查询默认扫描天数（默认 `120`）
+实际端口以 `.env` 为准。
 
-## 常用命令
+## 单独启动
+
+后端：
 
 ```bash
-# 前端构建验证
-cd frontend && npm run build
-
-# 后端运行
+. .venv/bin/activate
 uvicorn backend.app:app --host 0.0.0.0 --port 8000 --reload
 ```
 
-## 当前功能菜单
+前端：
 
-- 首页大盘、经营管理大屏
-- 用户宽表、人群圈选、行为分析、用户行为分析
-- AI 日志标签、图片向量检索、卫星数据分析
-- 银行报表、指标平台、日志可观测性、链路追踪、高并发点查
-- 智能制造、证券实时数仓、基金投研沙盘、资讯 AI 分析、系统配置
+```bash
+cd frontend
+npm run dev -- --host 0.0.0.0 --port 5173
+```
 
-## 开发约束摘要
+如果你改了端口，请同步改 `.env`，不要再分别改代码。
 
-- 先 `rg` 定位再读文件，禁止全盘扫描。
-- 同类问题一次性批量修改，减少多轮重复改动。
-- 每次改动后至少做最小可用验证（前端 build / 后端语法或运行验证）。
+## 生产更新
+
+从 GitHub 拉代码后，通常只需要：
+
+```bash
+git pull
+bash start_all.sh
+```
+
+如果只更新血缘功能，至少覆盖：
+
+- `backend/service/retail_lineage_service.py`
+- `backend/api/lineage_routes.py`
+- `frontend/src/views/Lineage.vue`
+- `frontend/src/api/index.js`
+
+## 关键说明
+
+### 血缘功能依赖
+
+血缘相关配置必须在 `.env` 中存在：
+
+```env
+RETAIL_LINEAGE_DB=retail_lineage
+OPENMETADATA_BASE_URL=http://ip:8585/api
+OPENMETADATA_JWT_TOKEN=...
+OPENMETADATA_TABLE_FQN_PREFIX=
+```
+
+### 端口统一
+
+不要再分别改：
+
+- `uvicorn --port`
+- `vite.config.js`
+- 启动脚本里的硬编码端口
+
+现在统一改 `.env`：
+
+```env
+BACKEND_PORT=8000
+FRONTEND_PORT=5173
+```
+
+## 常用命令
+
+前端构建：
+
+```bash
+cd frontend && npm run build
+```
+
+后端语法检查：
+
+```bash
+python3 -m py_compile backend/settings.py backend/app.py backend/api/lineage_routes.py backend/service/retail_lineage_service.py
+```
+
+## 开发规范
+
+- 规范文档：`DEVELOPMENT_SPEC.md`
+- 模板文档：`DEVELOPMENT_SPEC_TEMPLATE.md`

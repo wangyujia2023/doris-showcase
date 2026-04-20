@@ -68,3 +68,13 @@ INFO:     127.0.0.1:56132 - "GET /api/vector/users HTTP/1.1" 200 OK
 INFO:     127.0.0.1:56190 - "GET /api/user/wide?page=1&page_size=20 HTTP/1.1" 200 OK
 INFO:     127.0.0.1:56277 - "GET /api/segment/list HTTP/1.1" 200 OK
 INFO:     127.0.0.1:56285 - "POST /api/behavior/funnel HTTP/1.1" 200 OK
+WARNING:  StatReload detected changes in 'backend/settings.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [92665]
+INFO:     Started server process [14335]
+INFO:     Waiting for application startup.
+2026-04-20 21:01:29,730 [INFO] backend.app: ℹ️ 跳过启动预热，Doris 连接池改为按需初始化
+2026-04-20 21:01:29,730 [INFO] backend.app: ℹ️ Telemetry writer 已关闭
+INFO:     Application startup complete.
