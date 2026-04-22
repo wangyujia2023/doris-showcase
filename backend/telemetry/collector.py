@@ -4,9 +4,10 @@
 - 每次 DB 查询作为子 span（doris-connector），携带 offset_ms 和真实执行时间
 - 异步队列批量写入 Doris sys_logs / sys_spans 表，不阻塞请求
 """
-import asyncio
-import uuid
 import logging
+import asyncio
+import contextlib
+import uuid
 from contextvars import ContextVar
 from datetime import datetime
 from typing import Optional
@@ -148,15 +149,27 @@ async def _writer_loop():
         await _flush(_span_q, "sys_spans", _SPAN_COLS)
 
 
+async def ensure_tables() -> None:
+    from backend.doris.connect import execute_write
+    for sql in INIT_SQL:
+        await execute_write(sql)
+
+
 def start_writer():
     global _writer_task
+    if _writer_task and not _writer_task.done():
+        return
     _writer_task = asyncio.create_task(_writer_loop())
     logger.info("telemetry writer started")
 
 
 def stop_writer():
+    global _writer_task
     if _writer_task:
         _writer_task.cancel()
+        with contextlib.suppress(asyncio.CancelledError):
+            pass
+        _writer_task = None
 
 
 # ── Doris 建表 SQL ────────────────────────────────────────────────

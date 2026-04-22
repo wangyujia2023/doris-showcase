@@ -70,6 +70,11 @@
           <el-icon><SetUp /></el-icon><span>数字孪生沙盘</span>
         </el-menu-item>
 
+        <div class="menu-group-title">城市交通</div>
+        <el-menu-item index="/bjmetro">
+          <el-icon><DataAnalysis /></el-icon><span>地铁运营分析</span>
+        </el-menu-item>
+
         <div class="menu-group-title">证券场景</div>
         <el-menu-item index="/securities">
           <el-icon><WalletFilled /></el-icon><span>证券实时数仓</span>
@@ -110,7 +115,7 @@
         </div>
       </el-header>
       <el-main class="main-content">
-        <router-view />
+        <router-view :key="route.fullPath" />
       </el-main>
     </el-container>
   </el-container>

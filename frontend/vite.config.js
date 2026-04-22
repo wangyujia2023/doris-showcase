@@ -9,7 +9,7 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, fileURLToPath(new URL('..', import.meta.url)), '')
   const frontendPort = Number(env.FRONTEND_PORT || 5173)
   const backendPort = Number(env.BACKEND_PORT || 8000)
-  const backendHost = env.BACKEND_HOST || '127.0.0.1'
+  const backendProxyHost = env.BACKEND_PROXY_HOST || env.BACKEND_HOST || '127.0.0.1'
 
   return {
     envDir: '..',
@@ -49,7 +49,7 @@ export default defineConfig(({ mode }) => {
       host: env.FRONTEND_HOST || '0.0.0.0',
       port: frontendPort,
       proxy: {
-        '/api': { target: `http://${backendHost}:${backendPort}`, changeOrigin: true }
+        '/api': { target: `http://${backendProxyHost}:${backendPort}`, changeOrigin: true }
       }
     }
   }

@@ -1,0 +1,1288 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>北京地铁运营分析平台 · 设计稿</title>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    background: #f0f2f5;
+    color: #1f2a37;
+    font-size: 13px;
+  }
+
+  /* ── 顶部导航 ── */
+  .topbar {
+    height: 52px;
+    background: #001529;
+    display: flex;
+    align-items: center;
+    padding: 0 24px;
+    gap: 24px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 8px rgba(0,0,0,.3);
+  }
+  .topbar-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #fff;
+    font-weight: 700;
+    font-size: 15px;
+    white-space: nowrap;
+  }
+  .topbar-logo .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: #409eff;
+    box-shadow: 0 0 6px #409eff;
+  }
+  .topbar-tabs {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    flex: 1;
+  }
+  .topbar-tab {
+    padding: 6px 18px;
+    border-radius: 4px;
+    color: rgba(255,255,255,.6);
+    cursor: pointer;
+    font-size: 13px;
+    transition: all .2s;
+    white-space: nowrap;
+  }
+  .topbar-tab:hover { color: #fff; background: rgba(255,255,255,.08); }
+  .topbar-tab.active {
+    color: #409eff;
+    background: rgba(64,158,255,.15);
+    font-weight: 600;
+  }
+  .topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-left: auto;
+  }
+  .live-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    background: rgba(103,194,58,.15);
+    border: 1px solid rgba(103,194,58,.3);
+    border-radius: 12px;
+    color: #67c23a;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .live-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: #67c23a;
+    animation: blink 1.5s infinite;
+  }
+  @keyframes blink { 0%,100% { opacity: 1 } 50% { opacity: 0.3 } }
+  .topbar-time { color: rgba(255,255,255,.5); font-size: 12px; }
+
+  /* ── 页面主体 ── */
+  .page {
+    padding: 16px 20px;
+    display: none;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .page.active { display: flex; }
+
+  /* ── KPI条 ── */
+  .kpi-row {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 10px;
+  }
+  .kpi-card {
+    background: #fff;
+    border: 1px solid #e8edf3;
+    border-radius: 8px;
+    padding: 16px;
+    position: relative;
+    overflow: hidden;
+    transition: box-shadow .2s;
+  }
+  .kpi-card:hover { box-shadow: 0 4px 16px rgba(27,39,51,.08); }
+  .kpi-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    border-radius: 8px 8px 0 0;
+  }
+  .kpi-card.blue::before { background: #409eff; }
+  .kpi-card.green::before { background: #67c23a; }
+  .kpi-card.orange::before { background: #e6a23c; }
+  .kpi-card.red::before { background: #f56c6c; }
+  .kpi-card.purple::before { background: #9c6cd4; }
+  .kpi-card.teal::before { background: #17b3a3; }
+  .kpi-label { font-size: 12px; color: #909399; margin-bottom: 10px; }
+  .kpi-value { font-size: 26px; font-weight: 700; color: #1f2a37; line-height: 1; }
+  .kpi-value .unit { font-size: 13px; font-weight: 400; color: #909399; margin-left: 3px; }
+  .kpi-sub {
+    margin-top: 8px;
+    font-size: 11px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: #67c23a;
+  }
+  .kpi-sub.down { color: #f56c6c; }
+  .kpi-sub.flat { color: #909399; }
+
+  /* ── 卡片/图表 ── */
+  .card {
+    background: #fff;
+    border: 1px solid #e8edf3;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .card:hover { box-shadow: 0 4px 16px rgba(27,39,51,.07); }
+  .card-hd {
+    padding: 14px 16px 12px;
+    border-bottom: 1px solid #f0f2f5;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .card-title {
+    font-weight: 600;
+    font-size: 13px;
+    color: #1f2a37;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card-title .icon { font-size: 15px; }
+  .card-body { padding: 16px; }
+  .card-footer {
+    padding: 10px 16px;
+    border-top: 1px solid #f0f2f5;
+    font-size: 11px;
+    color: #c0c4cc;
+  }
+
+  /* ── 布局网格 ── */
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .grid-2-1 { display: grid; grid-template-columns: 2fr 1fr; gap: 14px; }
+  .grid-1-2 { display: grid; grid-template-columns: 1fr 2fr; gap: 14px; }
+
+  /* ── 标签 ── */
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .tag-blue { background: rgba(64,158,255,.1); color: #409eff; }
+  .tag-green { background: rgba(103,194,58,.1); color: #67c23a; }
+  .tag-red { background: rgba(245,108,108,.1); color: #f56c6c; }
+  .tag-orange { background: rgba(230,162,60,.1); color: #e6a23c; }
+  .tag-gray { background: #f4f5f7; color: #909399; }
+
+  /* ── 进度条 ── */
+  .progress-wrap { display: flex; flex-direction: column; gap: 10px; }
+  .progress-item {}
+  .progress-hd {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+    font-size: 12px;
+  }
+  .progress-name { color: #1f2a37; font-weight: 500; }
+  .progress-val { color: #409eff; font-weight: 600; }
+  .progress-bar {
+    height: 6px;
+    background: #f0f2f5;
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width .6s ease;
+  }
+
+  /* ── 表格 ── */
+  table { width: 100%; border-collapse: collapse; }
+  th, td { padding: 10px 12px; text-align: left; font-size: 12px; }
+  th {
+    background: #f8fafc;
+    color: #64748b;
+    font-weight: 600;
+    border-bottom: 1px solid #e8edf3;
+  }
+  td { border-bottom: 1px solid #f0f2f5; color: #1f2a37; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #fafbfc; }
+
+  /* ── 告警列表 ── */
+  .alert-list { display: flex; flex-direction: column; gap: 8px; }
+  .alert-item {
+    padding: 10px 12px;
+    border-radius: 6px;
+    border-left: 3px solid;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .alert-item.crit { background: #fef2f2; border-color: #f56c6c; }
+  .alert-item.warn { background: #fff7ed; border-color: #e6a23c; }
+  .alert-item.info { background: #eff6ff; border-color: #409eff; }
+  .alert-dot { width: 6px; height: 6px; border-radius: 50%; margin-top: 4px; flex-shrink: 0; }
+  .crit .alert-dot { background: #f56c6c; }
+  .warn .alert-dot { background: #e6a23c; }
+  .info .alert-dot { background: #409eff; }
+  .alert-content { flex: 1; }
+  .alert-msg { font-size: 12px; color: #1f2a37; font-weight: 500; margin-bottom: 3px; }
+  .alert-meta { font-size: 11px; color: #909399; }
+
+  /* ── 线路标签 ── */
+  .line-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    font-size: 11px;
+    font-weight: 700;
+    color: #fff;
+    flex-shrink: 0;
+  }
+
+  /* ── 统计数字行 ── */
+  .stat-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+  }
+  .stat-item {
+    text-align: center;
+    padding: 16px 12px;
+    border-right: 1px solid #f0f2f5;
+  }
+  .stat-item:last-child { border-right: none; }
+  .stat-num { font-size: 22px; font-weight: 700; color: #1f2a37; }
+  .stat-label { font-size: 11px; color: #909399; margin-top: 4px; }
+
+  /* ── 漏斗 ── */
+  .funnel-wrap { display: flex; flex-direction: column; gap: 6px; padding: 8px 0; }
+  .funnel-row { display: flex; align-items: center; gap: 10px; }
+  .funnel-bar-wrap { flex: 1; }
+  .funnel-fill {
+    height: 28px;
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    padding-left: 10px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #fff;
+    transition: width .6s;
+  }
+  .funnel-label { width: 80px; font-size: 12px; color: #64748b; text-align: right; }
+  .funnel-count { width: 70px; font-size: 12px; font-weight: 600; color: #409eff; text-align: right; }
+
+  /* ── 迷你状态格 ── */
+  .health-grid {
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    gap: 4px;
+  }
+  .health-cell {
+    aspect-ratio: 1;
+    border-radius: 3px;
+  }
+
+  /* ── 时间轴 ── */
+  .timeline { display: flex; flex-direction: column; gap: 0; }
+  .tl-item {
+    display: flex;
+    gap: 12px;
+    padding-bottom: 14px;
+    position: relative;
+  }
+  .tl-item:last-child { padding-bottom: 0; }
+  .tl-left { display: flex; flex-direction: column; align-items: center; }
+  .tl-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 3px;
+  }
+  .tl-line {
+    width: 2px;
+    flex: 1;
+    background: #f0f2f5;
+    margin: 3px 0;
+  }
+  .tl-item:last-child .tl-line { display: none; }
+  .tl-content { flex: 1; }
+  .tl-title { font-size: 12px; font-weight: 500; color: #1f2a37; }
+  .tl-desc { font-size: 11px; color: #909399; margin-top: 2px; }
+  .tl-time { font-size: 11px; color: #c0c4cc; margin-top: 2px; }
+
+  /* ── 地图占位 ── */
+  .map-placeholder {
+    width: 100%;
+    height: 340px;
+    background: linear-gradient(135deg, #e8f4fd 0%, #eef2ff 50%, #f0fdf4 100%);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 12px;
+    position: relative;
+    overflow: hidden;
+  }
+  .map-placeholder::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      repeating-linear-gradient(0deg, transparent, transparent 39px, #e0e8f0 39px, #e0e8f0 40px),
+      repeating-linear-gradient(90deg, transparent, transparent 39px, #e0e8f0 39px, #e0e8f0 40px);
+  }
+  .map-label {
+    position: relative;
+    background: rgba(255,255,255,.9);
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 13px;
+    color: #64748b;
+    border: 1px solid #e0e8f0;
+  }
+  /* 模拟线路 */
+  .map-lines {
+    position: absolute;
+    inset: 0;
+  }
+  .map-line {
+    position: absolute;
+    border-radius: 2px;
+  }
+
+  /* ── section分隔标题 ── */
+  .section-label {
+    font-size: 11px;
+    color: #909399;
+    font-weight: 600;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    padding: 4px 0;
+    border-bottom: 1px solid #f0f2f5;
+    margin-bottom: 12px;
+  }
+
+  /* ── 下拉按钮 ── */
+  .btn-sm {
+    padding: 4px 10px;
+    border-radius: 4px;
+    border: 1px solid #e0e8f0;
+    background: #fff;
+    font-size: 12px;
+    color: #64748b;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .btn-sm:hover { border-color: #409eff; color: #409eff; }
+
+  /* ── 占位图表容器 ── */
+  .chart-box {
+    width: 100%;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  /* ── 数值比较条 ── */
+  .compare-list { display: flex; flex-direction: column; gap: 8px; }
+  .compare-item {
+    display: grid;
+    grid-template-columns: 60px 1fr 50px;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+  }
+  .compare-name { color: #64748b; text-align: right; white-space: nowrap; }
+  .compare-track { background: #f0f2f5; border-radius: 3px; height: 8px; overflow: hidden; }
+  .compare-fill { height: 100%; border-radius: 3px; }
+  .compare-num { font-weight: 600; color: #1f2a37; text-align: right; }
+
+  /* ── 设备健康矩阵 ── */
+  .matrix-wrap { overflow-x: auto; }
+  .matrix-table { min-width: 600px; }
+  .matrix-cell {
+    width: 32px; height: 32px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 600;
+    color: #fff;
+    cursor: pointer;
+    transition: transform .1s;
+  }
+  .matrix-cell:hover { transform: scale(1.15); z-index: 2; }
+  .mc-good { background: #67c23a; }
+  .mc-warn { background: #e6a23c; }
+  .mc-crit { background: #f56c6c; }
+  .mc-maint { background: #909399; }
+
+  /* 设计稿注释标签 */
+  .design-note {
+    background: #fffbeb;
+    border: 1px dashed #f59e0b;
+    border-radius: 4px;
+    padding: 6px 10px;
+    font-size: 11px;
+    color: #92400e;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+</style>
+</head>
+<body>
+
+<!-- 顶部导航 -->
+<div class="topbar">
+  <div class="topbar-logo">
+    <span class="dot"></span>
+    地铁运营分析平台
+  </div>
+  <div class="topbar-tabs">
+    <div class="topbar-tab active" onclick="showTab('overview')">📊 运营总览</div>
+    <div class="topbar-tab" onclick="showTab('flow')">👥 客流分析</div>
+    <div class="topbar-tab" onclick="showTab('train')">🚇 列车运行</div>
+    <div class="topbar-tab" onclick="showTab('equipment')">⚙️ 设备安全</div>
+    <div class="topbar-tab" onclick="showTab('revenue')">💰 经营收益</div>
+  </div>
+  <div class="topbar-right">
+    <div class="live-badge"><span class="live-dot"></span>实时数据</div>
+    <span class="topbar-time" id="clock">2025-04-21 09:41:22</span>
+  </div>
+</div>
+
+<!-- ══════════════ Tab1: 运营总览 ══════════════ -->
+<div id="page-overview" class="page active">
+
+  <!-- KPI 行 -->
+  <div class="kpi-row">
+    <div class="kpi-card blue">
+      <div class="kpi-label">今日累计客流</div>
+      <div class="kpi-value">1,247<span class="unit">万人次</span></div>
+      <div class="kpi-sub">↑ 较昨日 +3.8%</div>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-label">列车准点率</div>
+      <div class="kpi-value">99.4<span class="unit">%</span></div>
+      <div class="kpi-sub">↑ 高于月均 +0.2%</div>
+    </div>
+    <div class="kpi-card orange">
+      <div class="kpi-label">今日运营收入</div>
+      <div class="kpi-value">4,318<span class="unit">万元</span></div>
+      <div class="kpi-sub">↑ 较昨日 +1.2%</div>
+    </div>
+    <div class="kpi-card red">
+      <div class="kpi-label">当前故障告警</div>
+      <div class="kpi-value">7<span class="unit">项</span></div>
+      <div class="kpi-sub down">↑ 较昨日 +2项</div>
+    </div>
+    <div class="kpi-card purple">
+      <div class="kpi-label">运营线路</div>
+      <div class="kpi-value">27<span class="unit">条</span></div>
+      <div class="kpi-sub flat">— 全部正常运营</div>
+    </div>
+    <div class="kpi-card teal">
+      <div class="kpi-label">在线列车</div>
+      <div class="kpi-value">1,086<span class="unit">列</span></div>
+      <div class="kpi-sub">↑ 高峰加开 +42列</div>
+    </div>
+  </div>
+
+  <div class="grid-2-1">
+    <!-- 客流实时趋势 -->
+    <div class="card">
+      <div class="card-hd">
+        <div class="card-title"><span class="icon">📈</span>今日全网客流趋势</div>
+        <div style="display:flex;gap:8px">
+          <button class="btn-sm">今日</button>
+          <button class="btn-sm">7天</button>
+          <button class="btn-sm">30天</button>
+        </div>
+      </div>
+      <div class="card-body" style="padding:12px 16px 8px">
+        <div id="chart-flow-trend" class="chart-box" style="height:240px"></div>
+      </div>
+      <div class="card-footer">早高峰 07:30–09:30 最高峰值 186万人次/小时 · 晚高峰 17:30–19:30 峰值 171万人次/小时</div>
+    </div>
+
+    <!-- 实时告警 -->
+    <div class="card">
+      <div class="card-hd">
+        <div class="card-title"><span class="icon">🚨</span>实时告警</div>
+        <span class="tag tag-red">7 待处理</span>
+      </div>
+      <div class="card-body">
+        <div class="alert-list">
+          <div class="alert-item crit">
+            <div class="alert-dot"></div>
+            <div class="alert-content">
+              <div class="alert-msg">1号线 木樨地站 闸机故障 (#3-#6)</div>
+              <div class="alert-meta">严重 · 09:18 · 维修人员已派遣</div>
+            </div>
+          </div>
+          <div class="alert-item warn">
+            <div class="alert-dot"></div>
+            <div class="alert-content">
+              <div class="alert-msg">4号线 北京南站 进站限流预警</div>
+              <div class="alert-meta">警告 · 09:31 · 客流超容80%</div>
+            </div>
+          </div>
+          <div class="alert-item warn">
+            <div class="alert-dot"></div>
+            <div class="alert-content">
+              <div class="alert-msg">10号线 国贸站 空调机组异常</div>
+              <div class="alert-meta">警告 · 09:22 · 温度28.7°C</div>
+            </div>
+          </div>
+          <div class="alert-item info">
+            <div class="alert-dot"></div>
+            <div class="alert-content">
+              <div class="alert-msg">6号线 草房-常营区间信号延迟</div>
+              <div class="alert-meta">信息 · 09:05 · 延迟1分42秒</div>
+            </div>
+          </div>
+          <div class="alert-item info">
+            <div class="alert-dot"></div>
+            <div class="alert-content">
+              <div class="alert-msg">13号线 五道口站 电梯计划维保</div>
+              <div class="alert-meta">信息 · 08:00 · 预计10:30恢复</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid-3">
+    <!-- 线路客流排行 -->
+    <div class="card">
+      <div class="card-hd">
+        <div class="card-title"><span class="icon">🏆</span>线路客流排行</div>
+        <span class="tag tag-gray">今日</span>
+      </div>
+      <div class="card-body">
+        <div class="compare-list">
+          <div class="compare-item">
+            <span class="compare-name">10号线</span>
+            <div class="compare-track"><div class="compare-fill" style="width:100%;background:#f56c6c"></div></div>
+            <span class="compare-num">198万</span>
+          </div>
+          <div class="compare-item">
+            <span class="compare-name">1号线</span>
+            <div class="compare-track"><div class="compare-fill" style="width:88%;background:#e6a23c"></div></div>
+            <span class="compare-num">175万</span>
+          </div>
+          <div class="compare-item">
+            <span class="compare-name">4号线</span>
+            <div class="compare-track"><div class="compare-fill" style="width:80%;background:#409eff"></div></div>
+            <span class="compare-num">158万</span>
+          </div>
+          <div class="compare-item">
+            <span class="compare-name">5号线</span>
+            <div class="compare-track"><div class="compare-fill" style="width:74%;background:#67c23a"></div></div>
+            <span class="compare-num">147万</span>
+          </div>
+          <div class="compare-item">
+            <span class="compare-name">2号线</span>
+            <div class="compare-track"><div class="compare-fill" style="width:68%;background:#9c6cd4"></div></div>
+            <span class="compare-num">135万</span>
+          </div>
+          <div class="compare-item">
+            <span class="compare-name">6号线</span>
+            <div class="compare-track"><div class="compare-fill" style="width:63%;background:#17b3a3"></div></div>
+            <span class="compare-num">125万</span>
+          </div>
+          <div class="compare-item">
+            <span class="compare-name">13号线</span>
+            <div class="compare-track"><div class="compare-fill" style="width:58%;background:#f59e0b"></div></div>
+            <span class="compare-num">115万</span>
+          </div>
+          <div class="compare-item">
+            <span class="compare-name">7号线</span>
+            <div class="compare-track"><div class="compare-fill" style="width:52%;background:#409eff"></div></div>
+            <span class="compare-num">103万</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 准点率雷达 -->
+    <div class="card">
+      <div class="card-hd">
+        <div class="card-title"><span class="icon">⏱️</span>各线准点率</div>
+      </div>
+      <div class="card-body" style="padding:8px">
+        <div id="chart-punctuality" class="chart-box" style="height:260px"></div>
+      </div>
+    </div>
+
+    <!-- 运营状态 -->
+    <div class="card">
+      <div class="card-hd">
+        <div class="card-title"><span class="icon">🟢</span>线路运营状态</div>
+      </div>
+      <div class="card-body" style="padding:10px">
+        <table>
+          <thead>
+            <tr><th>线路</th><th>状态</th><th>延误</th><th>客流</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><div style="display:flex;align-items:center;gap:6px"><div class="line-badge" style="background:#c41f3b;font-size:10px">1</div> 1号线</div></td><td><span class="tag tag-green">正常</span></td><td>—</td><td>175万</td></tr>
+            <tr><td><div style="display:flex;align-items:center;gap:6px"><div class="line-badge" style="background:#004b96">2</div> 2号线</div></td><td><span class="tag tag-green">正常</span></td><td>—</td><td>135万</td></tr>
+            <tr><td><div style="display:flex;align-items:center;gap:6px"><div class="line-badge" style="background:#007a3d">4</div> 4号线</div></td><td><span class="tag tag-orange">限流</span></td><td>—</td><td>158万</td></tr>
+            <tr><td><div style="display:flex;align-items:center;gap:6px"><div class="line-badge" style="background:#003b99">5</div> 5号线</div></td><td><span class="tag tag-green">正常</span></td><td>—</td><td>147万</td></tr>
+            <tr><td><div style="display:flex;align-items:center;gap:6px"><div class="line-badge" style="background:#e05a08">6</div> 6号线</div></td><td><span class="tag tag-orange">延误</span></td><td>1'42"</td><td>125万</td></tr>
+            <tr><td><div style="display:flex;align-items:center;gap:6px"><div class="line-badge" style="background:#f6ab00;color:#000">10</div> 10号线</div></td><td><span class="tag tag-green">正常</span></td><td>—</td><td>198万</td></tr>
+            <tr><td><div style="display:flex;align-items:center;gap:6px"><div class="line-badge" style="background:#999;font-size:10px">13</div> 13号线</div></td><td><span class="tag tag-gray">维保</span></td><td>—</td><td>115万</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════ Tab2: 客流分析 ══════════════ -->
+<div id="page-flow" class="page">
+
+  <div class="kpi-row" style="grid-template-columns:repeat(5,1fr)">
+    <div class="kpi-card blue">
+      <div class="kpi-label">今日总客流</div>
+      <div class="kpi-value">1,247<span class="unit">万</span></div>
+      <div class="kpi-sub">↑ +3.8% 较昨日</div>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-label">早高峰峰值</div>
+      <div class="kpi-value">186<span class="unit">万/时</span></div>
+      <div class="kpi-sub flat">07:30–09:30</div>
+    </div>
+    <div class="kpi-card orange">
+      <div class="kpi-label">晚高峰峰值</div>
+      <div class="kpi-value">171<span class="unit">万/时</span></div>
+      <div class="kpi-sub flat">17:30–19:30</div>
+    </div>
+    <div class="kpi-card red">
+      <div class="kpi-label">超载站点</div>
+      <div class="kpi-value">12<span class="unit">个</span></div>
+      <div class="kpi-sub down">当前限流措施中</div>
+    </div>
+    <div class="kpi-card purple">
+      <div class="kpi-label">平均行程时长</div>
+      <div class="kpi-value">38<span class="unit">分钟</span></div>
+      <div class="kpi-sub flat">— 较上月持平</div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <!-- 全天客流分布 -->
+    <div class="card">
+      <div class="card-hd">
+        <div class="card-title"><span class="icon">⏰</span>全天客流时段分布</div>
+        <button class="btn-sm">工作日 ▾</button>
+      </div>
+      <div class="card-body" style="padding:8px 16px">
+        <div id="chart-hourly" class="chart-box" style="height:260px"></div>
+      </div>
+    </div>
+
+    <!-- TOP20站点热力 -->
+    <div class="card">
+      <div class="card-hd">
+        <div class="card-title"><span class="icon">🔥</span>TOP20 热点站点</div>
+        <span class="tag tag-gray">今日进站</span>
+      </div>
+      <div class="card-body" style="padding:8px 16px">
+        <div id="chart-hotspot" class="chart-box" style="height:260px"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <!-- OD流量分析 -->
+    <div class="card">
+      <div class="card-hd">
+        <div class="card-title"><span class="icon">🔄</span>OD 热点流量（TOP 15对）</div>
+        <button class="btn-sm">早高峰 ▾</button>
+      </div>
+      <div class="card-body">
+        <table>
+          <thead>
+            <tr><th>出发站</th><th>目的站</th><th>流量(人次)</th><th>占比</th><th>趋势</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>天通苑</td><td>国贸</td><td>42,318</td><td><div class="compare-track" style="width:120px"><div class="compare-fill" style="width:100%;background:#409eff"></div></div></td><td style="color:#67c23a">↑ 5.2%</td></tr>
+            <tr><td>回龙观</td><td>西二旗</td><td>38,901</td><td><div class="compare-track" style="width:120px"><div class="compare-fill" style="width:92%;background:#409eff"></div></div></td><td style="color:#67c23a">↑ 8.1%</td></tr>
+            <tr><td>通州北苑</td><td>四惠</td><td>35,427</td><td><div class="compare-track" style="width:120px"><div class="compare-fill" style="width:84%;background:#409eff"></div></div></td><td style="color:#f56c6c">↓ 1.3%</td></tr>
+            <tr><td>望京</td><td>国贸</td><td>31,882</td><td><div class="compare-track" style="width:120px"><div class="compare-fill" style="width:75%;background:#409eff"></div></div></td><td style="color:#67c23a">↑ 2.7%</td></tr>
+            <tr><td>北京南站</td><td>西单</td><td>28,643</td><td><div class="compare-track" style="width:120px"><div class="compare-fill" style="width:68%;background:#409eff"></div></div></td><td style="color:#67c23a">↑ 12.4%</td></tr>
+            <tr><td>上地</td><td>中关村</td><td>26,119</td><td><div class="compare-track" style="width:120px"><div class="compare-fill" style="width:62%;background:#409eff"></div></div></td><td style="color:#67c23a">↑ 3.9%</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 乘客画像 -->
+    <div class="card">
+      <div class="card-hd">
+        <div class="card-title"><span class="icon">👤</span>乘客出行画像</div>
+      </div>
+      <div class="card-body" style="padding:8px">
+        <div id="chart-passenger-profile" class="chart-box" style="height:260px"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════ Tab3: 列车运行 ══════════════ -->
+<div id="page-train" class="page">
+
+  <div class="kpi-row" style="grid-template-columns:repeat(5,1fr)">
+    <div class="kpi-card green">
+      <div class="kpi-label">全网准点率</div>
+      <div class="kpi-value">99.4<span class="unit">%</span></div>
+      <div class="kpi-sub">优于目标 99.0%</div>
+    </div>
+    <div class="kpi-card blue">
+      <div class="kpi-label">在线列车</div>
+      <div class="kpi-value">1,086<span class="unit">列</span></div>
+      <div class="kpi-sub flat">共 1,128列编组</div>
+    </div>
+    <div class="kpi-card orange">
+      <div class="kpi-label">当前延误</div>
+      <div class="kpi-value">3<span class="unit">列</span></div>
+      <div class="kpi-sub flat">最大延误 1'42"</div>
+    </div>
+    <div class="kpi-card red">
+      <div class="kpi-label">今日故障</div>
+      <div class="kpi-value">12<span class="unit">起</span></div>
+      <div class="kpi-sub down">较昨日 +3起</div>
+    </div>
+    <div class="kpi-card purple">
+      <div class="kpi-label">平均站间距</div>
+      <div class="kpi-value">1.2<span class="unit">km</span></div>
+      <div class="kpi-sub flat">— 全网统计</div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <!-- 30天准点率趋势 -->
+    <div class="card">
+      <div class="card-hd">
+        <div class="card-title"><span class="icon">📉</span>准点率趋势（30天）</div>
+      </div>
+      <div class="card-body" style="padding:8px 16px">
+        <div id="chart-punctuality-trend" class="chart-box" style="height:240px"></div>
+      </div>
+    </div>
+
+    <!-- 故障分类统计 -->
+    <div class="card">
+      <div class="card-hd">
+        <div class="card-title"><span class="icon">🔧</span>故障原因分类</div>
+        <span class="tag tag-gray">本月累计</span>
+      </div>
+      <div class="card-body" style="padding:8px">
+        <div id="chart-fault-type" class="chart-box" style="height:240px"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-hd">
+      <div class="card-title"><span class="icon">🕐</span>列车运行时刻表（1号线 · 实时追踪）</div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button class="btn-sm">1号线 ▾</button>
+        <button class="btn-sm">苹果园→四惠东 ▾</button>
+      </div>
+    </div>
+    <div class="card-body">
+      <table>
+        <thead>
+          <tr><th>车次</th><th>编组</th><th>当前位置</th><th>下一站</th><th>预计到站</th><th>状态</th><th>载客率</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>K0901</td><td>6辆编组</td><td>木樨地 → 复兴门</td><td>复兴门</td><td>2分18秒</td><td><span class="tag tag-green">正点</span></td><td>78%</td></tr>
+          <tr><td>K0902</td><td>6辆编组</td><td>西单 站中</td><td>王府井</td><td>1分05秒</td><td><span class="tag tag-green">正点</span></td><td>91%</td></tr>
+          <tr><td>K0903</td><td>6辆编组</td><td>四惠东</td><td>终点</td><td>到站</td><td><span class="tag tag-blue">终到</span></td><td>35%</td></tr>
+          <tr><td>K0904</td><td>6辆编组</td><td>苹果园 → 古城</td><td>古城</td><td>3分40秒</td><td><span class="tag tag-orange">晚点1'12"</span></td><td>62%</td></tr>
+          <tr><td>K0905</td><td>6辆编组</td><td>国贸 站中</td><td>大望路</td><td>1分30秒</td><td><span class="tag tag-green">正点</span></td><td>88%</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════ Tab4: 设备安全 ══════════════ -->
+<div id="page-equipment" class="page">
+
+  <div class="kpi-row">
+    <div class="kpi-card green">
+      <div class="kpi-label">设备在线率</div>
+      <div class="kpi-value">99.1<span class="unit">%</span></div>
+      <div class="kpi-sub">↑ 较上月 +0.3%</div>
+    </div>
+    <div class="kpi-card blue">
+      <div class="kpi-label">受监设备总数</div>
+      <div class="kpi-value">82,416<span class="unit">台</span></div>
+      <div class="kpi-sub flat">含车辆/站务/轨道</div>
+    </div>
+    <div class="kpi-card orange">
+      <div class="kpi-label">待维修设备</div>
+      <div class="kpi-value">143<span class="unit">台</span></div>
+      <div class="kpi-sub flat">派单 67 · 在修 76</div>
+    </div>
+    <div class="kpi-card red">
+      <div class="kpi-label">严重故障</div>
+      <div class="kpi-value">7<span class="unit">起</span></div>
+      <div class="kpi-sub down">↑ 较昨日 +2起</div>
+    </div>
+    <div class="kpi-card purple">
+      <div class="kpi-label">本月维保完成率</div>
+      <div class="kpi-value">94.2<span class="unit">%</span></div>
+      <div class="kpi-sub">↑ 超计划 4.2%</div>
+    </div>
+    <div class="kpi-card teal">
+      <div class="kpi-label">平均修复时长</div>
+      <div class="kpi-value">2.4<span class="unit">小时</span></div>
+      <div class="kpi-sub">↓ 较上月 -18分</div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <!-- 设备健康矩阵 -->
+    <div class="card">
+      <div class="card-hd">
+        <div class="card-title"><span class="icon">🟦</span>车辆健康矩阵（1号线全部编组）</div>
+        <div style="display:flex;gap:8px;align-items:center;font-size:11px">
+          <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;background:#67c23a;border-radius:2px;display:inline-block"></span>优良</span>
+          <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;background:#e6a23c;border-radius:2px;display:inline-block"></span>注意</span>
+          <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;background:#f56c6c;border-radius:2px;display:inline-block"></span>故障</span>
+          <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;background:#909399;border-radius:2px;display:inline-block"></span>维保</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="matrix-wrap">
+          <div style="display:grid;grid-template-columns:repeat(16,1fr);gap:4px" id="health-matrix"></div>
+        </div>
+        <div style="margin-top:16px">
+          <div id="chart-equipment-health" style="height:180px"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 故障分布 + 维修记录 -->
+    <div class="card">
+      <div class="card-hd">
+        <div class="card-title"><span class="icon">🔩</span>设备故障分布</div>
+      </div>
+      <div class="card-body" style="padding:8px">
+        <div id="chart-fault-dist" style="height:200px"></div>
+        <div class="section-label" style="margin-top:16px">最新维修工单</div>
+        <div class="timeline">
+          <div class="tl-item">
+            <div class="tl-left"><div class="tl-dot" style="background:#f56c6c"></div><div class="tl-line"></div></div>
+            <div class="tl-content">
+              <div class="tl-title">1号线木樨地 AFC闸机 #3-#6 故障</div>
+              <div class="tl-desc">磁卡读头故障，无法识别卡 · 工单 #W2024041201</div>
+              <div class="tl-time">09:18 · 技术员已到场</div>
+            </div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-left"><div class="tl-dot" style="background:#e6a23c"></div><div class="tl-line"></div></div>
+            <div class="tl-content">
+              <div class="tl-title">10号线国贸 中央空调主机 异常</div>
+              <div class="tl-desc">制冷效果下降，温度超限 28.7°C · 工单 #W2024041202</div>
+              <div class="tl-time">09:22 · 维修中</div>
+            </div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-left"><div class="tl-dot" style="background:#67c23a"></div><div class="tl-line"></div></div>
+            <div class="tl-content">
+              <div class="tl-title">4号线新街口 扶梯 A3 修复完成</div>
+              <div class="tl-desc">驱动链条更换，验收通过 · 工单 #W2024041189</div>
+              <div class="tl-time">08:45 · 已关闭</div>
+            </div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-left"><div class="tl-dot" style="background:#409eff"></div></div>
+            <div class="tl-content">
+              <div class="tl-title">13号线五道口 电梯 B1 计划维保</div>
+              <div class="tl-desc">年度大修，预计10:30完成 · 工单 #W2024041176</div>
+              <div class="tl-time">08:00 · 进行中</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════ Tab5: 经营收益 ══════════════ -->
+<div id="page-revenue" class="page">
+
+  <div class="kpi-row">
+    <div class="kpi-card blue">
+      <div class="kpi-label">今日票务收入</div>
+      <div class="kpi-value">3,841<span class="unit">万元</span></div>
+      <div class="kpi-sub">↑ 较昨日 +1.2%</div>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-label">广告收入（本月）</div>
+      <div class="kpi-value">2,316<span class="unit">万元</span></div>
+      <div class="kpi-sub">↑ 完成年度计划 68%</div>
+    </div>
+    <div class="kpi-card orange">
+      <div class="kpi-label">商业租赁（本月）</div>
+      <div class="kpi-value">1,478<span class="unit">万元</span></div>
+      <div class="kpi-sub">↑ 较上月 +2.3%</div>
+    </div>
+    <div class="kpi-card purple">
+      <div class="kpi-label">月度总收入</div>
+      <div class="kpi-value">1.24<span class="unit">亿元</span></div>
+      <div class="kpi-sub">↑ 较上月 +4.7%</div>
+    </div>
+    <div class="kpi-card teal">
+      <div class="kpi-label">人均票价</div>
+      <div class="kpi-value">3.08<span class="unit">元</span></div>
+      <div class="kpi-sub flat">— 较上月持平</div>
+    </div>
+    <div class="kpi-card red">
+      <div class="kpi-label">优惠补贴（今日）</div>
+      <div class="kpi-value">418<span class="unit">万元</span></div>
+      <div class="kpi-sub down">月卡+学生+老人</div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <!-- 收入构成趋势 -->
+    <div class="card">
+      <div class="card-hd">
+        <div class="card-title"><span class="icon">💹</span>月度收入构成趋势</div>
+        <button class="btn-sm">近6个月 ▾</button>
+      </div>
+      <div class="card-body" style="padding:8px 16px">
+        <div id="chart-revenue-trend" class="chart-box" style="height:260px"></div>
+      </div>
+    </div>
+
+    <!-- 票价结构 -->
+    <div class="card">
+      <div class="card-hd">
+        <div class="card-title"><span class="icon">🎫</span>票务类型收入结构</div>
+      </div>
+      <div class="card-body" style="padding:8px">
+        <div id="chart-ticket-type" class="chart-box" style="height:260px"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-hd">
+      <div class="card-title"><span class="icon">📋</span>线路收益明细</div>
+      <div style="display:flex;gap:8px">
+        <button class="btn-sm">本月 ▾</button>
+        <button class="btn-sm">导出 Excel</button>
+      </div>
+    </div>
+    <div class="card-body" style="padding:0">
+      <table>
+        <thead>
+          <tr><th>线路</th><th>票务收入(万)</th><th>客流(万人次)</th><th>人均票价(元)</th><th>广告收入(万)</th><th>商业收入(万)</th><th>合计(万)</th><th>同比</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><div style="display:flex;align-items:center;gap:6px"><div class="line-badge" style="background:#f6ab00;color:#000;font-size:10px">10</div>10号线</div></td><td>6,241</td><td>4,820</td><td>3.21</td><td>428</td><td>312</td><td><strong>6,981</strong></td><td style="color:#67c23a">↑ 5.3%</td></tr>
+          <tr><td><div style="display:flex;align-items:center;gap:6px"><div class="line-badge" style="background:#c41f3b;font-size:10px">1</div>1号线</div></td><td>5,512</td><td>4,127</td><td>3.33</td><td>386</td><td>278</td><td><strong>6,176</strong></td><td style="color:#67c23a">↑ 3.1%</td></tr>
+          <tr><td><div style="display:flex;align-items:center;gap:6px"><div class="line-badge" style="background:#007a3d">4</div>4号线</div></td><td>4,831</td><td>3,821</td><td>3.14</td><td>341</td><td>241</td><td><strong>5,413</strong></td><td style="color:#67c23a">↑ 7.8%</td></tr>
+          <tr><td><div style="display:flex;align-items:center;gap:6px"><div class="line-badge" style="background:#003b99">5</div>5号线</div></td><td>4,218</td><td>3,412</td><td>3.08</td><td>312</td><td>198</td><td><strong>4,728</strong></td><td style="color:#f56c6c">↓ 0.7%</td></tr>
+          <tr><td><div style="display:flex;align-items:center;gap:6px"><div class="line-badge" style="background:#004b96">2</div>2号线</div></td><td>3,914</td><td>3,182</td><td>3.06</td><td>297</td><td>215</td><td><strong>4,426</strong></td><td style="color:#67c23a">↑ 2.4%</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// Tab 切换
+function showTab(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'))
+  document.querySelectorAll('.topbar-tab').forEach(t => t.classList.remove('active'))
+  document.getElementById('page-' + name).classList.add('active')
+  event.target.classList.add('active')
+  setTimeout(() => initCharts(name), 50)
+}
+
+// 时钟
+function updateClock() {
+  const now = new Date()
+  document.getElementById('clock').textContent = now.toLocaleString('zh-CN', { hour12: false }).replace(/\//g, '-')
+}
+setInterval(updateClock, 1000)
+
+// 颜色方案
+const C = { blue: '#409eff', green: '#67c23a', orange: '#e6a23c', red: '#f56c6c', purple: '#9c6cd4', teal: '#17b3a3' }
+
+// ── 设备健康矩阵 ──
+function buildMatrix() {
+  const el = document.getElementById('health-matrix')
+  if (!el) return
+  const states = ['good','good','good','good','good','good','good','warn','good','good','good','good','good','good','good','good',
+                  'good','good','crit','good','good','good','warn','good','good','good','good','good','good','maint','good','good']
+  el.innerHTML = states.map((s, i) => `<div class="matrix-cell mc-${s}" title="编组${i+1}">${i+1}</div>`).join('')
+}
+
+// ── 图表定义 ──
+function initCharts(tab) {
+  if (tab === 'overview' || !tab) {
+    // 客流趋势
+    const fc = echarts.init(document.getElementById('chart-flow-trend'))
+    const hours = Array.from({length:24}, (_,i) => `${String(i).padStart(2,'0')}:00`)
+    const vals = [2,1,1,1,2,8,48,182,186,124,87,92,105,88,76,118,162,171,148,112,78,54,32,14]
+    fc.setOption({
+      tooltip: { trigger: 'axis', formatter: p => `${p[0].name}<br/>客流：<b>${p[0].value}万人次</b>` },
+      grid: { left: 40, right: 20, top: 20, bottom: 30 },
+      xAxis: { type: 'category', data: hours, axisLabel: { color: '#999', fontSize: 11 }, axisTick: { show: false } },
+      yAxis: { type: 'value', axisLabel: { color: '#999', fontSize: 11 }, splitLine: { lineStyle: { color: '#f0f2f5' } } },
+      series: [{
+        type: 'line', data: vals, smooth: true,
+        symbol: 'none',
+        lineStyle: { color: C.blue, width: 2.5 },
+        areaStyle: { color: { type: 'linear', x:0,y:0,x2:0,y2:1, colorStops: [{offset:0,color:'rgba(64,158,255,.25)'},{offset:1,color:'rgba(64,158,255,.01)'}] } },
+        markArea: {
+          itemStyle: { color: 'rgba(245,108,108,.06)' },
+          data: [[{name:'早高峰',xAxis:'07:00'},{xAxis:'09:00'}],[{name:'晚高峰',xAxis:'17:00'},{xAxis:'19:00'}]]
+        }
+      }]
+    })
+    window.addEventListener('resize', () => fc.resize())
+
+    // 准点率
+    const pc = echarts.init(document.getElementById('chart-punctuality'))
+    const lines = ['1号线','2号线','4号线','5号线','6号线','10号线','13号线','14号线']
+    const pts = [99.6,99.8,99.1,99.3,97.8,99.7,99.2,98.9]
+    pc.setOption({
+      tooltip: { trigger: 'item' },
+      radar: { indicator: lines.map(n => ({name:n, max:100, min:96})), radius:'70%', axisName:{color:'#64748b',fontSize:11} },
+      series: [{ type: 'radar', data: [{ value: pts, name: '准点率', areaStyle: {color:'rgba(64,158,255,.15)'}, lineStyle: {color:C.blue}, itemStyle: {color:C.blue} }] }]
+    })
+    window.addEventListener('resize', () => pc.resize())
+  }
+
+  if (tab === 'flow') {
+    // 逐时客流
+    const hc = echarts.init(document.getElementById('chart-hourly'))
+    const h24 = Array.from({length:24}, (_,i) => `${String(i).padStart(2,'0')}:00`)
+    const wd = [2,1,1,1,2,8,48,182,186,124,87,92,105,88,76,118,162,171,148,112,78,54,32,14]
+    const we = [4,2,2,1,3,12,30,90,118,105,98,102,110,108,102,128,145,152,138,118,95,72,48,22]
+    hc.setOption({
+      tooltip: { trigger: 'axis' },
+      legend: { bottom: 0, textStyle: {color:'#64748b', fontSize:11} },
+      grid: { left:40, right:20, top:20, bottom:40 },
+      xAxis: { type:'category', data:h24, axisLabel:{color:'#999',fontSize:11} },
+      yAxis: { type:'value', axisLabel:{color:'#999',fontSize:11}, splitLine:{lineStyle:{color:'#f0f2f5'}} },
+      series: [
+        { name:'工作日', type:'line', data:wd, smooth:true, symbol:'none', lineStyle:{color:C.blue,width:2.5}, areaStyle:{color:'rgba(64,158,255,.1)'} },
+        { name:'周末', type:'line', data:we, smooth:true, symbol:'none', lineStyle:{color:C.green,width:2,type:'dashed'} }
+      ]
+    })
+    window.addEventListener('resize', () => hc.resize())
+
+    // 热点站点
+    const hs = echarts.init(document.getElementById('chart-hotspot'))
+    const stations = ['国贸','西单','中关村','北京南站','天通苑','四惠','望京','三元桥','国贸北','上地']
+    const vals2 = [42,38,35,33,31,28,26,24,23,21]
+    hs.setOption({
+      tooltip: { trigger: 'axis', formatter: p => `${p[0].name}: ${p[0].value}万人次` },
+      grid: { left:70, right:40, top:10, bottom:10 },
+      xAxis: { type:'value', axisLabel:{color:'#999',fontSize:11}, splitLine:{lineStyle:{color:'#f0f2f5'}} },
+      yAxis: { type:'category', data:[...stations].reverse(), axisLabel:{color:'#64748b',fontSize:11} },
+      series: [{
+        type:'bar', data:[...vals2].reverse(), barMaxWidth:16,
+        itemStyle: { color: { type:'linear', x:0,y:0,x2:1,y2:0, colorStops:[{offset:0,color:'rgba(64,158,255,.5)'},{offset:1,color:C.blue}] }, borderRadius:[0,4,4,0] },
+        label: { show:true, position:'right', formatter: p => p.value+'万', fontSize:11, color:'#64748b' }
+      }]
+    })
+    window.addEventListener('resize', () => hs.resize())
+
+    // 乘客画像
+    const pp = echarts.init(document.getElementById('chart-passenger-profile'))
+    pp.setOption({
+      tooltip: { trigger:'item' },
+      legend: { bottom:0, textStyle:{color:'#64748b', fontSize:11} },
+      series: [{
+        type:'pie', radius:['40%','70%'], center:['50%','45%'],
+        data: [
+          {value:38,name:'上班族',itemStyle:{color:C.blue}},
+          {value:22,name:'学生',itemStyle:{color:C.green}},
+          {value:18,name:'通勤务工',itemStyle:{color:C.orange}},
+          {value:12,name:'老年人',itemStyle:{color:C.purple}},
+          {value:10,name:'旅游探访',itemStyle:{color:C.red}}
+        ],
+        itemStyle: { borderColor:'#fff', borderWidth:2 },
+        label: { formatter: '{b}\n{d}%', fontSize:11 }
+      }]
+    })
+    window.addEventListener('resize', () => pp.resize())
+  }
+
+  if (tab === 'train') {
+    // 准点率趋势
+    const pt = echarts.init(document.getElementById('chart-punctuality-trend'))
+    const days = Array.from({length:30},(_,i)=>{const d=new Date(); d.setDate(d.getDate()-29+i); return `${d.getMonth()+1}/${d.getDate()}`})
+    const ptVals = days.map((_,i)=> +(98.5 + Math.sin(i/5)*0.8 + Math.random()*0.3).toFixed(2))
+    pt.setOption({
+      tooltip: { trigger:'axis' },
+      grid: { left:40, right:20, top:20, bottom:30 },
+      xAxis: { type:'category', data:days, axisLabel:{color:'#999',fontSize:10,rotate:45} },
+      yAxis: { type:'value', min:97, max:100, axisLabel:{color:'#999',fontSize:11}, splitLine:{lineStyle:{color:'#f0f2f5'}} },
+      series: [{
+        type:'line', data:ptVals, smooth:true, symbol:'none',
+        lineStyle:{color:C.green,width:2.5},
+        areaStyle:{color:'rgba(103,194,58,.12)'},
+        markLine:{data:[{yAxis:99,name:'目标',lineStyle:{color:'#f56c6c',type:'dashed'}}]}
+      }]
+    })
+    window.addEventListener('resize', () => pt.resize())
+
+    // 故障类型
+    const ft = echarts.init(document.getElementById('chart-fault-type'))
+    ft.setOption({
+      tooltip: { trigger:'item' },
+      legend: { bottom:0, textStyle:{color:'#64748b',fontSize:11} },
+      series: [{
+        type:'pie', radius:['35%','65%'],
+        data: [
+          {value:34,name:'AFC设备',itemStyle:{color:C.red}},
+          {value:28,name:'空调通风',itemStyle:{color:C.orange}},
+          {value:19,name:'信号系统',itemStyle:{color:C.blue}},
+          {value:12,name:'电梯扶梯',itemStyle:{color:C.purple}},
+          {value:7,name:'其他',itemStyle:{color:'#c0c4cc'}}
+        ],
+        itemStyle:{borderColor:'#fff',borderWidth:2},
+        label:{formatter:'{b}: {d}%',fontSize:11}
+      }]
+    })
+    window.addEventListener('resize', () => ft.resize())
+  }
+
+  if (tab === 'equipment') {
+    buildMatrix()
+    // 健康分布
+    const eh = echarts.init(document.getElementById('chart-equipment-health'))
+    eh.setOption({
+      tooltip: { trigger:'axis' },
+      grid: { left:40, right:20, top:10, bottom:30 },
+      xAxis: { type:'category', data:['优良(90+)','良好(80-90)','一般(70-80)','注意(60-70)','故障(<60)'], axisLabel:{color:'#64748b',fontSize:11} },
+      yAxis: { type:'value', axisLabel:{color:'#999',fontSize:11}, splitLine:{lineStyle:{color:'#f0f2f5'}} },
+      series: [{
+        type:'bar', data:[
+          {value:842,itemStyle:{color:C.green}},
+          {value:198,itemStyle:{color:'#85ce61'}},
+          {value:32,itemStyle:{color:C.orange}},
+          {value:11,itemStyle:{color:'#f59e0b'}},
+          {value:3,itemStyle:{color:C.red}}
+        ],
+        barMaxWidth:40, itemStyle:{borderRadius:[4,4,0,0]}
+      }]
+    })
+    window.addEventListener('resize', () => eh.resize())
+
+    // 故障分布
+    const fd = echarts.init(document.getElementById('chart-fault-dist'))
+    fd.setOption({
+      tooltip:{trigger:'item'},
+      legend:{top:0,textStyle:{fontSize:11}},
+      series:[{
+        type:'pie', radius:'60%',
+        data:[
+          {value:34,name:'AFC',itemStyle:{color:C.red}},
+          {value:28,name:'暖通',itemStyle:{color:C.orange}},
+          {value:19,name:'信号',itemStyle:{color:C.blue}},
+          {value:12,name:'垂直',itemStyle:{color:C.purple}},
+          {value:7,name:'其他',itemStyle:{color:'#c0c4cc'}}
+        ],
+        itemStyle:{borderColor:'#fff',borderWidth:2},
+        label:{fontSize:11}
+      }]
+    })
+    window.addEventListener('resize', () => fd.resize())
+  }
+
+  if (tab === 'revenue') {
+    // 收入趋势
+    const rt = echarts.init(document.getElementById('chart-revenue-trend'))
+    const months = ['11月','12月','1月','2月','3月','4月']
+    rt.setOption({
+      tooltip:{trigger:'axis'},
+      legend:{bottom:0,textStyle:{color:'#64748b',fontSize:11}},
+      grid:{left:50,right:20,top:20,bottom:40},
+      xAxis:{type:'category',data:months,axisLabel:{color:'#64748b',fontSize:12}},
+      yAxis:{type:'value',axisLabel:{color:'#999',fontSize:11},splitLine:{lineStyle:{color:'#f0f2f5'}}},
+      series:[
+        {name:'票务',type:'bar',stack:'rev',data:[9412,8821,7234,7891,10234,11821],itemStyle:{color:C.blue}},
+        {name:'广告',type:'bar',stack:'rev',data:[2314,2187,2018,2098,2241,2316],itemStyle:{color:C.green}},
+        {name:'商业',type:'bar',stack:'rev',data:[1324,1287,1198,1312,1401,1478],itemStyle:{color:C.orange}},
+        {name:'总计',type:'line',data:[13050,12295,10450,11301,13876,15615],smooth:true,symbol:'circle',symbolSize:5,lineStyle:{color:C.red,width:2},itemStyle:{color:C.red}}
+      ]
+    })
+    window.addEventListener('resize', () => rt.resize())
+
+    // 票务类型
+    const tt = echarts.init(document.getElementById('chart-ticket-type'))
+    tt.setOption({
+      tooltip:{trigger:'item'},
+      legend:{bottom:0,textStyle:{color:'#64748b',fontSize:11}},
+      series:[{
+        type:'pie',radius:['40%','70%'],
+        data:[
+          {value:48,name:'单程票',itemStyle:{color:C.blue}},
+          {value:31,name:'月卡/定期',itemStyle:{color:C.green}},
+          {value:13,name:'老年/学生',itemStyle:{color:C.orange}},
+          {value:8,name:'旅游套票',itemStyle:{color:C.purple}}
+        ],
+        itemStyle:{borderColor:'#fff',borderWidth:3},
+        label:{formatter:'{b}\n{d}%',fontSize:11}
+      }]
+    })
+    window.addEventListener('resize', () => tt.resize())
+  }
+}
+
+// 初始化
+initCharts('overview')
+</script>
+</body>
+</html>

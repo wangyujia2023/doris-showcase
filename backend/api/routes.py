@@ -7,6 +7,7 @@ from backend.api.core_routes import router as core_router
 from backend.api.fund_routes import router as fund_router
 from backend.api.manufacturing_routes import router as manufacturing_router
 from backend.api.news_routes import router as news_router
+from backend.api.bjmetro_routes import router as bjmetro_router
 from backend.api.lineage_routes import router as lineage_router
 from backend.api.satellite_routes import router as satellite_router
 from backend.api.securities_routes import router as securities_router
@@ -22,4 +23,5 @@ router.include_router(securities_router)
 router.include_router(manufacturing_router)
 router.include_router(fund_router)
 router.include_router(news_router)
+router.include_router(bjmetro_router)
 router.include_router(lineage_router)

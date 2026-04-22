@@ -1,27 +1,25 @@
 
 > bank-cdp-frontend@2.0.0 dev
-> vite --host
+> vite --host --host 0.0.0.0 --port 5173
 
 [33mThe CJS build of Vite's Node API is deprecated. See https://vite.dev/guide/troubleshooting.html#vite-cjs-node-api-deprecated for more details.[39m
 
-  VITE v5.4.21  ready in 272 ms
+  VITE v5.4.21  ready in 487 ms
 
   ➜  Local:   http://localhost:5173/
-  ➜  Network: http://192.168.3.30:5173/
-  ➜  Network: http://192.168.0.46:5173/
-7:17:13 PM [vite] hmr update /src/views/Lineage.vue
-7:17:28 PM [vite] hmr update /src/views/Lineage.vue?vue&type=style&index=0&scoped=5951c941&lang.css
-9:01:07 PM [vite] vite.config.js changed, restarting server...
-9:01:08 PM [vite] server restarted.
-9:09:02 PM [vite] ../.env changed, restarting server...
-9:09:02 PM [vite] server restarted.
-9:09:02 PM [vite] ../.env changed, restarting server...
-9:09:02 PM [vite] server restarted.
-9:09:02 PM [vite] ../.env changed, restarting server...
-9:09:02 PM [vite] server restarted.
-9:09:25 PM [vite] ../.env changed, restarting server...
-9:09:25 PM [vite] server restarted.
-9:09:25 PM [vite] ../.env changed, restarting server...
-9:09:25 PM [vite] server restarted.
-9:09:26 PM [vite] ../.env changed, restarting server...
-9:09:26 PM [vite] server restarted.
+  ➜  Network: http://192.168.3.50:5173/
+  ➜  Network: http://192.168.0.50:5173/
+11:39:18 PM [vite] hmr update /src/components/bjmetro/ArchTab.vue, /src/components/bjmetro/ArchTab.vue?vue&type=style&index=0&scoped=738d5e30&lang.css
+11:48:54 PM [vite] hmr update /src/App.vue, /src/views/BJMetro.vue, /src/components/bjmetro/OverviewTab.vue, /src/components/bjmetro/FlowTab.vue, /src/components/bjmetro/TrainTab.vue, /src/components/bjmetro/RevenueTab.vue, /src/components/bjmetro/EquipmentTab.vue
+11:49:05 PM [vite] hmr update /src/components/bjmetro/OverviewTab.vue
+11:56:18 PM [vite] hmr update /src/App.vue
+8:14:48 AM [vite] hmr update /src/components/bjmetro/OverviewTab.vue
+8:14:53 AM [vite] hmr update /src/components/bjmetro/OverviewTab.vue
+8:14:58 AM [vite] hmr update /src/components/bjmetro/OverviewTab.vue
+8:15:08 AM [vite] hmr update /src/components/bjmetro/OverviewTab.vue
+8:15:14 AM [vite] hmr update /src/components/bjmetro/OverviewTab.vue
+8:15:23 AM [vite] hmr update /src/components/bjmetro/OverviewTab.vue
+8:15:34 AM [vite] hmr update /src/components/bjmetro/OverviewTab.vue?vue&type=style&index=0&scoped=e4938611&lang.css
+8:21:05 AM [vite] hmr update /src/components/bjmetro/ArchTab.vue
+8:21:50 AM [vite] hmr update /src/components/bjmetro/ArchTab.vue
+8:23:22 AM [vite] hmr update /src/components/bjmetro/ArchTab.vue

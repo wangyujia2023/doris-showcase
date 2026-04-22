@@ -1,0 +1,1159 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>银行监管报送一表通 · 设计稿</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --navy: #0a1628;
+    --navy2: #0f1f3d;
+    --navy3: #162447;
+    --blue: #1e5fd4;
+    --blue-light: #3b82f6;
+    --accent: #00c4b4;
+    --gold: #f59e0b;
+    --red: #ef4444;
+    --green: #10b981;
+    --orange: #f97316;
+    --text: #e2e8f0;
+    --text2: #94a3b8;
+    --text3: #64748b;
+    --border: rgba(255,255,255,.08);
+    --card: rgba(255,255,255,.04);
+    --card2: rgba(255,255,255,.07);
+  }
+  body { font-family: 'PingFang SC','Microsoft YaHei',sans-serif; background: var(--navy); color: var(--text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; font-size: 13px; }
+
+  /* ── 顶部栏 ── */
+  .topbar {
+    height: 52px; background: var(--navy2); border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; padding: 0 20px; gap: 16px; flex-shrink: 0;
+  }
+  .top-logo { font-size: 15px; font-weight: 700; color: #fff; letter-spacing: 1px; white-space: nowrap; }
+  .top-logo span { color: var(--accent); }
+  .top-period {
+    display: flex; align-items: center; gap: 6px; padding: 4px 12px;
+    background: var(--card2); border: 1px solid var(--border); border-radius: 4px;
+    font-size: 12px; color: var(--text2); cursor: pointer;
+  }
+  .top-period strong { color: var(--text); }
+  .top-sep { width: 1px; height: 24px; background: var(--border); }
+  .status-chips { display: flex; gap: 6px; }
+  .chip { padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+  .chip.ok  { background: rgba(16,185,129,.15); color: var(--green); border: 1px solid rgba(16,185,129,.3); }
+  .chip.warn{ background: rgba(245,158,11,.15); color: var(--gold);  border: 1px solid rgba(245,158,11,.3); }
+  .chip.err { background: rgba(239,68,68,.15);  color: var(--red);   border: 1px solid rgba(239,68,68,.3); }
+  .top-right { margin-left: auto; display: flex; gap: 8px; align-items: center; }
+  .btn { padding: 5px 14px; border-radius: 4px; font-size: 12px; font-weight: 600; cursor: pointer; border: none; }
+  .btn-check { background: var(--card2); color: var(--text2); border: 1px solid var(--border); }
+  .btn-submit { background: var(--blue); color: #fff; }
+  .btn-submit:hover { background: var(--blue-light); }
+
+  /* ── 主体三栏 ── */
+  .main { display: flex; flex: 1; overflow: hidden; }
+
+  /* ── 左侧导航 ── */
+  .sidebar {
+    width: 220px; flex-shrink: 0; background: var(--navy2); border-right: 1px solid var(--border);
+    overflow-y: auto; padding: 12px 0;
+  }
+  .nav-group { margin-bottom: 4px; }
+  .nav-group-title {
+    padding: 6px 16px; font-size: 10px; font-weight: 700; color: var(--text3);
+    letter-spacing: 1.5px; text-transform: uppercase;
+  }
+  .nav-item {
+    display: flex; align-items: center; gap: 8px;
+    padding: 7px 16px; cursor: pointer; transition: all .15s;
+    border-left: 2px solid transparent;
+  }
+  .nav-item:hover { background: var(--card2); }
+  .nav-item.active { background: rgba(30,95,212,.15); border-left-color: var(--blue-light); }
+  .nav-item .nav-code { font-size: 10px; color: var(--text3); width: 28px; flex-shrink: 0; }
+  .nav-item .nav-name { font-size: 12px; color: var(--text2); flex: 1; }
+  .nav-item.active .nav-name { color: var(--text); }
+  .nav-item .nav-freq { font-size: 10px; padding: 1px 5px; border-radius: 3px; }
+  .freq-m { background: rgba(0,196,180,.1); color: var(--accent); }
+  .freq-q { background: rgba(245,158,11,.1); color: var(--gold); }
+  .nav-status { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+  .ns-ok  { background: var(--green); }
+  .ns-warn{ background: var(--gold); }
+  .ns-err { background: var(--red); }
+  .ns-pending { background: var(--text3); }
+
+  /* ── 中间内容区 ── */
+  .content { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
+
+  /* 报表头 */
+  .report-header {
+    padding: 14px 20px; background: var(--navy3); border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 14px; flex-shrink: 0;
+  }
+  .rh-code { font-size: 22px; font-weight: 800; color: var(--blue-light); letter-spacing: 1px; }
+  .rh-info h2 { font-size: 15px; font-weight: 700; color: #fff; }
+  .rh-info p { font-size: 11px; color: var(--text3); margin-top: 2px; }
+  .rh-tags { display: flex; gap: 6px; margin-left: auto; }
+  .tag { padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 500; }
+  .tag-cbirc { background: rgba(30,95,212,.2); color: #93c5fd; border: 1px solid rgba(30,95,212,.3); }
+  .tag-month { background: rgba(0,196,180,.1); color: var(--accent); border: 1px solid rgba(0,196,180,.2); }
+  .tag-qtr   { background: rgba(245,158,11,.1); color: var(--gold); border: 1px solid rgba(245,158,11,.2); }
+
+  /* Tab bar */
+  .tab-bar { display: flex; gap: 0; padding: 0 20px; background: var(--navy2); border-bottom: 1px solid var(--border); flex-shrink: 0; }
+  .tab { padding: 10px 18px; font-size: 12px; color: var(--text3); cursor: pointer; border-bottom: 2px solid transparent; transition: all .15s; white-space: nowrap; }
+  .tab:hover { color: var(--text2); }
+  .tab.active { color: var(--blue-light); border-bottom-color: var(--blue-light); }
+
+  /* 内容滚动区 */
+  .content-body { flex: 1; overflow-y: auto; padding: 16px 20px; }
+
+  /* ── 报表数据表格 ── */
+  .report-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .report-table thead th {
+    background: var(--navy3); color: var(--text2); font-weight: 600;
+    padding: 8px 12px; text-align: left; border: 1px solid var(--border);
+    font-size: 11px; white-space: nowrap;
+  }
+  .report-table tbody tr:hover { background: var(--card2); }
+  .report-table tbody td { padding: 7px 12px; border: 1px solid var(--border); color: var(--text2); }
+  .report-table tbody td.item-name { color: var(--text); font-weight: 500; }
+  .report-table tbody td.item-name.indent1 { padding-left: 24px; color: var(--text2); }
+  .report-table tbody td.item-name.indent2 { padding-left: 40px; color: var(--text3); }
+  .report-table tbody td.num { text-align: right; font-variant-numeric: tabular-nums; color: var(--text); }
+  .report-table tbody td.formula { font-family: monospace; font-size: 10px; color: var(--text3); }
+  .report-table tbody tr.section-header td { background: rgba(30,95,212,.08); color: var(--blue-light); font-weight: 700; font-size: 11px; }
+  .report-table tbody tr.subtotal td { background: rgba(255,255,255,.03); font-weight: 600; color: var(--accent) !important; }
+  .report-table tbody tr.total-row td { background: rgba(30,95,212,.12); font-weight: 700; color: #fff !important; }
+  .qc-ok   { color: var(--green); font-size: 11px; }
+  .qc-warn { color: var(--gold);  font-size: 11px; }
+  .qc-err  { color: var(--red);   font-size: 11px; }
+
+  /* ── 计算逻辑面板 ── */
+  .formula-section { margin-bottom: 20px; }
+  .formula-section h3 { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+  .formula-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 6px;
+    padding: 14px 16px; margin-bottom: 10px;
+  }
+  .formula-card h4 { font-size: 12px; color: var(--blue-light); font-weight: 700; margin-bottom: 8px; }
+  .formula-expr {
+    background: var(--navy); border: 1px solid rgba(30,95,212,.2); border-radius: 4px;
+    padding: 10px 14px; font-family: 'Fira Mono','Consolas',monospace; font-size: 12px;
+    color: var(--accent); margin: 8px 0; line-height: 1.6;
+  }
+  .formula-desc { font-size: 11px; color: var(--text3); line-height: 1.7; margin-top: 6px; }
+  .formula-items { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+  .fi { background: var(--navy); border: 1px solid var(--border); border-radius: 4px; padding: 8px 10px; }
+  .fi .fi-label { font-size: 10px; color: var(--text3); margin-bottom: 4px; }
+  .fi .fi-val { font-size: 15px; font-weight: 700; color: var(--text); }
+  .fi .fi-val.ok { color: var(--green); }
+  .fi .fi-val.warn { color: var(--gold); }
+  .fi .fi-val.err { color: var(--red); }
+  .fi .fi-threshold { font-size: 10px; color: var(--text3); }
+
+  /* 数据质量 */
+  .qc-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 16px; }
+  .qc-card { background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 12px; }
+  .qc-card-title { font-size: 11px; color: var(--text3); margin-bottom: 8px; }
+  .qc-score { font-size: 28px; font-weight: 800; }
+  .qc-score.pass { color: var(--green); }
+  .qc-score.warn { color: var(--gold); }
+  .qc-score.fail { color: var(--red); }
+  .qc-rule-list { display: flex; flex-direction: column; gap: 5px; }
+  .qc-rule { display: flex; align-items: center; gap: 7px; font-size: 11px; padding: 5px 8px; border-radius: 4px; background: var(--navy); }
+  .qc-rule.pass { border-left: 2px solid var(--green); }
+  .qc-rule.warn { border-left: 2px solid var(--gold); }
+  .qc-rule.fail { border-left: 2px solid var(--red); }
+  .qr-icon { font-size: 12px; }
+  .qr-desc { flex: 1; color: var(--text2); }
+  .qr-val  { color: var(--text3); font-family: monospace; font-size: 10px; }
+
+  /* ── 右侧面板 ── */
+  .right-panel {
+    width: 240px; flex-shrink: 0; background: var(--navy2); border-left: 1px solid var(--border);
+    overflow-y: auto; padding: 14px;
+  }
+  .rp-section { margin-bottom: 18px; }
+  .rp-title { font-size: 10px; font-weight: 700; color: var(--text3); letter-spacing: 1.5px; margin-bottom: 10px; }
+  /* 监管指标 */
+  .indicator-list { display: flex; flex-direction: column; gap: 8px; }
+  .ind-item { background: var(--card); border: 1px solid var(--border); border-radius: 5px; padding: 9px 10px; }
+  .ind-name { font-size: 11px; color: var(--text2); margin-bottom: 4px; }
+  .ind-row { display: flex; align-items: baseline; gap: 6px; }
+  .ind-val { font-size: 16px; font-weight: 700; }
+  .ind-val.ok  { color: var(--green); }
+  .ind-val.warn{ color: var(--gold); }
+  .ind-val.err { color: var(--red); }
+  .ind-threshold { font-size: 10px; color: var(--text3); }
+  .ind-bar-wrap { height: 3px; background: var(--border); border-radius: 2px; margin-top: 6px; overflow: hidden; }
+  .ind-bar { height: 100%; border-radius: 2px; }
+  /* 报送日历 */
+  .cal-list { display: flex; flex-direction: column; gap: 5px; }
+  .cal-item { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 4px; background: var(--card); font-size: 11px; }
+  .cal-date { font-weight: 700; color: var(--text); width: 38px; }
+  .cal-name { flex: 1; color: var(--text2); }
+  .cal-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+  .cal-dot.due    { background: var(--red); }
+  .cal-dot.coming { background: var(--gold); }
+  .cal-dot.done   { background: var(--green); }
+  /* 报送历史 */
+  .hist-list { display: flex; flex-direction: column; gap: 5px; }
+  .hist-item { padding: 6px 8px; border-radius: 4px; background: var(--card); font-size: 11px; border-left: 2px solid var(--green); }
+  .hist-title { color: var(--text2); }
+  .hist-meta { color: var(--text3); font-size: 10px; margin-top: 2px; }
+
+  /* 滚动条 */
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,.1); border-radius: 2px; }
+
+  /* 隐藏面板 */
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* section 标签 */
+  .section-badge {
+    display: inline-block; padding: 1px 6px; border-radius: 3px; font-size: 10px;
+    font-weight: 700; margin-right: 6px;
+  }
+  .sb-a { background: rgba(16,185,129,.15); color: var(--green); }
+  .sb-l { background: rgba(239,68,68,.15);  color: var(--red); }
+  .sb-c { background: rgba(245,158,11,.15); color: var(--gold); }
+
+  /* DDL 展示 */
+  .ddl-block {
+    background: var(--navy); border: 1px solid rgba(30,95,212,.2); border-radius: 6px;
+    padding: 14px 16px; font-family: 'Fira Mono','Consolas',monospace; font-size: 11px;
+    line-height: 1.8; color: var(--text2); overflow-x: auto; margin-bottom: 14px;
+    white-space: pre;
+  }
+  .ddl-block .kw  { color: #93c5fd; }
+  .ddl-block .tp  { color: var(--accent); }
+  .ddl-block .cm  { color: var(--text3); }
+  .ddl-block .str { color: #86efac; }
+</style>
+</head>
+<body>
+
+<!-- ── 顶部栏 ── -->
+<div class="topbar">
+  <div class="top-logo">🏦 银行监管报送<span>一表通</span></div>
+  <div class="top-sep"></div>
+  <div class="top-period">报告期：<strong>2024年Q1</strong> &nbsp;▾</div>
+  <div class="top-period">机构：<strong>某商业银行股份有限公司</strong> &nbsp;▾</div>
+  <div class="status-chips">
+    <span class="chip ok">✓ 已审核 8</span>
+    <span class="chip warn">⚠ 待核查 3</span>
+    <span class="chip err">✗ 校验失败 1</span>
+  </div>
+  <div class="top-right">
+    <button class="btn btn-check" onclick="switchPanel('qc')">🔍 一键质检</button>
+    <button class="btn btn-submit">📤 报送监管</button>
+  </div>
+</div>
+
+<!-- ── 主体 ── -->
+<div class="main">
+
+  <!-- 左侧导航 -->
+  <div class="sidebar">
+
+    <div class="nav-group">
+      <div class="nav-group-title">资产负债 / 损益</div>
+      <div class="nav-item active" onclick="selectReport('G01')">
+        <div class="nav-code">G01</div>
+        <div class="nav-name">资产负债表</div>
+        <div class="nav-freq freq-m">月</div>
+        <div class="nav-status ns-ok"></div>
+      </div>
+      <div class="nav-item" onclick="selectReport('G02')">
+        <div class="nav-code">G02</div>
+        <div class="nav-name">利润表</div>
+        <div class="nav-freq freq-q">季</div>
+        <div class="nav-status ns-ok"></div>
+      </div>
+      <div class="nav-item" onclick="selectReport('G03')">
+        <div class="nav-code">G03</div>
+        <div class="nav-name">资本充足率</div>
+        <div class="nav-freq freq-q">季</div>
+        <div class="nav-status ns-warn"></div>
+      </div>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-group-title">贷款质量</div>
+      <div class="nav-item" onclick="selectReport('G04A')">
+        <div class="nav-code">G04A</div>
+        <div class="nav-name">五级分类</div>
+        <div class="nav-freq freq-m">月</div>
+        <div class="nav-status ns-ok"></div>
+      </div>
+      <div class="nav-item" onclick="selectReport('G04B')">
+        <div class="nav-code">G04B</div>
+        <div class="nav-name">迁徙矩阵</div>
+        <div class="nav-freq freq-q">季</div>
+        <div class="nav-status ns-ok"></div>
+      </div>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-group-title">流动性风险</div>
+      <div class="nav-item" onclick="selectReport('G11')">
+        <div class="nav-code">G11</div>
+        <div class="nav-name">流动性覆盖率</div>
+        <div class="nav-freq freq-m">月</div>
+        <div class="nav-status ns-err"></div>
+      </div>
+      <div class="nav-item" onclick="selectReport('G11A')">
+        <div class="nav-code">G11A</div>
+        <div class="nav-name">净稳定资金比例</div>
+        <div class="nav-freq freq-q">季</div>
+        <div class="nav-status ns-ok"></div>
+      </div>
+      <div class="nav-item" onclick="selectReport('G12')">
+        <div class="nav-code">G12</div>
+        <div class="nav-name">期限错配</div>
+        <div class="nav-freq freq-m">月</div>
+        <div class="nav-status ns-ok"></div>
+      </div>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-group-title">信贷统计</div>
+      <div class="nav-item" onclick="selectReport('G21')">
+        <div class="nav-code">G21</div>
+        <div class="nav-name">人民币信贷收支</div>
+        <div class="nav-freq freq-m">月</div>
+        <div class="nav-status ns-ok"></div>
+      </div>
+      <div class="nav-item" onclick="selectReport('G22')">
+        <div class="nav-code">G22</div>
+        <div class="nav-name">贷款投向统计</div>
+        <div class="nav-freq freq-q">季</div>
+        <div class="nav-status ns-ok"></div>
+      </div>
+      <div class="nav-item" onclick="selectReport('G23')">
+        <div class="nav-code">G23</div>
+        <div class="nav-name">房地产贷款</div>
+        <div class="nav-freq freq-q">季</div>
+        <div class="nav-status ns-pending"></div>
+      </div>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-group-title">风险集中度</div>
+      <div class="nav-item" onclick="selectReport('G31')">
+        <div class="nav-code">G31</div>
+        <div class="nav-name">单一客户集中度</div>
+        <div class="nav-freq freq-q">季</div>
+        <div class="nav-status ns-ok"></div>
+      </div>
+      <div class="nav-item" onclick="selectReport('G32')">
+        <div class="nav-code">G32</div>
+        <div class="nav-name">集团客户授信</div>
+        <div class="nav-freq freq-q">季</div>
+        <div class="nav-status ns-ok"></div>
+      </div>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-group-title">市场风险</div>
+      <div class="nav-item" onclick="selectReport('G40')">
+        <div class="nav-code">G40</div>
+        <div class="nav-name">利率风险</div>
+        <div class="nav-freq freq-q">季</div>
+        <div class="nav-status ns-ok"></div>
+      </div>
+      <div class="nav-item" onclick="selectReport('G42')">
+        <div class="nav-code">G42</div>
+        <div class="nav-name">杠杆率</div>
+        <div class="nav-freq freq-q">季</div>
+        <div class="nav-status ns-ok"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 中间内容 -->
+  <div class="content">
+
+    <!-- 报表头 (动态) -->
+    <div class="report-header">
+      <div class="rh-code" id="rh-code">G01</div>
+      <div class="rh-info">
+        <h2 id="rh-name">资产负债表</h2>
+        <p id="rh-desc">统计银行期末资产、负债及所有者权益科目余额 · 监管机构：国家金融监管总局</p>
+      </div>
+      <div class="rh-tags" id="rh-tags">
+        <span class="tag tag-cbirc">NFRA</span>
+        <span class="tag tag-month">月报 · 次月15日前</span>
+      </div>
+    </div>
+
+    <!-- Tab -->
+    <div class="tab-bar">
+      <div class="tab active" onclick="switchPanel('data')">📋 报表数据</div>
+      <div class="tab" onclick="switchPanel('formula')">🔢 计算逻辑</div>
+      <div class="tab" onclick="switchPanel('qc')">✅ 数据质量</div>
+      <div class="tab" onclick="switchPanel('ddl')">🗄️ 数据结构</div>
+    </div>
+
+    <!-- 报表数据 -->
+    <div class="content-body">
+
+      <!-- 数据面板 -->
+      <div id="panel-data" class="panel active">
+        <table class="report-table" id="main-table">
+        </table>
+      </div>
+
+      <!-- 计算逻辑 -->
+      <div id="panel-formula" class="panel">
+        <div id="formula-content"></div>
+      </div>
+
+      <!-- 数据质量 -->
+      <div id="panel-qc" class="panel">
+        <div class="qc-grid">
+          <div class="qc-card">
+            <div class="qc-card-title">完整性</div>
+            <div class="qc-score pass">98<span style="font-size:14px">%</span></div>
+            <div style="font-size:11px;color:var(--text3);margin-top:4px">2个字段为空</div>
+          </div>
+          <div class="qc-card">
+            <div class="qc-card-title">平衡校验</div>
+            <div class="qc-score pass">通过</div>
+            <div style="font-size:11px;color:var(--text3);margin-top:4px">资产=负债+权益</div>
+          </div>
+          <div class="qc-card">
+            <div class="qc-card-title">勾稽规则</div>
+            <div class="qc-score warn">12/13</div>
+            <div style="font-size:11px;color:var(--gold);margin-top:4px">1条规则不符</div>
+          </div>
+        </div>
+        <div class="qc-rule-list" id="qc-rules"></div>
+      </div>
+
+      <!-- 数据结构 -->
+      <div id="panel-ddl" class="panel">
+        <div id="ddl-content"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 右侧面板 -->
+  <div class="right-panel">
+
+    <div class="rp-section">
+      <div class="rp-title">监管核心指标</div>
+      <div class="indicator-list">
+        <div class="ind-item">
+          <div class="ind-name">资本充足率 (CAR)</div>
+          <div class="ind-row">
+            <div class="ind-val ok">12.84%</div>
+            <div class="ind-threshold">≥ 10.5%</div>
+          </div>
+          <div class="ind-bar-wrap"><div class="ind-bar" style="width:82%;background:var(--green)"></div></div>
+        </div>
+        <div class="ind-item">
+          <div class="ind-name">核心一级资本充足率</div>
+          <div class="ind-row">
+            <div class="ind-val ok">9.62%</div>
+            <div class="ind-threshold">≥ 7.5%</div>
+          </div>
+          <div class="ind-bar-wrap"><div class="ind-bar" style="width:75%;background:var(--green)"></div></div>
+        </div>
+        <div class="ind-item">
+          <div class="ind-name">流动性覆盖率 (LCR)</div>
+          <div class="ind-row">
+            <div class="ind-val err">96.3%</div>
+            <div class="ind-threshold">≥ 100%</div>
+          </div>
+          <div class="ind-bar-wrap"><div class="ind-bar" style="width:48%;background:var(--red)"></div></div>
+        </div>
+        <div class="ind-item">
+          <div class="ind-name">净稳定资金比例 (NSFR)</div>
+          <div class="ind-row">
+            <div class="ind-val ok">108.5%</div>
+            <div class="ind-threshold">≥ 100%</div>
+          </div>
+          <div class="ind-bar-wrap"><div class="ind-bar" style="width:70%;background:var(--green)"></div></div>
+        </div>
+        <div class="ind-item">
+          <div class="ind-name">杠杆率</div>
+          <div class="ind-row">
+            <div class="ind-val ok">6.21%</div>
+            <div class="ind-threshold">≥ 4%</div>
+          </div>
+          <div class="ind-bar-wrap"><div class="ind-bar" style="width:78%;background:var(--green)"></div></div>
+        </div>
+        <div class="ind-item">
+          <div class="ind-name">不良贷款率 (NPL)</div>
+          <div class="ind-row">
+            <div class="ind-val ok">1.38%</div>
+            <div class="ind-threshold">≤ 5%</div>
+          </div>
+          <div class="ind-bar-wrap"><div class="ind-bar" style="width:27%;background:var(--green)"></div></div>
+        </div>
+        <div class="ind-item">
+          <div class="ind-name">拨备覆盖率</div>
+          <div class="ind-row">
+            <div class="ind-val warn">163.2%</div>
+            <div class="ind-threshold">≥ 150%</div>
+          </div>
+          <div class="ind-bar-wrap"><div class="ind-bar" style="width:55%;background:var(--gold)"></div></div>
+        </div>
+        <div class="ind-item">
+          <div class="ind-name">单一客户贷款集中度</div>
+          <div class="ind-row">
+            <div class="ind-val ok">7.4%</div>
+            <div class="ind-threshold">≤ 10%</div>
+          </div>
+          <div class="ind-bar-wrap"><div class="ind-bar" style="width:74%;background:var(--green)"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="rp-section">
+      <div class="rp-title">本月报送日历</div>
+      <div class="cal-list">
+        <div class="cal-item"><div class="cal-date">04-15</div><div class="cal-name">G01 资产负债</div><div class="cal-dot done"></div></div>
+        <div class="cal-item"><div class="cal-date">04-15</div><div class="cal-name">G04A 五级分类</div><div class="cal-dot done"></div></div>
+        <div class="cal-item"><div class="cal-date">04-15</div><div class="cal-name">G11 流动性</div><div class="cal-dot due"></div></div>
+        <div class="cal-item"><div class="cal-date">04-20</div><div class="cal-name">G21 信贷收支</div><div class="cal-dot coming"></div></div>
+        <div class="cal-item"><div class="cal-date">04-30</div><div class="cal-name">G03 资本充足</div><div class="cal-dot coming"></div></div>
+        <div class="cal-item"><div class="cal-date">04-30</div><div class="cal-name">G22 贷款投向</div><div class="cal-dot coming"></div></div>
+      </div>
+    </div>
+
+    <div class="rp-section">
+      <div class="rp-title">最近报送记录</div>
+      <div class="hist-list">
+        <div class="hist-item"><div class="hist-title">G01 资产负债表 · 2024-03</div><div class="hist-meta">2024-04-12 09:31 · 审核通过</div></div>
+        <div class="hist-item"><div class="hist-title">G04A 五级分类 · 2024-03</div><div class="hist-meta">2024-04-12 10:05 · 审核通过</div></div>
+        <div class="hist-item" style="border-left-color:var(--gold)"><div class="hist-title">G03 资本充足 · 2023-Q4</div><div class="hist-meta">2024-01-28 · 补报审核中</div></div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- ════════════════════════════════════════════════════════ -->
+<script>
+// ── 报表数据定义 ─────────────────────────────────────────────
+const REPORTS = {
+
+  G01: {
+    name: '资产负债表',
+    desc: '统计银行期末资产、负债及所有者权益科目余额 · 监管机构：国家金融监管总局',
+    tags: `<span class="tag tag-cbirc">NFRA</span><span class="tag tag-month">月报 · 次月15日前</span>`,
+    tableHeader: ['行项目代码','科目名称','期末余额(万元)','上期余额(万元)','变动(万元)','变动率','勾稽校验'],
+    tableData: [
+      {cls:'section-header', cols:['','◆ 资产类','','','','','']},
+      {cols:['A01','现金及存放央行款项','8,432,180','8,201,450','230,730','2.81%','✓']},
+      {cols:['A01.1','  现金','142,360','138,920','3,440','2.48%','✓'], name1:true, i1:true},
+      {cols:['A01.2','  存放中央银行款项','8,289,820','8,062,530','227,290','2.82%','✓'], name1:true, i1:true},
+      {cols:['A02','存放同业款项','2,156,740','2,340,610','-183,870','-7.86%','✓']},
+      {cols:['A03','贵金属','68,430','71,200','-2,770','-3.89%','✓']},
+      {cols:['A04','拆出资金','1,234,560','987,320','247,240','25.04%','✓']},
+      {cols:['A05','交易性金融资产','5,678,900','5,432,100','246,800','4.54%','✓']},
+      {cols:['A06','债权投资','18,976,200','18,234,560','741,640','4.07%','✓']},
+      {cols:['A07','其他债权投资','3,456,780','3,210,430','246,350','7.67%','✓']},
+      {cols:['A08','发放贷款及垫款','89,234,560','87,123,400','2,111,160','2.42%','✓']},
+      {cols:['A08.1','  个人贷款','31,432,100','30,876,200','555,900','1.80%','✓'], name1:true, i1:true},
+      {cols:['A08.2','  企业贷款','54,678,900','52,987,300','1,691,600','3.19%','✓'], name1:true, i1:true},
+      {cols:['A08.3','  贷款损失准备(-)','3,876,440','3,740,100','136,340','3.65%','✓'], name1:true, i1:true},
+      {cols:['A09','固定资产','1,234,560','1,267,890','-33,330','-2.63%','✓']},
+      {cols:['A10','递延税款资产','456,780','432,100','24,680','5.71%','✓']},
+      {cols:['A11','其他资产','2,345,670','2,198,340','147,330','6.70%','✓']},
+      {cls:'subtotal', cols:['','资产总计','133,275,360','129,499,400','3,775,960','2.91%','✓']},
+
+      {cls:'section-header', cols:['','◆ 负债类','','','','','']},
+      {cols:['L01','向中央银行借款','5,678,900','4,987,600','691,300','13.86%','✓']},
+      {cols:['L02','同业及其他金融机构存放款项','12,345,670','13,456,780','-1,111,110','-8.26%','✓']},
+      {cols:['L03','拆入资金','2,345,670','1,987,430','358,240','18.03%','✓']},
+      {cols:['L04','交易性金融负债','1,234,560','1,098,760','135,800','12.36%','✓']},
+      {cols:['L05','吸收存款','92,456,780','90,234,560','2,222,220','2.46%','✓']},
+      {cols:['L05.1','  单位存款','46,234,560','45,123,450','1,111,110','2.46%','✓'], name1:true, i1:true},
+      {cols:['L05.2','  个人存款','46,222,220','45,111,110','1,111,110','2.46%','✓'], name1:true, i1:true},
+      {cols:['L06','应付债券','8,765,430','8,432,100','333,330','3.95%','✓']},
+      {cols:['L07','递延税款负债','234,560','198,760','35,800','18.01%','✓']},
+      {cols:['L08','其他负债','3,456,780','3,234,560','222,220','6.87%','✓']},
+      {cls:'subtotal', cols:['','负债合计','126,518,350','123,630,550','2,887,800','2.34%','✓']},
+
+      {cls:'section-header', cols:['','◆ 所有者权益','','','','','']},
+      {cols:['E01','实收资本(股本)','3,000,000','3,000,000','0','0.00%','✓']},
+      {cols:['E02','资本公积','1,234,560','1,234,560','0','0.00%','✓']},
+      {cols:['E03','盈余公积','876,430','812,300','64,130','7.90%','✓']},
+      {cols:['E04','一般风险准备','678,900','645,600','33,300','5.16%','✓']},
+      {cols:['E05','未分配利润','967,120','176,390','790,730','448.2%','⚠'], warn:true},
+      {cls:'subtotal', cols:['','所有者权益合计','6,757,010','5,868,850','888,160','15.13%','✓']},
+      {cls:'total-row', cols:['','负债及所有者权益总计','133,275,360','129,499,400','3,775,960','2.91%','✓']},
+    ],
+    formulas: 'G01',
+    ddl: 'G01',
+  },
+
+  G03: {
+    name: '资本充足率报表',
+    desc: '统计银行资本构成及风险加权资产，计算各级资本充足率 · 巴塞尔III框架',
+    tags: `<span class="tag tag-cbirc">NFRA</span><span class="tag tag-qtr">季报 · 季末后30日</span>`,
+    tableHeader: ['项目代码','项目名称','金额(万元)','占比/比率','监管要求','达标'],
+    tableData: [
+      {cls:'section-header', cols:['','◆ 核心一级资本','','','','']},
+      {cols:['C1.1','实收资本(普通股)','3,000,000','','','']},
+      {cols:['C1.2','资本公积(股本溢价)','1,234,560','','','']},
+      {cols:['C1.3','盈余公积','876,430','','','']},
+      {cols:['C1.4','一般风险准备','678,900','','','']},
+      {cols:['C1.5','未分配利润','967,120','','','']},
+      {cols:['C1.6','少数股东资本(可计入)','123,450','','','']},
+      {cols:['C1.D1','减：商誉及其他无形资产','234,560','','','']},
+      {cols:['C1.D2','减：对金融机构核心资本投资','345,670','','','']},
+      {cls:'subtotal', cols:['C1','核心一级资本净额','6,300,230','','','']},
+      {cls:'section-header', cols:['','◆ 其他一级资本','','','','']},
+      {cols:['C2.1','优先股及永续债','500,000','','','']},
+      {cls:'subtotal', cols:['C2','一级资本净额（C1+C2）','6,800,230','','','']},
+      {cls:'section-header', cols:['','◆ 二级资本','','','','']},
+      {cols:['C3.1','超额贷款损失准备(可计入)','876,430','','','']},
+      {cols:['C3.2','次级债及混合资本债','1,200,000','','','']},
+      {cls:'subtotal', cols:['C3','二级资本净额','2,076,430','','','']},
+      {cls:'total-row', cols:['C','资本净额合计（C1+C2+C3）','8,876,660','','','']},
+      {cls:'section-header', cols:['','◆ 风险加权资产','','','','']},
+      {cols:['R1','信用风险加权资产','62,340,000','','','']},
+      {cols:['R1.1','  表内资产','58,760,000','','',''], i1:true},
+      {cols:['R1.2','  表外资产（信用转换后）','3,580,000','','',''], i1:true},
+      {cols:['R2','市场风险加权资产（×12.5）','2,340,000','','','']},
+      {cols:['R3','操作风险加权资产（×12.5）','4,560,000','','','']},
+      {cls:'total-row', cols:['R','风险加权资产合计','69,240,000','','','']},
+      {cls:'section-header', cols:['','◆ 资本充足率','','','','']},
+      {cls:'subtotal', cols:['CAR1','核心一级资本充足率','—','9.10%','≥ 7.5%','✓']},
+      {cls:'subtotal', cols:['CAR2','一级资本充足率','—','9.82%','≥ 8.5%','✓']},
+      {cls:'total-row', cols:['CAR','资本充足率','—','12.84%','≥ 10.5%','✓']},
+    ],
+    formulas: 'G03',
+    ddl: 'G03',
+  },
+
+  G04A: {
+    name: '贷款质量五级分类情况表',
+    desc: '按照五级分类标准统计各类贷款的质量分布及不良贷款情况',
+    tags: `<span class="tag tag-cbirc">NFRA</span><span class="tag tag-month">月报 · 次月15日前</span>`,
+    tableHeader: ['行业/类型','贷款总额(万元)','正常','关注','次级','可疑','损失','不良率','拨备余额'],
+    tableData: [
+      {cls:'section-header', cols:['贷款类型','','','','','','','','']},
+      {cols:['企业贷款','54,678,900','52,123,400','1,345,600','456,700','523,800','229,400','2.21%','3,476,120']},
+      {cols:['  制造业','18,234,560','17,456,700','432,100','134,560','145,670','65,530','1.89%','1,123,450'], i1:true},
+      {cols:['  房地产业','8,765,430','8,123,400','345,600','123,450','134,560','38,420','3.37%','876,430'], i1:true},
+      {cols:['  批发零售','6,543,210','6,123,400','234,560','87,650','75,430','22,170','2.83%','543,210'], i1:true},
+      {cols:['  基础设施','12,345,670','12,123,450','123,560','45,670','42,100','10,890','0.80%','567,890'], i1:true},
+      {cols:['  其他行业','8,990,030','8,296,450','209,780','65,370','125,240','92,390','3.13%','365,140'], i1:true},
+      {cols:['个人贷款','31,432,100','30,654,300','456,700','123,450','143,200','54,450','1.02%','1,234,560']},
+      {cols:['  个人住房贷款','18,765,430','18,456,700','234,560','34,560','45,670','34,000','0.61%','567,890'], i1:true},
+      {cols:['  个人消费贷款','7,654,320','7,345,600','123,450','56,780','78,900','49,590','2.42%','345,670'], i1:true},
+      {cols:['  个人经营贷款','5,012,350','4,852,000','98,690','32,110','18,630','-30,080','-0.59%','320,000'], i1:true},
+      {cls:'total-row', cols:['贷款合计','86,111,000','82,777,700','1,802,300','580,150','667,000','283,850','1.78%','4,710,680']},
+      {cls:'section-header', cols:['监管指标','','','','','','','','']},
+      {cls:'subtotal', cols:['不良贷款(次+可疑+损失)','1,531,000','','','580,150','667,000','283,850','1.78%','']},
+      {cls:'subtotal', cols:['拨备覆盖率','—','','','','','','307.7%','']},
+      {cls:'subtotal', cols:['贷款拨备率','—','','','','','','5.47%','']},
+    ],
+    formulas: 'G04A',
+    ddl: 'G04A',
+  },
+
+  G11: {
+    name: '流动性覆盖率报表',
+    desc: '统计合格优质流动资产及未来30天压力情景下的净现金流出，计算LCR',
+    tags: `<span class="tag tag-cbirc">NFRA</span><span class="tag tag-month">月报 · 次月15日前</span>`,
+    tableHeader: ['项目代码','项目名称','未调整价值(万元)','折扣率','折后价值(万元)','说明'],
+    tableData: [
+      {cls:'section-header', cols:['','◆ 合格优质流动资产（HQLA）','','','','']},
+      {cols:['H1','一级资产','','','','']},
+      {cols:['H1.1','  现金','142,360','100%','142,360','无折扣'], i1:true},
+      {cols:['H1.2','  央行准备金（超额部分）','2,456,780','100%','2,456,780','可随时动用'], i1:true},
+      {cols:['H1.3','  国债/央行票据','8,765,430','100%','8,765,430','0%风险权重'], i1:true},
+      {cls:'subtotal', cols:['H1','一级资产合计','11,364,570','—','11,364,570','']},
+      {cols:['H2A','二级A类资产','','','','']},
+      {cols:['H2A.1','  政策性银行债','3,456,780','85%','2,938,263','折扣15%'], i1:true},
+      {cols:['H2A.2','  地方政府债','2,345,670','85%','1,993,820','折扣15%'], i1:true},
+      {cls:'subtotal', cols:['H2A','二级A类资产合计','5,802,450','—','4,932,083','']},
+      {cols:['H2B','二级B类资产','','','','']},
+      {cols:['H2B.1','  高评级企业债','1,234,560','50%','617,280','折扣50%'], i1:true},
+      {cls:'subtotal', cols:['H2B','二级B类资产合计','1,234,560','—','617,280','']},
+      {cls:'total-row', cols:['H','HQLA合计','18,401,580','—','16,913,933','']},
+
+      {cls:'section-header', cols:['','◆ 现金流出（未来30天）','','','','']},
+      {cols:['O1','零售存款流出','46,222,220','5%','2,311,111','稳定存款']},
+      {cols:['O2','批发存款流出（非金融机构）','12,345,670','25%','3,086,418','']},
+      {cols:['O3','同业及金融机构存款流出','12,345,670','100%','12,345,670','']},
+      {cols:['O4','未承诺信贷额度提取','5,678,900','10%','567,890','']},
+      {cols:['O5','已承诺流动性便利','2,345,670','30%','703,701','']},
+      {cls:'total-row', cols:['O','现金流出合计','79,000,000','—','19,014,790','']},
+
+      {cls:'section-header', cols:['','◆ 现金流入（未来30天，上限75%流出）','','','','']},
+      {cols:['I1','到期贷款回收','4,567,890','50%','2,283,945','']},
+      {cols:['I2','其他合同性现金流入','1,234,560','100%','1,234,560','']},
+      {cls:'total-row', cols:['I','现金流入合计（取小：min vs 75%×O）','—','—','3,518,505','上限14,261,093']},
+
+      {cls:'section-header', cols:['','◆ 净现金流出 = 流出 - min(流入, 75%×流出)','','','','']},
+      {cls:'total-row', cols:['NCO','净现金流出','—','—','15,496,285','']},
+      {cls:'section-header', cols:['','◆ 流动性覆盖率 = HQLA / 净现金流出','','','','']},
+      {cls:'subtotal', cols:['LCR','流动性覆盖率','—','—','96.3%','⚠ 低于100%监管要求'], warn:true},
+    ],
+    formulas: 'G11',
+    ddl: 'G11',
+  },
+
+};
+
+// ── 计算逻辑内容 ─────────────────────────────────────────────
+const FORMULAS = {
+  G01: `
+  <div class="formula-section">
+    <h3>G01 资产负债表 · 核心勾稽关系</h3>
+    <div class="formula-card">
+      <h4>📐 基础恒等式（资产负债表平衡）</h4>
+      <div class="formula-expr">资产总计 = 负债合计 + 所有者权益合计
+A_total = L_total + E_total
+133,275,360 = 126,518,350 + 6,757,010  ✓</div>
+      <div class="formula-desc">这是资产负债表最根本的校验规则。任何一方不平衡均需排查。</div>
+    </div>
+    <div class="formula-card">
+      <h4>📐 发放贷款及垫款（A08）净值计算</h4>
+      <div class="formula-expr">A08净值 = A08贷款总额 - A08贷款损失准备
+       = 93,111,000 - 3,876,440
+       = 89,234,560 万元</div>
+    </div>
+    <div class="formula-card">
+      <h4>📐 A01 现金及存放央行款项</h4>
+      <div class="formula-expr">A01 = A01.1现金 + A01.2存放央行款项
+     = 142,360 + 8,289,820 = 8,432,180 万元</div>
+    </div>
+    <div class="formula-card">
+      <h4>📐 所有者权益</h4>
+      <div class="formula-expr">E_total = E01实收资本 + E02资本公积 + E03盈余公积
+       + E04一般风险准备 + E05未分配利润
+       = 3,000,000 + 1,234,560 + 876,430 + 678,900 + 967,120
+       = 6,757,010 万元</div>
+    </div>
+  </div>
+  <div class="formula-section">
+    <h3>关联报表校验</h3>
+    <div class="formula-card">
+      <h4>📎 G01↔G04A：贷款口径对齐</h4>
+      <div class="formula-expr">G01.A08贷款总额(不含准备) ≈ G04A.贷款合计
+93,111,000 ≈ 86,111,000 + 7,000,000(票据贴现等)</div>
+      <div class="formula-desc">差异来自票据贴现、保理等未纳入五级分类口径。</div>
+    </div>
+    <div class="formula-card">
+      <h4>📎 G01↔G02：留存收益验证</h4>
+      <div class="formula-expr">G01.E05(期末) = G01.E05(期初) + G02.净利润 - 分配股利
+967,120 = 176,390 + 812,230 - 21,500 ✓</div>
+    </div>
+  </div>`,
+
+  G03: `
+  <div class="formula-section">
+    <h3>G03 资本充足率 · 巴塞尔III计算框架</h3>
+    <div class="formula-items">
+      <div class="fi"><div class="fi-label">核心一级资本充足率</div><div class="fi-val ok">9.10%</div><div class="fi-threshold">监管下限 7.5%</div></div>
+      <div class="fi"><div class="fi-label">一级资本充足率</div><div class="fi-val ok">9.82%</div><div class="fi-threshold">监管下限 8.5%</div></div>
+      <div class="fi"><div class="fi-label">资本充足率</div><div class="fi-val ok">12.84%</div><div class="fi-threshold">监管下限 10.5%</div></div>
+      <div class="fi"><div class="fi-label">风险加权资产</div><div class="fi-val">6.924 亿</div><div class="fi-threshold">含信用+市场+操作</div></div>
+    </div>
+    <div class="formula-card" style="margin-top:12px">
+      <h4>核心一级资本 (CET1) 计算</h4>
+      <div class="formula-expr">CET1 = 实收资本 + 资本公积 + 盈余公积 + 一般风险准备
+       + 未分配利润 + 少数股东资本(可计入)
+       - 商誉 - 其他无形资产
+       - 对金融机构核心资本投资(超10%部分)
+     = 3,000,000 + 1,234,560 + 876,430 + 678,900
+       + 967,120 + 123,450
+       - 234,560 - 345,670
+     = 6,300,230 万元</div>
+    </div>
+    <div class="formula-card">
+      <h4>风险加权资产 (RWA) 计算</h4>
+      <div class="formula-expr">RWA = 信用风险RWA + 市场风险RWA×12.5 + 操作风险RWA×12.5
+
+信用风险RWA = Σ(表内资产 × 风险权重)
+  现金/央行准备金:    0%
+  政府债券:          0%
+  政策性银行债:      0%
+  商业银行(≤3月):   20%
+  个人住房贷款:      50%
+  一般企业贷款:     100%
+  不良贷款:         150%
+
+市场风险资本要求 × 12.5 = 187,200 × 12.5 = 2,340,000
+操作风险资本要求 × 12.5 = 364,800 × 12.5 = 4,560,000
+
+RWA合计 = 62,340,000 + 2,340,000 + 4,560,000 = 69,240,000 万元</div>
+    </div>
+    <div class="formula-card">
+      <h4>三个资本充足率</h4>
+      <div class="formula-expr">核心一级资本充足率 = CET1 / RWA
+= 6,300,230 / 69,240,000 = 9.10% ≥ 7.5% ✓
+
+一级资本充足率 = (CET1 + AT1) / RWA
+= (6,300,230 + 500,000) / 69,240,000 = 9.82% ≥ 8.5% ✓
+
+资本充足率 = (CET1+AT1+T2) / RWA
+= 8,876,660 / 69,240,000 = 12.84% ≥ 10.5% ✓</div>
+    </div>
+  </div>`,
+
+  G04A: `
+  <div class="formula-section">
+    <h3>G04A 五级分类 · 计算逻辑</h3>
+    <div class="formula-card">
+      <h4>不良贷款率 (NPL Ratio)</h4>
+      <div class="formula-expr">NPL率 = (次级 + 可疑 + 损失) / 贷款总额 × 100%
+     = (580,150 + 667,000 + 283,850) / 86,111,000 × 100%
+     = 1,531,000 / 86,111,000
+     = 1.78%  ≤ 5% ✓</div>
+    </div>
+    <div class="formula-card">
+      <h4>贷款损失准备充足性</h4>
+      <div class="formula-expr">拨备覆盖率 = 贷款损失准备 / 不良贷款总额 × 100%
+         = 4,710,680 / 1,531,000 × 100%
+         = 307.7%  ≥ 150% ✓
+
+贷款拨备率 = 贷款损失准备 / 贷款总额 × 100%
+         = 4,710,680 / 86,111,000 × 100%
+         = 5.47%  ≥ 2.5% ✓</div>
+    </div>
+    <div class="formula-card">
+      <h4>五级分类判断标准</h4>
+      <div class="formula-expr">正常：借款人能正常还款，无任何迹象表明本息可能损失
+关注：尽管目前可偿还，但存在影响偿还的不利因素  （逾期≤90天或关注类下迁信号）
+次级：借款人还款能力明显出现问题，即使执行担保也有损失  （逾期90~180天，或认定为不良）
+可疑：肯定无法足额偿还，损失程度较大  （逾期180~360天）
+损失：采取所有可能措施后，仍无法收回或只能收回极少部分  （逾期>360天或认定无法收回）</div>
+    </div>
+    <div class="formula-card">
+      <h4>迁徙率监控</h4>
+      <div class="formula-expr">各级迁徙率 = 期末下迁至低级别金额 / (期初余额 + 期间新发放)
+
+正常→关注迁徙率 = 本期新划入关注的贷款 / 期初正常类余额
+关注→次级迁徙率 = 本期新划入次级的贷款 / 期初关注类余额
+不良贷款迁徙率  = 期末不良 / (期初不良 + 期间新增不良)</div>
+    </div>
+  </div>`,
+
+  G11: `
+  <div class="formula-section">
+    <h3>G11 流动性覆盖率 (LCR) · 计算框架</h3>
+    <div class="formula-items">
+      <div class="fi"><div class="fi-label">HQLA（优质流动资产）</div><div class="fi-val ok">16,913,933</div><div class="fi-threshold">万元</div></div>
+      <div class="fi"><div class="fi-label">净现金流出（30天）</div><div class="fi-val">15,496,285</div><div class="fi-threshold">万元</div></div>
+      <div class="fi"><div class="fi-label">流动性覆盖率 LCR</div><div class="fi-val err">96.3%</div><div class="fi-threshold">⚠ 低于100%监管要求</div></div>
+      <div class="fi"><div class="fi-label">缺口</div><div class="fi-val err">-582,352</div><div class="fi-threshold">万元（需补充HQLA）</div></div>
+    </div>
+    <div class="formula-card" style="margin-top:12px">
+      <h4>LCR 核心公式</h4>
+      <div class="formula-expr">LCR = HQLA / 净现金流出(NCO) ≥ 100%
+
+净现金流出 = 压力情景下未来30天现金流出
+           - min(压力情景下现金流入, 75% × 现金流出)</div>
+    </div>
+    <div class="formula-card">
+      <h4>HQLA 分层构成</h4>
+      <div class="formula-expr">HQLA = 一级资产(无折扣)
+      + min(二级A类资产×85%, 40%×HQLA)
+      + min(二级B类资产×50%或75%, 15%×HQLA)
+
+一级资产  = 现金 + 超额准备金 + 国债/央票
+          = 142,360 + 2,456,780 + 8,765,430 = 11,364,570
+
+二级A折后 = 5,802,450 × 85% = 4,932,083
+二级B折后 = 1,234,560 × 50% = 617,280
+
+HQLA合计  = 11,364,570 + 4,932,083 + 617,280 = 16,913,933 万元</div>
+    </div>
+    <div class="formula-card">
+      <h4>现金流出（各类别压力系数）</h4>
+      <div class="formula-expr">流出类别               压力系数   金额(万元)
+零售存款（稳定）         3%~5%     46,222,220 × 5% = 2,311,111
+零售存款（不稳定）       10%~15%   —
+非金融机构存款           25%       12,345,670 × 25% = 3,086,418
+同业/金融机构存款        100%      12,345,670 × 100% = 12,345,670
+未承诺信贷额度           10%       5,678,900 × 10% = 567,890
+已承诺流动性便利         30%       2,345,670 × 30% = 703,701
+
+总流出 = 19,014,790 万元</div>
+    </div>
+  </div>`,
+};
+
+// ── DDL 数据结构 ─────────────────────────────────────────────
+const DDLS = {
+  G01: `<div class="formula-section"><h3>G01 · 核心 Doris 表结构</h3></div>
+<div class="ddl-block"><span class="cm">-- 报表基础科目表（维度表）</span>
+<span class="kw">CREATE TABLE</span> reg_report_item (
+    report_code     <span class="tp">VARCHAR(10)</span>    <span class="kw">NOT NULL</span>   <span class="cm">COMMENT '报表代码 G01/G03...'</span>,
+    item_code       <span class="tp">VARCHAR(20)</span>    <span class="kw">NOT NULL</span>   <span class="cm">COMMENT '行项目代码 A01/L01/E01'</span>,
+    item_name       <span class="tp">VARCHAR(100)</span>   <span class="kw">NOT NULL</span>   <span class="cm">COMMENT '科目名称'</span>,
+    item_type       <span class="tp">VARCHAR(10)</span>                <span class="cm">COMMENT 'ASSET/LIABILITY/EQUITY'</span>,
+    parent_code     <span class="tp">VARCHAR(20)</span>                <span class="cm">COMMENT '父级科目（用于汇总）'</span>,
+    sort_order      <span class="tp">INT</span>,
+    sign_flag       <span class="tp">TINYINT</span>                    <span class="cm">COMMENT '1=正，-1=减项'</span>,
+    formula         <span class="tp">VARCHAR(500)</span>               <span class="cm">COMMENT '计算公式描述'</span>,
+    is_leaf         <span class="tp">TINYINT</span>        DEFAULT 1
+) ENGINE=OLAP
+<span class="kw">UNIQUE KEY</span>(report_code, item_code)
+DISTRIBUTED BY HASH(report_code) BUCKETS 3
+PROPERTIES (<span class="str">"replication_num"</span>=<span class="str">"1"</span>);</div>
+
+<div class="ddl-block"><span class="cm">-- G01 资产负债表数据（按期报送）</span>
+<span class="kw">CREATE TABLE</span> reg_g01_balance_sheet (
+    report_period   <span class="tp">VARCHAR(10)</span>    <span class="kw">NOT NULL</span>   <span class="cm">COMMENT '报告期 2024-03'</span>,
+    org_code        <span class="tp">VARCHAR(20)</span>    <span class="kw">NOT NULL</span>   <span class="cm">COMMENT '机构代码'</span>,
+    item_code       <span class="tp">VARCHAR(20)</span>    <span class="kw">NOT NULL</span>   <span class="cm">COMMENT '行项目代码'</span>,
+    curr_balance    <span class="tp">BIGINT</span>                     <span class="cm">COMMENT '期末余额（分）'</span>,
+    prev_balance    <span class="tp">BIGINT</span>                     <span class="cm">COMMENT '上期余额（分）'</span>,
+    currency_code   <span class="tp">VARCHAR(5)</span>     DEFAULT <span class="str">'CNY'</span>,
+    data_source     <span class="tp">VARCHAR(50)</span>                <span class="cm">COMMENT '数据来源系统'</span>,
+    create_time     <span class="tp">DATETIME</span>       DEFAULT CURRENT_TIMESTAMP,
+    submit_time     <span class="tp">DATETIME</span>                   <span class="cm">COMMENT '报送时间'</span>,
+    status          <span class="tp">VARCHAR(20)</span>    DEFAULT <span class="str">'draft'</span> <span class="cm">COMMENT 'draft/verified/submitted/accepted'</span>
+) ENGINE=OLAP
+<span class="kw">UNIQUE KEY</span>(report_period, org_code, item_code, currency_code)
+DISTRIBUTED BY HASH(org_code) BUCKETS 5
+PROPERTIES (<span class="str">"replication_num"</span>=<span class="str">"1"</span>);</div>
+
+<div class="ddl-block"><span class="cm">-- G03 资本充足率（结构化存储）</span>
+<span class="kw">CREATE TABLE</span> reg_g03_capital (
+    report_period   <span class="tp">VARCHAR(10)</span>    <span class="kw">NOT NULL</span>,
+    org_code        <span class="tp">VARCHAR(20)</span>    <span class="kw">NOT NULL</span>,
+    cet1_capital    <span class="tp">BIGINT</span>                     <span class="cm">COMMENT '核心一级资本净额（分）'</span>,
+    at1_capital     <span class="tp">BIGINT</span>                     <span class="cm">COMMENT '其他一级资本'</span>,
+    t2_capital      <span class="tp">BIGINT</span>                     <span class="cm">COMMENT '二级资本'</span>,
+    total_capital   <span class="tp">BIGINT</span>                     <span class="cm">COMMENT '资本净额合计'</span>,
+    credit_rwa      <span class="tp">BIGINT</span>                     <span class="cm">COMMENT '信用风险加权资产'</span>,
+    market_rwa      <span class="tp">BIGINT</span>                     <span class="cm">COMMENT '市场风险加权资产'</span>,
+    ops_rwa         <span class="tp">BIGINT</span>                     <span class="cm">COMMENT '操作风险加权资产'</span>,
+    total_rwa       <span class="tp">BIGINT</span>                     <span class="cm">COMMENT '风险加权资产合计'</span>,
+    cet1_ratio      <span class="tp">DECIMAL(8,4)</span>               <span class="cm">COMMENT '核心一级资本充足率'</span>,
+    tier1_ratio     <span class="tp">DECIMAL(8,4)</span>               <span class="cm">COMMENT '一级资本充足率'</span>,
+    car_ratio       <span class="tp">DECIMAL(8,4)</span>               <span class="cm">COMMENT '资本充足率'</span>,
+    leverage_ratio  <span class="tp">DECIMAL(8,4)</span>               <span class="cm">COMMENT '杠杆率'</span>,
+    status          <span class="tp">VARCHAR(20)</span>    DEFAULT <span class="str">'draft'</span>
+) ENGINE=OLAP
+<span class="kw">UNIQUE KEY</span>(report_period, org_code)
+DISTRIBUTED BY HASH(org_code) BUCKETS 3
+PROPERTIES (<span class="str">"replication_num"</span>=<span class="str">"1"</span>);</div>
+
+<div class="ddl-block"><span class="cm">-- G04A 五级分类明细</span>
+<span class="kw">CREATE TABLE</span> reg_g04a_loan_quality (
+    report_period       <span class="tp">VARCHAR(10)</span>   <span class="kw">NOT NULL</span>,
+    org_code            <span class="tp">VARCHAR(20)</span>   <span class="kw">NOT NULL</span>,
+    industry_code       <span class="tp">VARCHAR(20)</span>   <span class="kw">NOT NULL</span>   <span class="cm">COMMENT '国民经济行业分类'</span>,
+    loan_type           <span class="tp">VARCHAR(20)</span>   <span class="kw">NOT NULL</span>   <span class="cm">COMMENT 'CORP/RETAIL/INTERBANK'</span>,
+    total_balance       <span class="tp">BIGINT</span>                    <span class="cm">COMMENT '贷款总额（分）'</span>,
+    normal_balance      <span class="tp">BIGINT</span>                    <span class="cm">COMMENT '正常类'</span>,
+    concern_balance     <span class="tp">BIGINT</span>                    <span class="cm">COMMENT '关注类'</span>,
+    substandard_balance <span class="tp">BIGINT</span>                    <span class="cm">COMMENT '次级类'</span>,
+    doubtful_balance    <span class="tp">BIGINT</span>                    <span class="cm">COMMENT '可疑类'</span>,
+    loss_balance        <span class="tp">BIGINT</span>                    <span class="cm">COMMENT '损失类'</span>,
+    provision_balance   <span class="tp">BIGINT</span>                    <span class="cm">COMMENT '贷款损失准备'</span>,
+    npl_ratio           <span class="tp">DECIMAL(8,4)</span>              <span class="cm">COMMENT '不良贷款率 = (次+可+损)/总'</span>,
+    provision_coverage  <span class="tp">DECIMAL(8,4)</span>              <span class="cm">COMMENT '拨备覆盖率 = 准备/不良'</span>
+) ENGINE=OLAP
+<span class="kw">UNIQUE KEY</span>(report_period, org_code, industry_code, loan_type)
+DISTRIBUTED BY HASH(org_code) BUCKETS 5
+PROPERTIES (<span class="str">"replication_num"</span>=<span class="str">"1"</span>);</div>
+
+<div class="ddl-block"><span class="cm">-- G11 流动性覆盖率</span>
+<span class="kw">CREATE TABLE</span> reg_g11_lcr (
+    report_period       <span class="tp">VARCHAR(10)</span>   <span class="kw">NOT NULL</span>,
+    org_code            <span class="tp">VARCHAR(20)</span>   <span class="kw">NOT NULL</span>,
+    <span class="cm">-- HQLA</span>
+    hqla_l1            <span class="tp">BIGINT</span>                    <span class="cm">COMMENT '一级资产折后值'</span>,
+    hqla_l2a           <span class="tp">BIGINT</span>                    <span class="cm">COMMENT '二级A类折后值'</span>,
+    hqla_l2b           <span class="tp">BIGINT</span>                    <span class="cm">COMMENT '二级B类折后值'</span>,
+    hqla_total         <span class="tp">BIGINT</span>                    <span class="cm">COMMENT 'HQLA合计'</span>,
+    <span class="cm">-- 现金流出</span>
+    outflow_retail     <span class="tp">BIGINT</span>                    <span class="cm">COMMENT '零售存款流出'</span>,
+    outflow_wholesale  <span class="tp">BIGINT</span>                    <span class="cm">COMMENT '批发存款流出'</span>,
+    outflow_interbank  <span class="tp">BIGINT</span>                    <span class="cm">COMMENT '同业存款流出'</span>,
+    outflow_other      <span class="tp">BIGINT</span>                    <span class="cm">COMMENT '其他流出'</span>,
+    total_outflow      <span class="tp">BIGINT</span>                    <span class="cm">COMMENT '总现金流出'</span>,
+    <span class="cm">-- 现金流入</span>
+    inflow_loans       <span class="tp">BIGINT</span>                    <span class="cm">COMMENT '贷款回收流入'</span>,
+    inflow_other       <span class="tp">BIGINT</span>                    <span class="cm">COMMENT '其他合同流入'</span>,
+    inflow_cap         <span class="tp">BIGINT</span>                    <span class="cm">COMMENT '流入上限(75%×流出)'</span>,
+    net_outflow        <span class="tp">BIGINT</span>                    <span class="cm">COMMENT '净现金流出'</span>,
+    lcr_ratio          <span class="tp">DECIMAL(8,4)</span>              <span class="cm">COMMENT 'LCR = HQLA/净流出'</span>,
+    is_compliant       <span class="tp">TINYINT</span>                   <span class="cm">COMMENT '1=达标 0=不达标'</span>
+) ENGINE=OLAP
+<span class="kw">UNIQUE KEY</span>(report_period, org_code)
+DISTRIBUTED BY HASH(org_code) BUCKETS 3
+PROPERTIES (<span class="str">"replication_num"</span>=<span class="str">"1"</span>);</div>
+
+<div class="ddl-block"><span class="cm">-- 报送流程控制表</span>
+<span class="kw">CREATE TABLE</span> reg_submission_log (
+    submission_id   <span class="tp">VARCHAR(36)</span>   <span class="kw">NOT NULL</span>   <span class="cm">COMMENT 'UUID'</span>,
+    report_code     <span class="tp">VARCHAR(10)</span>   <span class="kw">NOT NULL</span>,
+    report_period   <span class="tp">VARCHAR(10)</span>   <span class="kw">NOT NULL</span>,
+    org_code        <span class="tp">VARCHAR(20)</span>   <span class="kw">NOT NULL</span>,
+    status          <span class="tp">VARCHAR(20)</span>   <span class="kw">NOT NULL</span>   <span class="cm">COMMENT 'draft/qc_pass/submitted/accepted/rejected'</span>,
+    submitter       <span class="tp">VARCHAR(50)</span>,
+    submit_time     <span class="tp">DATETIME</span>,
+    regulator_ack   <span class="tp">DATETIME</span>                  <span class="cm">COMMENT '监管确认时间'</span>,
+    qc_score        <span class="tp">DECIMAL(5,2)</span>              <span class="cm">COMMENT '质检分数 0~100'</span>,
+    fail_rules      <span class="tp">STRING</span>                    <span class="cm">COMMENT 'JSON：不通过的规则列表'</span>,
+    remark          <span class="tp">VARCHAR(500)</span>,
+    <span class="kw">INDEX</span> idx_status (status) USING INVERTED,
+    <span class="kw">INDEX</span> idx_period (report_period) USING INVERTED
+) ENGINE=OLAP
+<span class="kw">DUPLICATE KEY</span>(submission_id)
+DISTRIBUTED BY HASH(org_code) BUCKETS 5
+PROPERTIES (<span class="str">"replication_num"</span>=<span class="str">"1"</span>);</div>`,
+
+  G03: `<div class="formula-section"><h3>G03 · 资本充足率表结构</h3></div>
+<div class="ddl-block"><span class="cm">-- reg_g03_capital 已在 G01 DDL 中展示，此处补充风险权重维度表</span>
+<span class="kw">CREATE TABLE</span> reg_rw_mapping (
+    asset_type      <span class="tp">VARCHAR(50)</span>   <span class="kw">NOT NULL</span>   <span class="cm">COMMENT '资产类型'</span>,
+    counterparty    <span class="tp">VARCHAR(50)</span>                <span class="cm">COMMENT '交易对手类型'</span>,
+    rating_grade    <span class="tp">VARCHAR(10)</span>                <span class="cm">COMMENT '外部评级等级'</span>,
+    risk_weight     <span class="tp">DECIMAL(5,2)</span>  <span class="kw">NOT NULL</span>   <span class="cm">COMMENT '风险权重 0~1.5'</span>,
+    method          <span class="tp">VARCHAR(20)</span>                <span class="cm">COMMENT 'STD=标准法/IRB=内评法'</span>,
+    effective_date  <span class="tp">DATE</span>          <span class="kw">NOT NULL</span>   <span class="cm">COMMENT '生效日期'</span>
+) ENGINE=OLAP
+<span class="kw">UNIQUE KEY</span>(asset_type, counterparty, rating_grade, effective_date)
+DISTRIBUTED BY HASH(asset_type) BUCKETS 3
+PROPERTIES (<span class="str">"replication_num"</span>=<span class="str">"1"</span>);</div>`,
+
+  G04A: `<div class="formula-section"><h3>G04A · 贷款质量表结构（见G01页DDL补充）</h3></div>
+<div class="ddl-block"><span class="cm">-- 贷款台账明细（计算五级分类的原始数据）</span>
+<span class="kw">CREATE TABLE</span> reg_loan_detail (
+    loan_id             <span class="tp">VARCHAR(30)</span>   <span class="kw">NOT NULL</span>,
+    customer_id         <span class="tp">VARCHAR(20)</span>   <span class="kw">NOT NULL</span>,
+    industry_code       <span class="tp">VARCHAR(20)</span>,
+    loan_type           <span class="tp">VARCHAR(20)</span>,
+    loan_balance        <span class="tp">BIGINT</span>                    <span class="cm">COMMENT '贷款余额（分）'</span>,
+    overdue_days        <span class="tp">INT</span>                       <span class="cm">COMMENT '逾期天数'</span>,
+    classification      <span class="tp">VARCHAR(10)</span>               <span class="cm">COMMENT '正常/关注/次级/可疑/损失'</span>,
+    provision_balance   <span class="tp">BIGINT</span>                    <span class="cm">COMMENT '单笔拨备余额'</span>,
+    provision_rate      <span class="tp">DECIMAL(6,4)</span>              <span class="cm">COMMENT '拨备率'</span>,
+    report_period       <span class="tp">VARCHAR(10)</span>   <span class="kw">NOT NULL</span>,
+    <span class="kw">INDEX</span> idx_class (classification) USING INVERTED,
+    <span class="kw">INDEX</span> idx_overdue (overdue_days) USING INVERTED
+) ENGINE=OLAP
+<span class="kw">DUPLICATE KEY</span>(loan_id, report_period)
+DISTRIBUTED BY HASH(customer_id) BUCKETS 10
+PROPERTIES (<span class="str">"replication_num"</span>=<span class="str">"1"</span>);</div>`,
+
+  G11: `<div class="formula-section"><h3>G11 · 流动性覆盖率表结构</h3></div>
+<div class="ddl-block"><span class="cm">-- reg_g11_lcr 已在 G01 DDL 中展示，此处补充资产流动性分层表</span>
+<span class="kw">CREATE TABLE</span> reg_hqla_asset (
+    report_period   <span class="tp">VARCHAR(10)</span>   <span class="kw">NOT NULL</span>,
+    org_code        <span class="tp">VARCHAR(20)</span>   <span class="kw">NOT NULL</span>,
+    asset_code      <span class="tp">VARCHAR(20)</span>   <span class="kw">NOT NULL</span>,
+    asset_name      <span class="tp">VARCHAR(100)</span>,
+    hqla_level      <span class="tp">VARCHAR(5)</span>                <span class="cm">COMMENT 'L1/L2A/L2B'</span>,
+    market_value    <span class="tp">BIGINT</span>                    <span class="cm">COMMENT '市场价值（分）'</span>,
+    haircut_rate    <span class="tp">DECIMAL(5,2)</span>              <span class="cm">COMMENT '折扣率'</span>,
+    adjusted_value  <span class="tp">BIGINT</span>                    <span class="cm">COMMENT '折后价值'</span>,
+    encumbered      <span class="tp">TINYINT</span>    DEFAULT 0      <span class="cm">COMMENT '是否已质押'</span>
+) ENGINE=OLAP
+<span class="kw">UNIQUE KEY</span>(report_period, org_code, asset_code)
+DISTRIBUTED BY HASH(org_code) BUCKETS 5
+PROPERTIES (<span class="str">"replication_num"</span>=<span class="str">"1"</span>);</div>`,
+};
+
+// ── QC 规则 ─────────────────────────────────────────────────
+const QC_RULES = {
+  G01: [
+    {cls:'pass', icon:'✅', desc:'资产 = 负债 + 权益平衡校验', val:'差额=0'},
+    {cls:'pass', icon:'✅', desc:'A01 = A01.1 + A01.2 汇总校验', val:'通过'},
+    {cls:'pass', icon:'✅', desc:'A08净值 = 贷款总额 - 损失准备', val:'通过'},
+    {cls:'pass', icon:'✅', desc:'负债合计 = Σ各负债科目', val:'通过'},
+    {cls:'pass', icon:'✅', desc:'与上期余额变动率合理性检查（|变动|≤30%）', val:'通过'},
+    {cls:'warn', icon:'⚠️', desc:'E05未分配利润环比增幅 >100% 触发异常提示', val:'448.2% 待确认'},
+    {cls:'pass', icon:'✅', desc:'A08与G04A贷款台账余额核对（差异≤1‰）', val:'差异0.03‰'},
+    {cls:'pass', icon:'✅', desc:'L05存款与系统核心账务数据一致性核对', val:'通过'},
+    {cls:'pass', icon:'✅', desc:'外币折算汇率使用报告期末中国人民银行公布汇率', val:'通过'},
+    {cls:'pass', icon:'✅', desc:'与G02利润表期间净利润与E05变动勾稽', val:'通过'},
+    {cls:'pass', icon:'✅', desc:'本期数据非空检验（关键科目）', val:'100%非空'},
+    {cls:'pass', icon:'✅', desc:'科目代码有效性校验（对照报表模板）', val:'通过'},
+    {cls:'pass', icon:'✅', desc:'数值单位一致性校验（万元，取整）', val:'通过'},
+  ],
+};
+
+// ── 渲染逻辑 ─────────────────────────────────────────────────
+let currentReport = 'G01';
+
+function selectReport(code) {
+  currentReport = code;
+  const r = REPORTS[code];
+  if (!r) return;
+
+  // 更新激活样式
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  event && event.currentTarget && event.currentTarget.classList.add('active');
+
+  // 更新 header
+  document.getElementById('rh-code').textContent = code;
+  document.getElementById('rh-name').textContent = r.name;
+  document.getElementById('rh-desc').textContent = r.desc;
+  document.getElementById('rh-tags').innerHTML = r.tags;
+
+  // 渲染表格
+  renderTable(r);
+
+  // 渲染公式
+  document.getElementById('formula-content').innerHTML = FORMULAS[r.formulas] || '<div style="padding:20px;color:var(--text3)">计算逻辑文档完善中…</div>';
+
+  // 渲染DDL
+  document.getElementById('ddl-content').innerHTML = DDLS[r.ddl] || '<div style="padding:20px;color:var(--text3)">数据结构文档完善中…</div>';
+
+  // 渲染QC
+  const rules = QC_RULES[code] || QC_RULES['G01'];
+  document.getElementById('qc-rules').innerHTML = rules.map(r =>
+    `<div class="qc-rule ${r.cls}"><span class="qr-icon">${r.icon}</span><span class="qr-desc">${r.desc}</span><span class="qr-val">${r.val}</span></div>`
+  ).join('');
+
+  switchPanel('data');
+}
+
+function renderTable(r) {
+  const thead = `<thead><tr>${r.tableHeader.map(h => `<th>${h}</th>`).join('')}</tr></thead>`;
+  const tbody = '<tbody>' + r.tableData.map(row => {
+    const cls = row.cls || '';
+    return `<tr class="${cls}">${row.cols.map((c, i) => {
+      let td = 'td';
+      let inner = c;
+      let extra = '';
+      if (i === 1) {
+        extra = 'class="item-name' + (row.i1 ? ' indent1' : '') + '"';
+      } else if (i >= 2) {
+        extra = `class="${c && (c.includes(',') || c.includes('%') || c === '—') ? (row.cls === 'section-header' ? '' : 'num') : ''}"`;
+      }
+      if (c === '✓') inner = '<span class="qc-ok">✓</span>';
+      if (c === '⚠' || (row.warn && i === 6)) inner = `<span class="qc-warn">${c}</span>`;
+      return `<${td} ${extra}>${inner}</${td}>`;
+    }).join('')}</tr>`;
+  }).join('') + '</tbody>';
+  document.getElementById('main-table').innerHTML = thead + tbody;
+}
+
+function switchPanel(name) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+  const tabs = document.querySelectorAll('.tab');
+  const map = {data:0, formula:1, qc:2, ddl:3};
+  if (map[name] !== undefined) tabs[map[name]].classList.add('active');
+}
+
+// 初始化
+selectReport('G01');
+</script>
+</body>
+</html>

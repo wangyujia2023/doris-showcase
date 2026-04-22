@@ -13,6 +13,7 @@ cp .env.example .env
 然后只改这一个文件里的参数：
 
 - `BACKEND_HOST` / `BACKEND_PORT`
+- `BACKEND_PROXY_HOST`
 - `FRONTEND_HOST` / `FRONTEND_PORT`
 - `DORIS_HOST` / `DORIS_PORT` / `DORIS_USER` / `DORIS_PASSWORD` / `DORIS_DATABASE`
 - `RETAIL_LINEAGE_DB`
@@ -129,7 +130,14 @@ OPENMETADATA_TABLE_FQN_PREFIX=
 ```env
 BACKEND_PORT=8000
 FRONTEND_PORT=5173
+BACKEND_PROXY_HOST=127.0.0.1
 ```
+
+说明：
+
+- `BACKEND_HOST` 是后端监听地址，可用 `0.0.0.0`
+- `BACKEND_PROXY_HOST` 是前端 Vite 代理目标，建议固定 `127.0.0.1`
+- 不要把代理目标写成 `0.0.0.0`
 
 ## 常用命令
 

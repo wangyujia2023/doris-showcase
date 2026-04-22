@@ -21,6 +21,7 @@ const routes = [
   { path: '/securities',    component: () => import('@/views/Securities.vue'),          meta: { title: '证券经营与风控沙盘' } },
   { path: '/fund',          component: () => import('@/views/Fund.vue'),                meta: { title: '基金投研沙盘' } },
   { path: '/news',          component: () => import('@/views/NewsInsight.vue'),          meta: { title: '资讯 AI 分析' } },
+  { path: '/bjmetro',       component: () => import('@/views/BJMetro.vue'),               meta: { title: '地铁运营分析' } },
   { path: '/lineage',       component: () => import('@/views/Lineage.vue'),               meta: { title: '数据血缘' } },
   { path: '/config',        component: () => import('@/views/SysConfig.vue'),           meta: { title: '系统配置' } },
 ]

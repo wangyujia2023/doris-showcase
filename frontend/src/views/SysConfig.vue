@@ -4,7 +4,7 @@
       <!-- Doris 连接状态 -->
       <el-col :span="24">
         <div class="card">
-          <div class="card-title">🗄️ Apache Doris 4.0 连接配置</div>
+          <div class="card-title">🗄️ SelectDB 连接配置</div>
           <el-descriptions :column="1" border size="small">
             <el-descriptions-item label="Doris Host">{{ cfg.doris_host }}</el-descriptions-item>
             <el-descriptions-item label="MySQL 端口">{{ cfg.doris_port }}</el-descriptions-item>

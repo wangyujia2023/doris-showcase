@@ -12,7 +12,7 @@ from backend.settings import settings
 from backend.doris.connect import get_pool, close_pool
 from backend.api.routes import router
 from backend.middleware.request_logger import RequestLoggerMiddleware
-from backend.telemetry.collector import start_writer, stop_writer
+from backend.telemetry.collector import ensure_tables, start_writer, stop_writer
 
 logging.basicConfig(
     level=logging.INFO,
@@ -33,8 +33,12 @@ async def lifespan(app: FastAPI):
         logger.info("ℹ️ 跳过启动预热，Doris 连接池改为按需初始化")
 
     if settings.TELEMETRY_ENABLED:
-        start_writer()
-        logger.info("✅ Telemetry writer 已启动")
+        try:
+            await ensure_tables()
+            start_writer()
+            logger.info("✅ Telemetry writer 已启动，sys_logs/sys_spans 已就绪")
+        except Exception as e:
+            logger.warning(f"⚠️ Telemetry 初始化失败: {e}")
     else:
         logger.info("ℹ️ Telemetry writer 已关闭")
     yield
@@ -45,7 +49,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title="银行业CDP平台",
-    description="基于 Apache Doris 4.0 的银行客户数据平台（HASP + AI Function）",
+    description="基于 SelectDB的银行客户数据平台（HASP + AI Function）",
     version="2.0.0",
     lifespan=lifespan,
 )

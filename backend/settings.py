@@ -68,7 +68,7 @@ class Settings:
             "http://localhost:3000",
             f"http://127.0.0.1:{self.FRONTEND_PORT}",
         ]
-        self.TELEMETRY_ENABLED: bool = _env_bool("TELEMETRY_ENABLED", "false")
+        self.TELEMETRY_ENABLED: bool = _env_bool("TELEMETRY_ENABLED", "true")
         self.BEHAVIOR_SCAN_DAYS: int = _env_int("BEHAVIOR_SCAN_DAYS", "120")
         self.OPENMETADATA_BASE_URL: str = os.getenv("OPENMETADATA_BASE_URL", "http://10.26.20.3:8585/api")
         self.OPENMETADATA_JWT_TOKEN: str = os.getenv("OPENMETADATA_JWT_TOKEN", "")
