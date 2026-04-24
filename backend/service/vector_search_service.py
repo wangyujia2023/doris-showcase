@@ -349,7 +349,7 @@ class VectorSearchService:
         top_k: int = 5,
     ) -> dict:
         """
-        HASP 混合检索：
+        HSAP 混合检索：
         - query_vector: 照片 embedding（可选）
         - label_filters: 标签标量过滤（可选）
         - description: 文本描述 → 自动转 embedding（可选，优先级低于 query_vector）

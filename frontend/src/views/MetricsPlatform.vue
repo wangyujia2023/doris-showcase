@@ -4,26 +4,26 @@
     <!-- ── 左侧面板 ─────────────────────────────── -->
     <div class="left-panel card">
       <div class="lp-tabs">
-        <span :class="['lp-tab', lpTab==='catalog'?'act':'']"   @click="lpTab='catalog'">目录</span>
-        <span :class="['lp-tab', lpTab==='template'?'act':'']"  @click="lpTab='template';loadTemplates()">模板</span>
-        <span :class="['lp-tab', lpTab==='saved'?'act':'']"     @click="lpTab='saved';loadSaved()">收藏</span>
-        <span :class="['lp-tab', lpTab==='history'?'act':'']"   @click="lpTab='history';loadHistory()">历史</span>
+        <span :class="['lp-tab', lpTab==='catalog'?'act':'']"   @click="lpTab='catalog'">{{ t('catalog') }}</span>
+        <span :class="['lp-tab', lpTab==='template'?'act':'']"  @click="lpTab='template';loadTemplates()">{{ t('template') }}</span>
+        <span :class="['lp-tab', lpTab==='saved'?'act':'']"     @click="lpTab='saved';loadSaved()">{{ t('saved') }}</span>
+        <span :class="['lp-tab', lpTab==='history'?'act':'']"   @click="lpTab='history';loadHistory()">{{ t('history') }}</span>
       </div>
 
       <!-- 目录 -->
       <div v-show="lpTab==='catalog'" class="lp-body">
-        <div class="cat-title">维度 <el-tag size="small" type="info">{{ defs.dimensions.length }}</el-tag></div>
+        <div class="cat-title">{{ t('dimensions') }} <el-tag size="small" type="info">{{ defs.dimensions.length }}</el-tag></div>
         <div v-for="d in defs.dimensions" :key="d.field"
           class="cat-item" :class="{ active: selectedDims.includes(d.field) }"
           @click="toggleDim(d.field)">
-          <span>{{ d.icon }}</span><span class="ci-label">{{ d.label }}</span>
+          <span>{{ d.icon }}</span><span class="ci-label">{{ dimLabel(d.field) }}</span>
           <el-icon v-if="selectedDims.includes(d.field)" color="#409eff" size="13"><Check /></el-icon>
         </div>
-        <div class="cat-title" style="margin-top:8px">指标 <el-tag size="small" type="success">{{ defs.measures.length }}</el-tag></div>
+        <div class="cat-title" style="margin-top:8px">{{ t('measures') }} <el-tag size="small" type="success">{{ defs.measures.length }}</el-tag></div>
         <div v-for="m in defs.measures" :key="m.alias"
           class="cat-item" :class="{ active: selectedMeasures.includes(m.alias) }"
           @click="toggleMeasure(m.alias)">
-          <span>📊</span><span class="ci-label">{{ m.label }}</span>
+          <span>📊</span><span class="ci-label">{{ measureLabel(m.alias) }}</span>
           <el-tag v-if="m.fmt==='money'" size="small" effect="plain" type="warning" style="font-size:10px;margin-left:auto">¥</el-tag>
           <el-tag v-else-if="m.fmt==='pct'"  size="small" effect="plain" type="info"    style="font-size:10px;margin-left:auto">%</el-tag>
           <el-icon v-if="selectedMeasures.includes(m.alias)" color="#67c23a" size="13"><Check /></el-icon>
@@ -32,15 +32,15 @@
 
       <!-- 模板 -->
       <div v-show="lpTab==='template'" class="lp-body">
-        <div v-for="t in templates" :key="t.id" class="tmpl-card" @click="applyTemplate(t)">
-          <div class="tmpl-name">{{ t.name }}</div>
-          <div class="tmpl-desc">{{ t.desc }}</div>
+          <div v-for="t in templates" :key="t.id" class="tmpl-card" @click="applyTemplate(t)">
+          <div class="tmpl-name">{{ templateText(t.id, 'name', t.name) }}</div>
+          <div class="tmpl-desc">{{ templateText(t.id, 'desc', t.desc) }}</div>
         </div>
       </div>
 
       <!-- 收藏 -->
       <div v-show="lpTab==='saved'" class="lp-body">
-        <el-empty v-if="!savedList.length" description="暂无收藏" :image-size="48" />
+        <el-empty v-if="!savedList.length" :description="t('noSaved')" :image-size="48" />
         <div v-for="s in savedList" :key="s.id" class="saved-item">
           <span class="si-name" @click="loadSavedConfig(s)">{{ s.name }}</span>
           <span class="si-time">{{ s.created_at }}</span>
@@ -50,7 +50,7 @@
 
       <!-- 历史 -->
       <div v-show="lpTab==='history'" class="lp-body">
-        <el-empty v-if="!history.length" description="暂无记录" :image-size="48" />
+        <el-empty v-if="!history.length" :description="t('noHistory')" :image-size="48" />
         <div v-for="(h, i) in history" :key="i" class="hist-item">
           <div class="hist-meta">
             <el-tag size="small" type="success">{{ h.rows }}行</el-tag>
@@ -69,67 +69,67 @@
       <div class="card qb-card">
         <!-- 时间筛选 -->
         <div class="qb-row">
-          <span class="qb-label">时间</span>
+          <span class="qb-label">{{ t('time') }}</span>
           <el-radio-group v-model="timeRange" size="small" @change="()=>{}">
-            <el-radio-button value="">不限</el-radio-button>
-            <el-radio-button value="today">今日</el-radio-button>
-            <el-radio-button value="week">近7天</el-radio-button>
-            <el-radio-button value="month">近30天</el-radio-button>
-            <el-radio-button value="quarter">近季度</el-radio-button>
-            <el-radio-button value="custom">自定义</el-radio-button>
+            <el-radio-button value="">{{ t('any') }}</el-radio-button>
+            <el-radio-button value="today">{{ t('today') }}</el-radio-button>
+            <el-radio-button value="week">{{ t('last7d') }}</el-radio-button>
+            <el-radio-button value="month">{{ t('last30d') }}</el-radio-button>
+            <el-radio-button value="quarter">{{ t('lastQuarter') }}</el-radio-button>
+            <el-radio-button value="custom">{{ t('custom') }}</el-radio-button>
           </el-radio-group>
           <el-date-picker v-if="timeRange==='custom'" v-model="customRange"
             type="daterange" size="small" style="margin-left:8px;width:230px"
-            start-placeholder="开始" end-placeholder="结束" value-format="YYYY-MM-DD" />
+            :start-placeholder="t('start')" :end-placeholder="t('end')" value-format="YYYY-MM-DD" />
         </div>
 
         <!-- 维度 -->
         <div class="qb-row">
-          <span class="qb-label">维度</span>
+          <span class="qb-label">{{ t('dimensions') }}</span>
           <div class="chip-area">
             <el-tag v-for="f in selectedDims" :key="f" closable type="primary" effect="plain" size="small"
               style="margin:2px" @close="toggleDim(f)">{{ dimLabel(f) }}</el-tag>
-            <span v-if="!selectedDims.length" class="ph">从左侧点击添加维度…</span>
+            <span v-if="!selectedDims.length" class="ph">{{ t('pickDim') }}</span>
           </div>
         </div>
 
         <!-- 指标 -->
         <div class="qb-row">
-          <span class="qb-label">指标</span>
+          <span class="qb-label">{{ t('measures') }}</span>
           <div class="chip-area">
             <el-tag v-for="a in selectedMeasures" :key="a" closable type="success" effect="plain" size="small"
               style="margin:2px" @close="toggleMeasure(a)">{{ measureLabel(a) }}</el-tag>
-            <span v-if="!selectedMeasures.length" class="ph">从左侧点击添加指标…</span>
+            <span v-if="!selectedMeasures.length" class="ph">{{ t('pickMeasure') }}</span>
           </div>
         </div>
 
         <!-- 筛选条件 -->
         <div class="qb-row" style="align-items:flex-start">
-          <span class="qb-label" style="padding-top:4px">筛选</span>
+          <span class="qb-label" style="padding-top:4px">{{ t('filters') }}</span>
           <div style="flex:1">
             <div v-for="(f, i) in filters" :key="i" class="filter-row">
               <el-select v-if="i>0" v-model="f.logic" size="small" style="width:54px">
                 <el-option value="AND" label="且" /><el-option value="OR" label="或" />
               </el-select>
               <span v-else style="width:54px;font-size:12px;color:#909399">WHERE</span>
-              <el-select v-model="f.field" size="small" placeholder="字段" style="width:110px">
-                <el-option-group label="维度">
+              <el-select v-model="f.field" size="small" :placeholder="t('field')" style="width:110px">
+                <el-option-group :label="t('dimensions')">
                   <el-option v-for="d in defs.dimensions" :value="d.field" :label="d.label" />
                 </el-option-group>
-                <el-option-group label="数值">
-                  <el-option value="aum_total"    label="AUM总额" />
-                  <el-option value="credit_score"  label="信用分" />
-                  <el-option value="churn_prob"    label="流失概率" />
-                  <el-option value="loan_amount"   label="贷款额" />
-                  <el-option value="fund_amount"   label="基金额" />
-                  <el-option value="deposit_amount" label="存款额" />
-                  <el-option value="age"           label="年龄" />
+                <el-option-group :label="t('numerics')">
+                  <el-option value="aum_total"    :label="metricText('aum_total')" />
+                  <el-option value="credit_score"  :label="metricText('credit_score')" />
+                  <el-option value="churn_prob"    :label="metricText('churn_prob')" />
+                  <el-option value="loan_amount"   :label="metricText('loan_amount')" />
+                  <el-option value="fund_amount"   :label="metricText('fund_amount')" />
+                  <el-option value="deposit_amount" :label="metricText('deposit_amount')" />
+                  <el-option value="age"           :label="metricText('age')" />
                 </el-option-group>
               </el-select>
               <el-select v-model="f.op" size="small" style="width:68px">
                 <el-option v-for="op in ['=','!=','>','>=','<','<=','LIKE']" :key="op" :value="op" :label="op" />
               </el-select>
-              <el-input v-model="f.value" size="small" placeholder="值" style="width:110px" />
+              <el-input v-model="f.value" size="small" :placeholder="t('value')" style="width:110px" />
               <el-button size="small" type="danger" text @click="filters.splice(i,1)">✕</el-button>
             </div>
             <el-button size="small" type="primary" text @click="addFilter">+ 添加条件</el-button>
@@ -138,39 +138,39 @@
 
         <!-- 自定义计算字段（折叠） -->
         <div class="qb-row" v-if="showCalc" style="align-items:flex-start">
-          <span class="qb-label" style="padding-top:4px">计算字段</span>
+          <span class="qb-label" style="padding-top:4px">{{ t('calcFields') }}</span>
           <div style="flex:1">
             <div v-for="(cf, i) in calcFields" :key="i" style="display:flex;gap:6px;margin-bottom:6px;align-items:center">
-              <el-input v-model="cf.label" size="small" placeholder="名称" style="width:90px" />
+              <el-input v-model="cf.label" size="small" :placeholder="t('name')" style="width:90px" />
               <span style="font-size:12px;color:#909399">=</span>
-              <el-input v-model="cf.expr"  size="small" placeholder="公式 如 aum_total / user_cnt" style="width:220px" />
+              <el-input v-model="cf.expr"  size="small" :placeholder="t('formula')" style="width:220px" />
               <el-button size="small" type="danger" text @click="calcFields.splice(i,1)">✕</el-button>
             </div>
-            <el-button size="small" type="primary" text @click="calcFields.push({label:'',expr:''})">+ 添加公式</el-button>
+            <el-button size="small" type="primary" text @click="calcFields.push({label:'',expr:''})">+ {{ t('addFormula') }}</el-button>
           </div>
         </div>
 
         <!-- 操作栏 -->
         <div class="qb-actions">
           <el-button type="primary" :loading="querying" :disabled="!canQuery" @click="doQuery">
-            <el-icon><Search /></el-icon> 执行查询
+            <el-icon><Search /></el-icon> {{ t('runQuery') }}
           </el-button>
-          <el-button @click="clearAll">清空</el-button>
-          <el-button :type="showCalc?'warning':'default'" @click="showCalc=!showCalc">ƒ 计算字段</el-button>
+          <el-button @click="clearAll">{{ t('clear') }}</el-button>
+          <el-button :type="showCalc?'warning':'default'" @click="showCalc=!showCalc">ƒ {{ t('calcFields') }}</el-button>
 
-          <el-select v-model="sortBy" size="small" placeholder="排序字段" style="width:110px" clearable>
+          <el-select v-model="sortBy" size="small" :placeholder="t('sortField')" style="width:110px" clearable>
             <el-option v-for="a in selectedMeasures" :key="a" :value="a" :label="measureLabel(a)" />
           </el-select>
           <el-select v-model="sortDir" size="small" style="width:72px">
-            <el-option value="DESC" label="↓ 降序" /><el-option value="ASC" label="↑ 升序" />
+            <el-option value="DESC" :label="t('desc')" /><el-option value="ASC" :label="t('asc')" />
           </el-select>
-          <el-select v-model="topN" size="small" placeholder="TopN" style="width:82px" clearable>
+          <el-select v-model="topN" size="small" :placeholder="t('topn')" style="width:82px" clearable>
             <el-option :value="5"  label="Top5" /><el-option :value="10" label="Top10" />
             <el-option :value="20" label="Top20" /><el-option :value="50" label="Top50" />
           </el-select>
 
           <div style="margin-left:auto;display:flex;align-items:center;gap:6px">
-            <span style="font-size:12px;color:#909399">返回</span>
+            <span style="font-size:12px;color:#909399">{{ t('returnRows') }}</span>
             <el-select v-model="pageSize" size="small" style="width:68px">
               <el-option v-for="n in [20,50,100,200]" :key="n" :value="n" :label="n" />
             </el-select>
@@ -182,8 +182,8 @@
       <div v-if="result.sql" class="card sql-card">
         <div class="sql-toggle" @click="sqlExpanded=!sqlExpanded">
           <el-tag type="success" effect="dark" size="small">SQL</el-tag>
-          <span class="sql-meta">耗时 {{ result.elapsed_ms }}ms · {{ result.total }} 行</span>
-          <span style="margin-left:auto;font-size:12px;color:#67c23a">{{ sqlExpanded?'▲ 收起':'▼ 展开' }}</span>
+          <span class="sql-meta">{{ t('elapsed') }} {{ result.elapsed_ms }}ms · {{ result.total }} {{ t('rows') }}</span>
+          <span style="margin-left:auto;font-size:12px;color:#67c23a">{{ sqlExpanded?t('collapse'):t('expand') }}</span>
         </div>
         <pre v-if="sqlExpanded" class="sql-code">{{ result.sql }}</pre>
       </div>
@@ -193,21 +193,21 @@
         <el-tabs v-model="resultTab" @tab-click="onTabSwitch">
 
           <!-- ① 查询结果 -->
-          <el-tab-pane label="查询结果" name="result">
+          <el-tab-pane :label="t('queryResult')" name="result">
             <div v-if="result.rows.length">
               <!-- 图表工具栏 -->
               <div v-if="canChart" class="chart-toolbar">
                 <el-radio-group v-model="chartType" size="small">
-                  <el-radio-button value="bar">柱状图</el-radio-button>
-                  <el-radio-button value="line">折线图</el-radio-button>
-                  <el-radio-button value="pie">饼图</el-radio-button>
-                  <el-radio-button value="scatter">散点图</el-radio-button>
-                  <el-radio-button value="radar">雷达图</el-radio-button>
+                  <el-radio-button value="bar">{{ t('bar') }}</el-radio-button>
+                  <el-radio-button value="line">{{ t('line') }}</el-radio-button>
+                  <el-radio-button value="pie">{{ t('pie') }}</el-radio-button>
+                  <el-radio-button value="scatter">{{ t('scatter') }}</el-radio-button>
+                  <el-radio-button value="radar">{{ t('radar') }}</el-radio-button>
                 </el-radio-group>
                 <div style="margin-left:auto;display:flex;gap:6px">
                   <el-button size="small" @click="exportCsv">⬇ CSV</el-button>
                   <el-button size="small" @click="exportExcel">⬇ Excel</el-button>
-                  <el-button size="small" @click="openSaveDialog" :disabled="!result.rows.length">💾 保存</el-button>
+                  <el-button size="small" @click="openSaveDialog" :disabled="!result.rows.length">💾 {{ t('save') }}</el-button>
                 </div>
               </div>
               <v-chart :option="chartOpt" style="height:300px;margin-bottom:12px"
@@ -215,7 +215,7 @@
 
               <!-- 表格 -->
               <div class="table-toolbar">
-                <el-tag size="small">{{ result.total }} 条</el-tag>
+                <el-tag size="small">{{ result.total }} {{ t('rows') }}</el-tag>
                 <el-pagination v-model:current-page="curPage" :page-size="pageSize"
                   :total="result.total" layout="prev,pager,next"
                   @current-change="doQuery" small style="margin-left:auto" />
@@ -237,7 +237,7 @@
                     <span v-else style="font-weight:600">{{ fmtNum(row[col.field]) }}</span>
                   </template>
                 </el-table-column>
-                <el-table-column label="下钻" width="54" v-if="selectedDims.length">
+                <el-table-column :label="t('drill')" width="54" v-if="selectedDims.length">
                   <template #default="{row}">
                     <el-button size="small" text type="primary" @click.stop="initDrill(row)">→</el-button>
                   </template>
@@ -246,13 +246,13 @@
 
               <!-- 目标值对比 -->
               <div class="target-section">
-                <span class="ts-title">目标值对比</span>
+                <span class="ts-title">{{ t('targetCompare') }}</span>
                 <div class="target-grid">
                   <div v-for="a in selectedMeasures" :key="a" class="target-cell">
                     <div class="tc-label">{{ measureLabel(a) }}</div>
-                    <el-input v-model="targets[a]" size="small" placeholder="输入目标值" style="width:120px" />
+                    <el-input v-model="targets[a]" size="small" :placeholder="t('targetValue')" style="width:120px" />
                     <div v-if="targets[a] && result.rows.length" class="tc-rate">
-                      达成率
+                      {{ t('achieveRate') }}
                       <span :style="{color: achieveRate(a)>=100?'#67c23a':'#e6a23c',fontWeight:'700'}">
                         {{ achieveRate(a) }}%
                       </span>
@@ -261,27 +261,27 @@
                 </div>
               </div>
             </div>
-            <el-empty v-else-if="queried && !querying" description="暂无数据" :image-size="60" />
+            <el-empty v-else-if="queried && !querying" :description="t('noData')" :image-size="60" />
           </el-tab-pane>
 
           <!-- ② 对比分析 -->
-          <el-tab-pane label="对比分析" name="compare">
+          <el-tab-pane :label="t('compare')" name="compare">
             <div class="compare-toolbar">
               <el-radio-group v-model="compareType" size="small">
-                <el-radio-button value="mom">环比</el-radio-button>
-                <el-radio-button value="yoy">同比</el-radio-button>
+                <el-radio-button value="mom">{{ t('mom') }}</el-radio-button>
+                <el-radio-button value="yoy">{{ t('yoy') }}</el-radio-button>
               </el-radio-group>
               <el-date-picker v-model="compareRange" type="daterange" size="small"
                 style="margin-left:12px;width:230px" value-format="YYYY-MM-DD"
-                start-placeholder="当前开始" end-placeholder="当前结束" />
+                :start-placeholder="t('currentStart')" :end-placeholder="t('currentEnd')" />
               <el-button type="primary" size="small" :loading="comparing"
-                @click="doCompare" style="margin-left:8px">分析</el-button>
+                @click="doCompare" style="margin-left:8px">{{ t('analyze') }}</el-button>
             </div>
 
             <div v-if="compareResult.diffs && compareResult.diffs.length" style="margin-top:16px">
               <div class="period-label">
-                <el-tag type="primary" effect="plain">当前: {{ compareResult.current_period }}</el-tag>
-                <el-tag type="info"    effect="plain" style="margin-left:8px">对比: {{ compareResult.prev_period }}</el-tag>
+                <el-tag type="primary" effect="plain">{{ t('current') }}: {{ compareResult.current_period }}</el-tag>
+                <el-tag type="info"    effect="plain" style="margin-left:8px">{{ t('compareTo') }}: {{ compareResult.prev_period }}</el-tag>
               </div>
               <div class="compare-cards">
                 <div v-for="d in compareResult.diffs" :key="d.alias" class="cmp-card">
@@ -290,7 +290,7 @@
                   <div :class="['cc-chg', d.up?'up':'down']">
                     {{ d.up ? '▲' : '▼' }} {{ Math.abs(d.change_pct) }}%
                   </div>
-                  <div class="cc-prev">对比期: {{ fmtNum(d.previous) }}</div>
+                  <div class="cc-prev">{{ t('comparePeriod') }}: {{ fmtNum(d.previous) }}</div>
                 </div>
               </div>
             </div>
@@ -307,10 +307,10 @@
                   <el-table-column :label="measureLabel(a)" align="right" min-width="90">
                     <template #default="{row}">{{ fmtNum(row[a]) }}</template>
                   </el-table-column>
-                  <el-table-column label="对比期" align="right" min-width="80">
+                  <el-table-column :label="t('comparePeriod')" align="right" min-width="80">
                     <template #default="{row}">{{ fmtNum(row[`${a}_prev`]) }}</template>
                   </el-table-column>
-                  <el-table-column label="涨跌%" align="right" width="80">
+                  <el-table-column :label="t('changePct')" align="right" width="80">
                     <template #default="{row}">
                       <span :style="{color:row[`${a}_up`]?'#67c23a':'#f56c6c',fontWeight:'600'}">
                         {{ row[`${a}_up`]?'▲':'▼' }} {{ Math.abs(row[`${a}_chg`]) }}%
@@ -321,29 +321,29 @@
               </el-table>
             </div>
 
-            <el-empty v-if="!compareResult.diffs && !compareResult.rows" description="请配置对比条件后点击分析" :image-size="60" />
+            <el-empty v-if="!compareResult.diffs && !compareResult.rows" :description="t('compareHint')" :image-size="60" />
           </el-tab-pane>
 
           <!-- ③ 下钻分析 -->
-          <el-tab-pane label="下钻分析" name="drill">
+          <el-tab-pane :label="t('drillAnalysis')" name="drill">
             <div v-if="!drillContext">
-              <el-empty description="在查询结果表格中点击行右侧 → 按钮进入下钻" :image-size="60" />
+              <el-empty :description="t('drillHint')" :image-size="60" />
             </div>
             <div v-else>
               <el-breadcrumb separator="/" style="margin-bottom:12px">
-                <el-breadcrumb-item @click="clearDrill" style="cursor:pointer">全量</el-breadcrumb-item>
+                <el-breadcrumb-item @click="clearDrill" style="cursor:pointer">{{ t('all') }}</el-breadcrumb-item>
                 <el-breadcrumb-item v-for="(p,i) in drillPath" :key="i">
                   {{ dimLabel(p.dim) }}: <b>{{ p.value }}</b>
                 </el-breadcrumb-item>
               </el-breadcrumb>
 
               <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
-                <span style="font-size:13px;color:#606266">下钻至</span>
+                <span style="font-size:13px;color:#606266">{{ t('drillTo') }}</span>
                 <el-select v-model="drillChildDim" size="small" style="width:120px">
                   <el-option v-for="d in drillableDims" :key="d.field" :value="d.field" :label="d.label" />
                 </el-select>
-                <el-button size="small" type="primary" :loading="drilling" @click="executeDrill">展开</el-button>
-                <el-button size="small" @click="clearDrill">重置</el-button>
+                <el-button size="small" type="primary" :loading="drilling" @click="executeDrill">{{ t('expand') }}</el-button>
+                <el-button size="small" @click="clearDrill">{{ t('reset') }}</el-button>
               </div>
 
               <el-table v-if="drillResult.rows.length" :data="drillResult.rows"
@@ -357,7 +357,7 @@
                     <span v-else style="font-weight:600">{{ fmtNum(row[col.field]) }}</span>
                   </template>
                 </el-table-column>
-                <el-table-column label="继续下钻" width="72">
+                <el-table-column :label="t('continueDrill')" width="72">
                   <template #default="{row}">
                     <el-button size="small" text type="primary" @click.stop="initDrillFrom(row)">→</el-button>
                   </template>
@@ -378,11 +378,11 @@
   </div>
 
   <!-- 保存查询对话框 -->
-  <el-dialog v-model="saveVisible" title="保存查询配置" width="340px">
-    <el-input v-model="saveName" placeholder="查询名称" maxlength="30" show-word-limit />
+      <el-dialog v-model="saveVisible" title="保存查询配置" width="340px">
+    <el-input v-model="saveName" :placeholder="t('queryName')" maxlength="30" show-word-limit />
     <template #footer>
-      <el-button @click="saveVisible=false">取消</el-button>
-      <el-button type="primary" @click="doSave" :disabled="!saveName.trim()">保存</el-button>
+      <el-button @click="saveVisible=false">{{ t('cancel') }}</el-button>
+      <el-button type="primary" @click="doSave" :disabled="!saveName.trim()">{{ t('save') }}</el-button>
     </template>
   </el-dialog>
 </template>
@@ -400,6 +400,28 @@ import VChart from 'vue-echarts'
 import { Check, Search } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import { metricsApi } from '@/api'
+import { t, locale } from '@/i18n'
+
+const DIM_EN = {
+  asset_level:'Asset Level', age_group:'Age Group', city:'City', lifecycle_stage:'Lifecycle Stage',
+  active_level:'Activity Level', preferred_channel:'Preferred Channel', gender:'Gender',
+  credit_grade:'Credit Grade', risk_level:'Risk Level', province:'Province',
+}
+const MEASURE_EN = {
+  user_cnt:'Users', total_aum:'Total AUM', avg_aum:'Avg AUM', max_aum:'Max AUM',
+  anomaly_cnt:'Anomaly Users', anomaly_rate:'Anomaly Rate', avg_churn:'Avg Churn',
+  avg_credit:'Avg Credit', loan_total:'Loan Total', fund_total:'Fund Total', deposit_sum:'Deposit Total',
+  aum_total:'AUM', credit_score:'Credit Score', churn_prob:'Churn Probability', loan_amount:'Loan Amount',
+  fund_amount:'Fund Amount', deposit_amount:'Deposit Amount', age:'Age',
+}
+const TEMPLATE_EN = {
+  t1: { name: 'Asset Level Distribution', desc: 'Count users and AUM by asset level' },
+  t2: { name: 'Province Churn Analysis', desc: 'Compare average churn rate by province' },
+  t3: { name: 'Channel Activity Analysis', desc: 'Credit score and AUM by preferred channel' },
+  t4: { name: 'Lifecycle x Asset Cross', desc: 'Cross analysis of lifecycle stage and asset level' },
+  t5: { name: 'High-Value Profile', desc: 'Client structure with AUM > 50万' },
+  t6: { name: 'Credit Risk by Region', desc: 'Loan scale and anomaly rate by city' },
+}
 
 use([CanvasRenderer, BarChart, LineChart, PieChart, ScatterChart, RadarChart,
      GridComponent, TooltipComponent, LegendComponent, MarkLineComponent, RadarComponent])
@@ -459,8 +481,10 @@ const canChart = computed(() =>
   selectedDims.value.length >= 1 && selectedMeasures.value.length >= 1 && result.value.rows.length > 0
 )
 
-const dimLabel     = f => defs.value.dimensions.find(d => d.field === f)?.label || f
-const measureLabel = a => defs.value.measures.find(m => m.alias === a)?.label || a
+const dimLabel     = f => (locale.value === 'en' ? DIM_EN[f] : defs.value.dimensions.find(d => d.field === f)?.label) || f
+const measureLabel = a => (locale.value === 'en' ? MEASURE_EN[a] : defs.value.measures.find(m => m.alias === a)?.label) || a
+const metricText = k => MEASURE_EN[k] || k
+const templateText = (id, key, fallback) => (locale.value === 'en' ? TEMPLATE_EN[id]?.[key] : fallback) || fallback
 
 const drillableDims = computed(() =>
   defs.value.dimensions.filter(d => d.field !== drillContext.value?.dim)

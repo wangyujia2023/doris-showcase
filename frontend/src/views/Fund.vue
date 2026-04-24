@@ -5,7 +5,7 @@
     <div class="card collapse-card">
       <div class="collapse-hd" @click="archOpen=!archOpen">
         <span>📈</span>
-        <span class="ch-title">基金投研平台 · 全链路数据架构</span>
+        <span class="ch-title">{{ t('fund.archTitle') }}</span>
         <span class="badge blue">Apache Doris 4.0</span>
         <span class="badge green">DUPLICATE KEY 多表</span>
         <span class="badge orange">CORR() 相关性矩阵</span>
@@ -44,7 +44,7 @@ fund_manager     DUPLICATE KEY(manager_id)            -- 经理画像维表
             <div class="ss"><div class="sv">4表</div><div class="sk">Doris表结构</div></div>
             <div class="ss"><div class="sv">&lt;5ms</div><div class="sk">CORR查询延迟</div></div>
             <div class="ss-btn">
-              <el-button type="primary" size="small" :loading="generating" @click="doGen(20)">一键初始化(20日)</el-button>
+              <el-button type="primary" size="small" :loading="generating" @click="doGen(20)">{{ t('fund.initBtn') }}</el-button>
             </div>
           </div>
         </div>
@@ -163,7 +163,7 @@ fund_manager     DUPLICATE KEY(manager_id)            -- 经理画像维表
 
         <el-tabs v-model="detailTab" @tab-click="onDetailTab">
           <!-- Tab1: 净值走势 -->
-          <el-tab-pane label="📈 净值走势" name="nav">
+          <el-tab-pane :label="`📈 ${t('fund.tabNav')}`" name="nav">
             <div class="two-col">
               <div><div class="ct">累计净值 vs 基准</div><div ref="navChart" class="chart-h260"></div></div>
               <div><div class="ct">水下回撤图</div><div ref="ddChart" class="chart-h260"></div></div>
@@ -188,7 +188,7 @@ fund_manager     DUPLICATE KEY(manager_id)            -- 经理画像维表
           </el-tab-pane>
 
           <!-- Tab2: 持仓穿透 -->
-          <el-tab-pane label="🔍 持仓穿透" name="position">
+          <el-tab-pane :label="`🔍 ${t('fund.tabPosition')}`" name="position">
             <div class="two-col">
               <div><div class="ct">板块分布</div><div ref="sectorPieChart" class="chart-h260"></div></div>
               <div><div class="ct">板块贡献度（瀑布）</div><div ref="contribChart" class="chart-h260"></div></div>
@@ -231,7 +231,7 @@ GROUP BY p.fund_id
           </el-tab-pane>
 
           <!-- Tab3: 经理画像 -->
-          <el-tab-pane label="👤 经理画像" name="manager">
+          <el-tab-pane :label="`👤 ${t('fund.tabManager')}`" name="manager">
             <div class="mgr-card" v-if="mgrData?.manager">
               <div class="mgr-avatar">{{ mgrData.manager.name?.slice(-1) }}</div>
               <div class="mgr-info">
@@ -271,7 +271,7 @@ GROUP BY p.fund_id
           </el-tab-pane>
 
           <!-- Tab4: 竞品对比 -->
-          <el-tab-pane label="⚔️ 竞品雷达" name="peers">
+          <el-tab-pane :label="`⚔️ ${t('fund.tabPeers')}`" name="peers">
             <div class="two-col">
               <div><div class="ct">同板块基金综合雷达</div><div ref="radarChart" class="chart-h300"></div></div>
               <div><div class="ct">风险收益散点图（回撤 vs 年化收益）</div><div ref="scatterChart" class="chart-h300"></div></div>
@@ -360,6 +360,7 @@ import { LineChart, BarChart, PieChart, RadarChart, ScatterChart, HeatmapChart }
 import { GridComponent, TooltipComponent, LegendComponent, RadarComponent, VisualMapComponent, MarkLineComponent } from 'echarts/components'
 import * as echarts from 'echarts/core'
 import { fundApi } from '@/api'
+import { t, locale } from '@/i18n'
 
 use([
   CanvasRenderer,

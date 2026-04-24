@@ -3,10 +3,10 @@
     <CollapseCard v-model:open="archOpen">
       <template #header-left>
         <span>🏭</span>
-        <span class="ch-title">工厂数字孪生 · 全链路数据架构</span>
-        <span class="badge blue">Apache Doris 4.0 HASP</span>
-        <span class="badge green">Stream Load 实时写入</span>
-        <span class="badge orange">50+ 维度指标</span>
+        <span class="ch-title">{{ t('mfg.archTitle') }}</span>
+        <span class="badge blue">{{ t('mfg.badgeHasp') }}</span>
+        <span class="badge green">{{ t('mfg.badgeStream') }}</span>
+        <span class="badge orange">{{ t('mfg.badgeMetrics') }}</span>
       </template>
       <div>
         <div class="arch-flow">
@@ -46,7 +46,7 @@ DUPLICATE KEY(ts, machine_id)  DISTRIBUTED BY HASH(machine_id) BUCKETS 4</pre>
             <div class="ss"><div class="sv">50+</div><div class="sk">采集指标</div></div>
             <div class="ss"><div class="sv">&lt;1ms</div><div class="sk">查询延迟</div></div>
             <div class="ss-btn">
-              <el-button type="primary" size="small" :loading="generating" @click="doGen(20)">一键初始化演示数据(20步)</el-button>
+              <el-button type="primary" size="small" :loading="generating" @click="doGen(20)">{{ t('mfg.initBtn') }}</el-button>
             </div>
           </div>
         </div>
@@ -66,7 +66,7 @@ DUPLICATE KEY(ts, machine_id)  DISTRIBUTED BY HASH(machine_id) BUCKETS 4</pre>
             <el-button type="primary" size="large" :loading="generating" @click="doGen(5)">+5步</el-button>
             <el-button type="primary" size="large" :loading="generating" @click="doGen(10)">+10步</el-button>
           </el-button-group>
-          <el-button :type="autoOn?'warning':'default'" size="large" @click="toggleAuto">{{ autoOn?'⏸ 停止':'▶ 自动演练' }}</el-button>
+          <el-button :type="autoOn?'warning':'default'" size="large" @click="toggleAuto">{{ autoOn ? t('mfg.stopPlay') : t('mfg.autoPlay') }}</el-button>
           <el-button size="large" @click="resetData" :disabled="generating">🔄 重置</el-button>
         </div>
         <div class="ctrl-hint">每步推进15分钟 · 自动演练每3秒生成1步 · 连续操作可完整观察黄金时段→疲劳→熔断→恢复全生命周期</div>
@@ -86,7 +86,7 @@ DUPLICATE KEY(ts, machine_id)  DISTRIBUTED BY HASH(machine_id) BUCKETS 4</pre>
       <el-tabs v-model="activeTab" @tab-click="onTabChange">
 
         <!-- Tab1: 设备状态 -->
-        <el-tab-pane label="⚙️ 设备状态" name="device">
+        <el-tab-pane :label="t('mfg.tabDevice')" name="device">
           <!-- 机器选择行 -->
           <div class="machine-chips">
             <div v-for="m in machines" :key="m.machine_id"
@@ -137,7 +137,7 @@ DUPLICATE KEY(ts, machine_id)  DISTRIBUTED BY HASH(machine_id) BUCKETS 4</pre>
         </el-tab-pane>
 
         <!-- Tab2: 工艺分析 -->
-        <el-tab-pane label="🔧 工艺分析" name="process">
+        <el-tab-pane :label="t('mfg.tabProcess')" name="process">
           <div class="two-col">
             <div>
               <div class="ct">节拍时间 vs 计划</div>
@@ -161,7 +161,7 @@ DUPLICATE KEY(ts, machine_id)  DISTRIBUTED BY HASH(machine_id) BUCKETS 4</pre>
         </el-tab-pane>
 
         <!-- Tab3: 质量管理 -->
-        <el-tab-pane label="✅ 质量管理" name="quality">
+        <el-tab-pane :label="t('mfg.tabQuality')" name="quality">
           <div class="two-col">
             <div>
               <div class="ct">首次通过率 FPY & PPM（各设备）</div>
@@ -185,7 +185,7 @@ DUPLICATE KEY(ts, machine_id)  DISTRIBUTED BY HASH(machine_id) BUCKETS 4</pre>
         </el-tab-pane>
 
         <!-- Tab4: 能耗环境 -->
-        <el-tab-pane label="⚡ 能耗环境" name="energy">
+        <el-tab-pane :label="t('mfg.tabEnergy')" name="energy">
           <div class="two-col">
             <div>
               <div class="ct">各设备总能耗 & 碳排放</div>
@@ -209,7 +209,7 @@ DUPLICATE KEY(ts, machine_id)  DISTRIBUTED BY HASH(machine_id) BUCKETS 4</pre>
         </el-tab-pane>
 
         <!-- Tab5: 预测维保 -->
-        <el-tab-pane label="🔔 预测维保" name="maint">
+        <el-tab-pane :label="t('mfg.tabMaint')" name="maint">
           <div class="two-col">
             <div>
               <div class="ct">刀具磨损度 & 换刀次数</div>
@@ -275,6 +275,7 @@ import { LineChart, BarChart } from 'echarts/charts'
 import { GridComponent, TooltipComponent, LegendComponent, MarkLineComponent } from 'echarts/components'
 import * as echarts from 'echarts/core'
 import { mfgApi } from '@/api'
+import { t, locale } from '@/i18n'
 import CollapseCard from '@/components/common/CollapseCard.vue'
 
 use([CanvasRenderer, LineChart, BarChart, GridComponent, TooltipComponent, LegendComponent, MarkLineComponent])

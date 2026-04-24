@@ -5,16 +5,16 @@
       <div class="sub-nav-left">
       </div>
       <div class="sn-tabs">
-        <div v-for="t in TABS" :key="t.key"
-             class="sn-tab" :class="{ active: activeTab === t.key }"
-             @click="switchTab(t.key)">
-          {{ t.label }}
+        <div v-for="tab in TABS" :key="tab.key"
+             class="sn-tab" :class="{ active: activeTab === tab.key }"
+             @click="switchTab(tab.key)">
+          {{ tab.label }}
         </div>
       </div>
       <div class="sn-actions">
-        <el-button size="small" type="primary" :loading="initLoading" @click="handleInit">建表</el-button>
-        <el-button size="small" type="success" :loading="seedLoading" @click="handleSeed">导入数据</el-button>
-        <span class="live-dot-wrap"><span class="live-dot"></span>实时</span>
+        <el-button size="small" type="primary" :loading="initLoading" @click="handleInit">{{ t('metro.initBtn') }}</el-button>
+        <el-button size="small" type="success" :loading="seedLoading" @click="handleSeed">{{ t('metro.seedBtn') }}</el-button>
+        <span class="live-dot-wrap"><span class="live-dot"></span>{{ t('metro.realtime') }}</span>
       </div>
     </div>
 
@@ -31,7 +31,8 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
+import { t, locale } from '@/i18n'
 import { ElMessage } from 'element-plus'
 import { bjMetroApi } from '@/api'
 import OverviewTab  from '@/components/bjmetro/OverviewTab.vue'
@@ -41,14 +42,14 @@ import EquipmentTab from '@/components/bjmetro/EquipmentTab.vue'
 import RevenueTab   from '@/components/bjmetro/RevenueTab.vue'
 import ArchTab      from '@/components/bjmetro/ArchTab.vue'
 
-const TABS = [
-  { key: 'overview',  label: '📊 运营总览' },
-  { key: 'flow',      label: '👥 客流分析' },
-  { key: 'train',     label: '🚇 列车运行' },
-  { key: 'equipment', label: '⚙️ 设备安全' },
-  { key: 'revenue',   label: '💰 经营收益' },
-  { key: 'arch',      label: '🏗️ 架构图' },
-]
+const TABS = computed(() => [
+  { key: 'overview',  label: `📊 ${t('metro.tabOverview')}` },
+  { key: 'flow',      label: `👥 ${t('metro.tabFlow')}` },
+  { key: 'train',     label: `🚇 ${t('metro.tabTrain')}` },
+  { key: 'equipment', label: `⚙️ ${t('metro.tabEquip')}` },
+  { key: 'revenue',   label: `💰 ${t('metro.tabRevenue')}` },
+  { key: 'arch',      label: `🏗️ ${t('metro.tabArch')}` },
+])
 
 const activeTab  = ref('overview')
 const initLoading = ref(false)

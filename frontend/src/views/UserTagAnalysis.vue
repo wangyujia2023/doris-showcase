@@ -1,13 +1,13 @@
 <template>
   <div>
     <el-tabs v-model="activeTab" type="card" style="margin-bottom:0">
-      <el-tab-pane label="🎯 人群包构建" name="crowd" />
-      <el-tab-pane label="📊 人群画像" name="portrait" />
-      <el-tab-pane label="🗺️ 地图投放" name="map" />
-      <el-tab-pane label="🔬 标签分析" name="taganalysis" />
-      <el-tab-pane label="📋 宽表查询" name="wide" />
-      <el-tab-pane label="📈 行为分析" name="behavior" />
-      <el-tab-pane label="🔄 ETL" name="etl" />
+      <el-tab-pane :label="t('ut.crowdBuild')" name="crowd" />
+      <el-tab-pane :label="t('ut.portrait')" name="portrait" />
+      <el-tab-pane :label="t('ut.mapPush')" name="map" />
+      <el-tab-pane :label="t('ut.tagAnalysis')" name="taganalysis" />
+      <el-tab-pane :label="t('ut.wideQuery')" name="wide" />
+      <el-tab-pane :label="t('ut.behavior')" name="behavior" />
+      <el-tab-pane :label="t('etl')" name="etl" />
     </el-tabs>
 
     <!-- ═══════════════════ 人群包构建 ═══════════════════ -->
@@ -16,10 +16,10 @@
         <!-- 左侧：标签选择 -->
         <el-col :span="14">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-            <span style="font-size:13px;font-weight:600">标签圈选（左键=包含，右键=排除）</span>
+            <span style="font-size:13px;font-weight:600">{{ t('ut.tagSelect') }}</span>
             <div style="display:flex;gap:8px">
-              <el-tag type="success" size="small">包含 {{ includeTagIds.length }}</el-tag>
-              <el-tag type="danger" size="small">排除 {{ excludeTagIds.length }}</el-tag>
+              <el-tag type="success" size="small">{{ t('ut.include') }} {{ includeTagIds.length }}</el-tag>
+              <el-tag type="danger" size="small">{{ t('ut.exclude') }} {{ excludeTagIds.length }}</el-tag>
             </div>
           </div>
           <div v-for="grp in tagMeta" :key="grp.category" style="margin-bottom:12px">
@@ -39,48 +39,48 @@
         <!-- 右侧：当前圈选 + 操作 -->
         <el-col :span="10">
           <div style="background:#f5f7fa;border-radius:6px;padding:14px">
-            <div style="font-size:13px;font-weight:600;margin-bottom:10px">人群预估</div>
+            <div style="font-size:13px;font-weight:600;margin-bottom:10px">{{ t('ut.estimate') }}</div>
             <div style="margin-bottom:8px">
-              <div style="font-size:12px;color:#67c23a;margin-bottom:4px">✓ 包含</div>
+              <div style="font-size:12px;color:#67c23a;margin-bottom:4px">✓ {{ t('ut.include') }}</div>
               <el-tag
                 v-for="tid in includeTagIds" :key="tid" type="success" closable size="small"
                 @close="includeTagIds = includeTagIds.filter(x=>x!==tid)"
                 style="margin:2px"
               >{{ tagLabel(tid) }}</el-tag>
-              <span v-if="!includeTagIds.length" style="font-size:12px;color:#c0c4cc">（不限）</span>
+              <span v-if="!includeTagIds.length" style="font-size:12px;color:#c0c4cc">({{ t('ut.any') }})</span>
             </div>
             <div style="margin-bottom:12px">
-              <div style="font-size:12px;color:#f56c6c;margin-bottom:4px">✗ 排除</div>
+              <div style="font-size:12px;color:#f56c6c;margin-bottom:4px">✗ {{ t('ut.exclude') }}</div>
               <el-tag
                 v-for="tid in excludeTagIds" :key="tid" type="danger" closable size="small"
                 @close="excludeTagIds = excludeTagIds.filter(x=>x!==tid)"
                 style="margin:2px"
               >{{ tagLabel(tid) }}</el-tag>
-              <span v-if="!excludeTagIds.length" style="font-size:12px;color:#c0c4cc">（无）</span>
+              <span v-if="!excludeTagIds.length" style="font-size:12px;color:#c0c4cc">({{ t('ut.none') }})</span>
             </div>
 
             <el-button type="primary" size="small" :loading="bitmapLoading" @click="computeBitmapCrowd" style="width:100%;margin-bottom:10px">
-              Bitmap 估算人群规模
+              {{ t('ut.bitmapEstimate') }}
             </el-button>
 
             <div v-if="crowdSize !== null" style="text-align:center;margin-bottom:12px">
               <div style="font-size:28px;font-weight:700;color:#409eff">{{ crowdSize.toLocaleString() }}</div>
-              <div style="font-size:12px;color:#909399">预计覆盖用户数</div>
+              <div style="font-size:12px;color:#909399">{{ t('ut.coveredUsers') }}</div>
             </div>
 
             <el-divider />
-            <div style="font-size:13px;font-weight:600;margin-bottom:8px">保存人群包</div>
-            <el-input v-model="crowdName" placeholder="人群包名称" size="small" style="margin-bottom:6px" />
-            <el-input v-model="crowdDesc" placeholder="描述（可选）" size="small" style="margin-bottom:8px" />
+            <div style="font-size:13px;font-weight:600;margin-bottom:8px">{{ t('ut.saveCrowd') }}</div>
+            <el-input v-model="crowdName" :placeholder="t('ut.crowdName')" size="small" style="margin-bottom:6px" />
+            <el-input v-model="crowdDesc" :placeholder="t('ut.descOpt')" size="small" style="margin-bottom:8px" />
             <el-button type="success" size="small" :disabled="!crowdName || crowdSize === null" @click="saveCrowd" style="width:100%">
-              保存人群包
+              {{ t('ut.saveCrowd') }}
             </el-button>
           </div>
         </el-col>
       </el-row>
 
       <!-- 人群包列表 -->
-      <el-divider>已保存人群包</el-divider>
+      <el-divider>{{ t('ut.savedCrowd') }}</el-divider>
       <el-row :gutter="12" style="margin-bottom:10px;align-items:center">
         <el-col :span="20">
           <el-checkbox-group v-model="compareIds" :max="2" style="display:inline">
@@ -90,35 +90,35 @@
                 <div style="font-size:11px;color:#909399;margin:3px 0">{{ pkg.desc || '—' }}</div>
                 <div style="font-size:12px;color:#409eff">{{ pkg.crowd_size.toLocaleString() }} 人</div>
                 <div style="font-size:11px;color:#c0c4cc;margin-top:4px">{{ pkg.created_at }}</div>
-                <el-button size="small" type="danger" text @click.stop="deleteCrowd(pkg.crowd_id)" style="position:absolute;top:6px;right:6px">删除</el-button>
+                <el-button size="small" type="danger" text @click.stop="deleteCrowd(pkg.crowd_id)" style="position:absolute;top:6px;right:6px">{{ t('common.delete') }}</el-button>
               </el-card>
             </el-checkbox>
           </el-checkbox-group>
         </el-col>
         <el-col :span="4">
           <el-button type="primary" :disabled="compareIds.length !== 2" :loading="compareLoading" @click="runCompare">
-            对比分析
+            {{ t('ut.compare') }}
           </el-button>
         </el-col>
       </el-row>
 
       <!-- 对比结果 -->
       <div v-if="compareResult">
-        <el-divider>人群包对比：{{ compareResult.pkg_a.name }} vs {{ compareResult.pkg_b.name }}</el-divider>
+        <el-divider>{{ t('ut.compareTitle') }}：{{ compareResult.pkg_a.name }} vs {{ compareResult.pkg_b.name }}</el-divider>
         <el-table :data="compareResult.diffs.slice(0,20)" border size="small">
-          <el-table-column prop="label" label="标签" width="140" />
-          <el-table-column prop="category" label="分类" width="80" />
-          <el-table-column label="包A命中率" width="160">
+          <el-table-column prop="label" :label="t('ut.tag')" width="140" />
+          <el-table-column prop="category" :label="t('ut.category')" width="80" />
+          <el-table-column :label="t('ut.pkgA')" width="160">
             <template #default="{row}">
               <el-progress :percentage="Math.min(row.pct_a,100)" :stroke-width="8" :format="()=>row.pct_a+'%'" />
             </template>
           </el-table-column>
-          <el-table-column label="包B命中率" width="160">
+          <el-table-column :label="t('ut.pkgB')" width="160">
             <template #default="{row}">
               <el-progress :percentage="Math.min(row.pct_b,100)" :stroke-width="8" :format="()=>row.pct_b+'%'" />
             </template>
           </el-table-column>
-          <el-table-column label="差值" width="90">
+          <el-table-column :label="t('ut.diff')" width="90">
             <template #default="{row}">
               <span :style="{color: row.diff>0?'#67c23a':row.diff<0?'#f56c6c':'#909399'}">
                 {{ row.diff > 0 ? '+' : '' }}{{ row.diff }}%
@@ -586,6 +586,7 @@ import { GridComponent, TooltipComponent, LegendComponent } from 'echarts/compon
 import { CanvasRenderer } from 'echarts/renderers'
 import VChart from 'vue-echarts'
 import axios from 'axios'
+import { t, locale } from '@/i18n'
 
 use([FunnelChart, BarChart, GridComponent, TooltipComponent, LegendComponent, CanvasRenderer])
 

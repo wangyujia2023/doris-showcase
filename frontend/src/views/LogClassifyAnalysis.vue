@@ -5,8 +5,8 @@
     <div class="card showcase-card">
       <div class="showcase-header">
         <div>
-          <div class="showcase-title">Doris AI_FUNCTION 打标签能力演示</div>
-          <div class="showcase-sub">通过 AI_CLASSIFY() 内置函数，对用户行为日志进行语义理解并自动打标签，无需离线建模</div>
+          <div class="showcase-title">{{ t('title') }}</div>
+          <div class="showcase-sub">{{ t('subtitle') }}</div>
         </div>
         <div class="showcase-actions">
           <el-button
@@ -15,21 +15,21 @@
             :loading="classifying"
             :icon="MagicStick"
             @click="runClassify"
-          >执行 AI 打标签</el-button>
-          <el-button size="large" @click="reloadAll">刷新分析</el-button>
+          >{{ t('run') }}</el-button>
+          <el-button size="large" @click="reloadAll">{{ t('common.refresh') }}</el-button>
         </div>
       </div>
 
       <!-- SQL 展示（默认折叠） -->
       <div class="sql-showcase">
         <div class="sql-label" @click="sqlExpanded = !sqlExpanded" style="cursor:pointer;user-select:none">
-          <el-tag type="success" effect="dark" size="small">核心 SQL</el-tag>
-          <span style="margin-left:8px;color:#67c23a;font-size:12px">在 Doris 中直接执行，无需外部调用</span>
-          <span style="margin-left:auto;color:#67c23a;font-size:12px">{{ sqlExpanded ? '▲ 收起' : '▼ 展开查看' }}</span>
+          <el-tag type="success" effect="dark" size="small">{{ t('sql') }}</el-tag>
+          <span style="margin-left:8px;color:#67c23a;font-size:12px">{{ t('sqlHint') }}</span>
+          <span style="margin-left:auto;color:#67c23a;font-size:12px">{{ sqlExpanded ? t('common.collapse') : t('common.expand') }}</span>
         </div>
         <div v-if="!sqlExpanded" class="sql-collapsed" @click="sqlExpanded = true">
           <span class="sql-collapsed-hint">UPDATE user_wide SET log_tags = AI_CLASSIFY('qwen_llm_resource', CONCAT(...), ARRAY[...])  </span>
-          <el-link type="success" :underline="false" style="font-size:12px">展开完整 SQL</el-link>
+          <el-link type="success" :underline="false" style="font-size:12px">{{ t('expandSql') }}</el-link>
         </div>
         <pre v-else class="sql-code">{{ showcaseSQL }}</pre>
       </div>
@@ -37,19 +37,19 @@
       <!-- 执行结果 -->
       <div v-if="classifyResult" class="classify-result">
         <el-alert
-          :title="`打标签完成：共处理 ${classifyResult.total} 名用户，成功标记 ${classifyResult.tagged} 名`"
+          :title="t('done', [classifyResult.total, classifyResult.tagged])"
           type="success"
           :closable="false"
           show-icon
         >
           <template #default>
             <div style="margin-top:8px">
-              <span style="color:#606266;font-size:13px">标记样例：</span>
+              <span style="color:#606266;font-size:13px">{{ t('samples') }}：</span>
               <el-tag
                 v-for="s in classifyResult.samples" :key="s.user_id"
                 style="margin:2px 4px"
                 effect="plain"
-              >用户 {{ s.user_id }}：{{ s.tags.join('、') }}</el-tag>
+              >{{ t('userTag', [s.user_id, s.tags.join('、')]) }}</el-tag>
             </div>
           </template>
         </el-alert>
@@ -62,7 +62,7 @@
             <el-icon size="22"><DataBoard /></el-icon>
           </div>
           <div class="flow-text">
-            <div class="flow-title">用户行为日志</div>
+            <div class="flow-title">{{ t('flowLog') }}</div>
             <div class="flow-desc">asset_level / aum / active_level</div>
           </div>
         </div>
@@ -73,7 +73,7 @@
           </div>
           <div class="flow-text">
             <div class="flow-title">AI_CLASSIFY()</div>
-            <div class="flow-desc">Doris 内置 LLM 推理函数</div>
+            <div class="flow-desc">{{ t('flowAi') }}</div>
           </div>
         </div>
         <div class="flow-arrow">→</div>
@@ -82,8 +82,8 @@
             <el-icon size="22"><Finished /></el-icon>
           </div>
           <div class="flow-text">
-            <div class="flow-title">标签写回</div>
-            <div class="flow-desc">log_tags 字段实时更新</div>
+            <div class="flow-title">{{ t('flowWriteback') }}</div>
+            <div class="flow-desc">{{ t('flowWritebackDesc') }}</div>
           </div>
         </div>
         <div class="flow-arrow">→</div>
@@ -92,8 +92,8 @@
             <el-icon size="22"><TrendCharts /></el-icon>
           </div>
           <div class="flow-text">
-            <div class="flow-title">标签分析</div>
-            <div class="flow-desc">用户洞察 / 风险识别</div>
+            <div class="flow-title">{{ t('flowAnalysis') }}</div>
+            <div class="flow-desc">{{ t('flowAnalysisDesc') }}</div>
           </div>
         </div>
       </div>
@@ -102,87 +102,87 @@
     <!-- 顶部统计 -->
     <div class="stat-row">
       <div class="stat-card">
-        <div class="stat-label">用户总数</div>
+        <div class="stat-label">{{ t('totalUsers') }}</div>
         <div class="stat-value" style="color:#409eff">{{ fmt(summary.total_users) }}</div>
-        <div class="stat-sub">全量用户</div>
+        <div class="stat-sub">{{ t('allUsers') }}</div>
       </div>
       <div class="stat-card">
-        <div class="stat-label">已打标签用户</div>
+        <div class="stat-label">{{ t('taggedUsers') }}</div>
         <div class="stat-value" style="color:#67c23a">{{ fmt(summary.tagged_users) }}</div>
-        <div class="stat-sub">标签覆盖率 {{ coverPct }}%</div>
+        <div class="stat-sub">{{ t('coverPct', [coverPct]) }}</div>
       </div>
       <div class="stat-card">
-        <div class="stat-label">异常标记用户</div>
+        <div class="stat-label">{{ t('riskUsers') }}</div>
         <div class="stat-value" style="color:#f56c6c">{{ fmt(summary.risk_users) }}</div>
-        <div class="stat-sub">含风险类标签</div>
+        <div class="stat-sub">{{ t('riskHint') }}</div>
       </div>
       <div class="stat-card">
-        <div class="stat-label">标签种类</div>
+        <div class="stat-label">{{ t('tagKinds') }}</div>
         <div class="stat-value" style="color:#e6a23c">{{ tagDist.length }}</div>
-        <div class="stat-sub">覆盖 {{ tagCategories.length }} 个分类</div>
+        <div class="stat-sub">{{ t('coverCats', [tagCategories.length]) }}</div>
       </div>
     </div>
 
     <!-- ═══ 分析 Tab ═══ -->
     <el-tabs v-model="activeTab" type="card" style="margin-bottom:0">
-      <el-tab-pane label="标签分布" name="dist" />
-      <el-tab-pane label="风险标签分析" name="risk" />
-      <el-tab-pane label="标签 × 资产交叉" name="cross" />
-      <el-tab-pane label="标签共现" name="cooc" />
-      <el-tab-pane label="用户明细" name="users" />
+      <el-tab-pane :label="t('logClassify.tabDist')" name="dist" />
+      <el-tab-pane :label="t('logClassify.tabRisk')" name="risk" />
+      <el-tab-pane :label="t('logClassify.tabCross')" name="cross" />
+      <el-tab-pane :label="t('logClassify.tabCooc')" name="cooc" />
+      <el-tab-pane :label="t('logClassify.tabUsers')" name="users" />
     </el-tabs>
 
-    <!-- ─── 标签分布 ─── -->
+    <!-- ─── {{ t('logClassify.tabDist') }} ─── -->
     <div v-if="activeTab === 'dist'" class="card" style="border-top-left-radius:0">
       <el-row :gutter="16">
         <el-col :span="10">
-          <div class="card-title">标签覆盖用户数</div>
+          <div class="card-title">{{ t('logClassify.coverUsers') }}</div>
           <v-chart :option="distBarOption" style="height:360px" autoresize />
         </el-col>
         <el-col :span="7">
-          <div class="card-title">按分类占比</div>
+          <div class="card-title">{{ t('logClassify.categoryRatio') }}</div>
           <v-chart :option="catPieOption" style="height:360px" autoresize />
         </el-col>
         <el-col :span="7">
-          <div class="card-title">标签详情</div>
+          <div class="card-title">{{ t('logClassify.tagDetail') }}</div>
           <div class="tag-list">
             <div
-              v-for="t in tagDist" :key="t.tag_name"
+              v-for="tag in tagDist" :key="tag.tag_name"
               class="tag-item"
-              :class="{ risk: t.is_risk }"
-              @click="jumpToUsers(t.tag_name)"
+              :class="{ risk: tag.is_risk }"
+              @click="jumpToUsers(tag.tag_name)"
             >
-              <div class="tag-dot" :style="{ background: t.color }"></div>
+              <div class="tag-dot" :style="{ background: tag.color }"></div>
               <div class="tag-info">
-                <span class="tag-name">{{ t.tag_name }}</span>
-                <span class="tag-cat">{{ t.category }}</span>
+                <span class="tag-name">{{ tag.tag_name }}</span>
+                <span class="tag-cat">{{ tag.category }}</span>
               </div>
-              <div class="tag-count">{{ t.user_count }}<small>人</small></div>
-              <el-tag v-if="t.is_risk" type="danger" size="small" effect="plain" style="margin-left:4px">风险</el-tag>
+              <div class="tag-count">{{ tag.user_count }}<small>{{ t('logClassify.unitPerson') }}</small></div>
+              <el-tag v-if="tag.is_risk" type="danger" size="small" effect="plain" style="margin-left:4px">{{ t('logClassify.risk') }}</el-tag>
             </div>
           </div>
         </el-col>
       </el-row>
     </div>
 
-    <!-- ─── 风险标签分析 ─── -->
+    <!-- ─── {{ t('logClassify.tabRisk') }} ─── -->
     <div v-if="activeTab === 'risk'" class="card" style="border-top-left-radius:0">
-      <div class="card-title">风险类标签关联用户的异常情况</div>
+      <div class="card-title">{{ t('logClassify.riskTitle') }}</div>
       <el-row :gutter="16">
         <el-col :span="14">
           <el-table :data="riskData" border stripe size="small">
-            <el-table-column prop="tag_name" label="风险标签" width="100">
+            <el-table-column prop="tag_name" :label="t('logClassify.riskTag')" width="100">
               <template #default="{row}">
                 <el-tag type="danger" size="small" effect="dark">{{ row.tag_name }}</el-tag>
               </template>
             </el-table-column>
-            <el-table-column prop="total_users" label="用户数" width="80" align="center" />
-            <el-table-column prop="anomaly_users" label="异常用户" width="90" align="center">
+            <el-table-column prop="total_users" :label="t('logClassify.users')" width="80" align="center" />
+            <el-table-column prop="anomaly_users" :label="t('logClassify.anomalyUsers')" width="90" align="center">
               <template #default="{row}">
                 <span style="color:#f56c6c;font-weight:600">{{ row.anomaly_users }}</span>
               </template>
             </el-table-column>
-            <el-table-column label="异常率" width="140">
+            <el-table-column :label="t('logClassify.anomalyRate')" width="140">
               <template #default="{row}">
                 <el-progress
                   :percentage="row.total_users ? Math.round(row.anomaly_users * 100 / row.total_users) : 0"
@@ -191,10 +191,10 @@
                 />
               </template>
             </el-table-column>
-            <el-table-column prop="avg_aum" label="平均AUM(万)" width="110" align="right">
+            <el-table-column prop="avg_aum" :label="t('logClassify.avgAum')" width="110" align="right">
               <template #default="{row}">{{ row.avg_aum.toFixed(1) }}</template>
             </el-table-column>
-            <el-table-column prop="avg_churn_pct" label="平均流失率%" width="110" align="right">
+            <el-table-column prop="avg_churn_pct" :label="t('logClassify.avgChurn')" width="110" align="right">
               <template #default="{row}">
                 <span :style="{color: row.avg_churn_pct > 30 ? '#f56c6c' : '#e6a23c', fontWeight:'600'}">
                   {{ row.avg_churn_pct }}%
@@ -209,17 +209,17 @@
       </el-row>
     </div>
 
-    <!-- ─── 标签 × 资产交叉 ─── -->
+    <!-- ─── {{ t('logClassify.tabCross') }} ─── -->
     <div v-if="activeTab === 'cross'" class="card" style="border-top-left-radius:0">
-      <div class="card-title">各标签下用户资产等级分布</div>
+      <div class="card-title">{{ t('logClassify.crossTitle') }}</div>
       <div class="cross-grid">
-        <div v-for="t in crossData" :key="t.tag_name" class="cross-item">
-          <div class="cross-tag" :style="{ borderColor: t.color, color: t.color }">
-            {{ t.tag_name }}
-            <small>{{ t.category }}</small>
+        <div v-for="tag in crossData" :key="tag.tag_name" class="cross-item">
+          <div class="cross-tag" :style="{ borderColor: tag.color, color: tag.color }">
+            {{ tag.tag_name }}
+            <small>{{ tag.category }}</small>
           </div>
           <div class="cross-bars">
-            <div v-for="d in t.asset_dist" :key="d.level" class="cross-bar-row">
+            <div v-for="d in tag.asset_dist" :key="d.level" class="cross-bar-row">
               <span class="cross-label">
                 <el-tag :type="assetTagType(d.level)" size="small" style="font-size:10px">{{ d.level }}</el-tag>
               </span>
@@ -227,7 +227,7 @@
                 :percentage="Math.min(d.cnt * 100, 100)"
                 :stroke-width="10"
                 :show-text="false"
-                :color="t.color"
+                :color="tag.color"
                 style="flex:1"
               />
               <span class="cross-cnt">{{ d.cnt }}</span>
@@ -237,31 +237,31 @@
       </div>
     </div>
 
-    <!-- ─── 标签共现 ─── -->
+    <!-- ─── {{ t('logClassify.tabCooc') }} ─── -->
     <div v-if="activeTab === 'cooc'" class="card" style="border-top-left-radius:0">
-      <div class="card-title">标签共现（同时出现在同一用户的标签对）</div>
+      <div class="card-title">{{ t('logClassify.coocTitle') }}</div>
       <el-row :gutter="16">
         <el-col :span="12">
           <el-table :data="coocData" border size="small" stripe>
             <el-table-column type="index" width="40" />
-            <el-table-column prop="tag_a" label="标签 A" width="110">
+            <el-table-column prop="tag_a" :label="t('logClassify.tagA')" width="110">
               <template #default="{row}">
                 <el-tag size="small" effect="plain" :style="{borderColor: tagColor(row.tag_a), color: tagColor(row.tag_a)}">
                   {{ row.tag_a }}
                 </el-tag>
               </template>
             </el-table-column>
-            <el-table-column label="+" width="30" align="center">
+            <el-table-column :label="'+'" width="30" align="center">
               <template #default><b style="color:#c0c4cc">+</b></template>
             </el-table-column>
-            <el-table-column prop="tag_b" label="标签 B" width="110">
+            <el-table-column prop="tag_b" :label="t('logClassify.tagB')" width="110">
               <template #default="{row}">
                 <el-tag size="small" effect="plain" :style="{borderColor: tagColor(row.tag_b), color: tagColor(row.tag_b)}">
                   {{ row.tag_b }}
                 </el-tag>
               </template>
             </el-table-column>
-            <el-table-column prop="count" label="共现用户数" align="center">
+            <el-table-column prop="count" :label="t('logClassify.coocUsers')" align="center">
               <template #default="{row}">
                 <el-tag type="primary" effect="dark" size="small">{{ row.count }}</el-tag>
               </template>
@@ -274,41 +274,41 @@
       </el-row>
     </div>
 
-    <!-- ─── 用户明细 ─── -->
+    <!-- ─── {{ t('logClassify.tabUsers') }} ─── -->
     <div v-if="activeTab === 'users'" class="card" style="border-top-left-radius:0">
       <el-form inline style="margin-bottom:12px">
-        <el-form-item label="按标签筛选">
-          <el-select v-model="userFilter.tag_name" clearable placeholder="全部标签" style="width:130px" @change="loadUsers">
-            <el-option v-for="t in tagDist" :key="t.tag_name" :label="t.tag_name" :value="t.tag_name">
-              <span :style="{color: t.color}">● </span>{{ t.tag_name }}
-              <span style="color:#c0c4cc;margin-left:4px">({{ t.user_count }}人)</span>
+        <el-form-item :label="t('logClassify.filterTag')">
+          <el-select v-model="userFilter.tag_name" clearable :placeholder="t('logClassify.allTags')" style="width:130px" @change="loadUsers">
+            <el-option v-for="tag in tagDist" :key="tag.tag_name" :label="tag.tag_name" :value="tag.tag_name">
+              <span :style="{color: tag.color}">● </span>{{ tag.tag_name }}
+              <span style="color:#c0c4cc;margin-left:4px">({{ tag.user_count }}{{ t('logClassify.unitPerson') }})</span>
             </el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="仅看异常">
+        <el-form-item :label="t('logClassify.onlyRisk')">
           <el-switch v-model="userFilter.onlyRisk" @change="loadUsers" />
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="loadUsers">查询</el-button>
+          <el-button type="primary" @click="loadUsers">{{ t('common.search') }}</el-button>
         </el-form-item>
       </el-form>
 
       <el-table :data="userRows" v-loading="userLoading" border size="small" stripe>
-        <el-table-column prop="user_id"        label="用户ID"  width="80" />
-        <el-table-column prop="user_name"      label="姓名"    width="72" />
-        <el-table-column prop="age_group"      label="年龄段"  width="72" />
-        <el-table-column prop="city"           label="城市"    width="65" />
-        <el-table-column prop="asset_level"    label="资产等级" width="90">
+        <el-table-column prop="user_id"        :label="t('logClassify.userId')"  width="80" />
+        <el-table-column prop="user_name"      :label="t('logClassify.name')"    width="72" />
+        <el-table-column prop="age_group"      :label="t('logClassify.ageGroup')"  width="72" />
+        <el-table-column prop="city"           :label="t('logClassify.city')"    width="65" />
+        <el-table-column prop="asset_level"    :label="t('logClassify.assetLevel')" width="90">
           <template #default="{row}">
             <el-tag :type="assetTagType(row.asset_level)" size="small">{{ row.asset_level }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="aum_total"      label="AUM(万)" width="85" align="right">
+        <el-table-column prop="aum_total"      :label="t('logClassify.aum')" width="85" align="right">
           <template #default="{row}">{{ row.aum_total.toFixed(1) }}</template>
         </el-table-column>
-        <el-table-column prop="active_level"   label="活跃"   width="65" />
-        <el-table-column prop="lifecycle_stage" label="周期"  width="80" />
-        <el-table-column prop="log_tags"       label="AI标签" min-width="180">
+        <el-table-column prop="active_level"   :label="t('logClassify.active')"   width="65" />
+        <el-table-column prop="lifecycle_stage" :label="t('logClassify.lifecycle')"  width="80" />
+        <el-table-column prop="log_tags"       :label="t('logClassify.aiTags')" min-width="180">
           <template #default="{row}">
             <template v-if="parseTags(row.log_tags).length">
               <el-tag
@@ -317,13 +317,13 @@
                 :style="{ marginRight:'3px', borderColor: tagColor(tag), color: tagColor(tag) }"
               >{{ tag }}</el-tag>
             </template>
-            <span v-else style="color:#c0c4cc;font-size:12px">— 未打标签</span>
+            <span v-else style="color:#c0c4cc;font-size:12px">— {{ t('logClassify.noTag') }}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="anomaly_flag"   label="异常"   width="60" align="center">
+        <el-table-column prop="anomaly_flag"   :label="t('logClassify.anomaly')"   width="60" align="center">
           <template #default="{row}">
-            <el-tag v-if="+row.anomaly_flag" type="danger" size="small">是</el-tag>
-            <span v-else style="color:#67c23a;font-size:12px">否</span>
+            <el-tag v-if="+row.anomaly_flag" type="danger" size="small">{{ t('common.yes') }}</el-tag>
+            <span v-else style="color:#67c23a;font-size:12px">{{ t('common.no') }}</span>
           </template>
         </el-table-column>
       </el-table>
@@ -339,6 +339,7 @@ import { MagicStick, DataBoard, Cpu, Finished, TrendCharts } from '@element-plus
 import { BarChart, PieChart } from 'echarts/charts'
 import VChart from 'vue-echarts'
 import { tagAnalysisApi } from '@/api'
+import { t, locale } from '@/i18n'
 
 
 const showcaseSQL = `-- Doris AI_CLASSIFY 打标签（一键执行，无需离线建模）
@@ -346,10 +347,10 @@ UPDATE user_wide
 SET log_tags = AI_CLASSIFY(
     'qwen_llm_resource',                          -- Doris Resource：已注册的 LLM 端点
     CONCAT(
-        '资产等级:', asset_level,
+        '{{ t('logClassify.assetLevel') }}:', asset_level,
         ' AUM:', aum_total, '万',
-        ' 活跃度:', active_level,
-        ' 周期:', lifecycle_stage
+        ' {{ t('logClassify.active') }}度:', active_level,
+        ' {{ t('logClassify.lifecycle') }}:', lifecycle_stage
     ),                                            -- 输入：用户画像文本
     ARRAY[
         '高净值','基金偏好','理财偏好','贷款需求',
@@ -399,7 +400,7 @@ async function runClassify() {
   try {
     const res = await tagAnalysisApi.runClassify()
     classifyResult.value = res
-    ElMessage.success(`AI 打标签完成，已标记 ${res.tagged} 名用户`)
+    ElMessage.success(`AI tagging complete, tagged ${res.tagged} users`)
     await reloadAll()
   } finally {
     classifying.value = false
@@ -446,7 +447,7 @@ const catPieOption = computed(() => {
   const catMap = {}
   tagDist.value.forEach(t => { catMap[t.category] = (catMap[t.category] || 0) + t.user_count })
   return {
-    tooltip: { trigger: 'item', formatter: '{b}: {c}人 ({d}%)' },
+    tooltip: { trigger: 'item', formatter: '{b}: {c}users ({d}%)' },
     legend: { bottom: 0, textStyle: { fontSize: 11 } },
     series: [{
       type: 'pie', radius: ['35%', '60%'],
@@ -458,13 +459,13 @@ const catPieOption = computed(() => {
 
 const riskBarOption = computed(() => ({
   tooltip: { trigger: 'axis' },
-  legend: { data: ['总用户', '异常用户'], top: 0 },
+  legend: { data: ['Total Users', 'Anomaly Users'], top: 0 },
   grid: { left: 70, right: 20, top: 36, bottom: 10 },
   xAxis: { type: 'value' },
   yAxis: { type: 'category', data: riskData.value.map(r => r.tag_name) },
   series: [
-    { name: '总用户',  type: 'bar', data: riskData.value.map(r => r.total_users),  itemStyle: { color: '#c0d9f0' } },
-    { name: '异常用户', type: 'bar', data: riskData.value.map(r => r.anomaly_users), itemStyle: { color: '#f56c6c' } },
+    { name: 'Total Users',  type: 'bar', data: riskData.value.map(r => r.total_users),  itemStyle: { color: '#c0d9f0' } },
+    { name: 'Anomaly Users', type: 'bar', data: riskData.value.map(r => r.anomaly_users), itemStyle: { color: '#f56c6c' } },
   ]
 }))
 
@@ -487,7 +488,7 @@ const coocChordOption = computed(() => {
       tooltip: {
         formatter: p => {
           const [xi, yi, cnt] = p.value
-          return `${allTags[xi]} + ${allTags[yi]}<br/>共现 <b>${cnt}</b> 人`
+          return `${allTags[xi]} + ${allTags[yi]}<br/>共现 <b>${cnt}</b> users`
         }
       }
     }]

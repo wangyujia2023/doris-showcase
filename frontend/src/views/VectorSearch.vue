@@ -6,15 +6,14 @@
       <div class="banner-left">
         <div class="banner-title">
           <el-tag type="danger" size="small" effect="dark" style="margin-right:8px">HASP</el-tag>
-          Doris 混合检索能力演示 · 向量 + 标量协同
+          {{ t('vec.title') }}
         </div>
         <div class="banner-desc">
-          上传照片提取 <b>8维特征向量</b>，结合标签标量过滤与文本描述，展示
-          <code>cosine_distance()</code> + <code>WHERE</code> 在 HASP 向量化引擎下的混合检索能力。
+          {{ t('vec.subtitle') }}
         </div>
       </div>
       <el-button type="primary" :loading="initing" @click="initData" plain>
-        <el-icon><RefreshRight /></el-icon> 初始化示例数据
+        <el-icon><RefreshRight /></el-icon> {{ t('vec.initData') }}
       </el-button>
     </div>
 
@@ -23,13 +22,13 @@
       <!-- 左：用户库 -->
       <div class="card users-panel">
         <div class="panel-title">
-          用户库
+          {{ t('vec.userLib') }}
           <el-tag size="small" style="margin-left:6px">{{ users.length }}</el-tag>
           <el-button size="small" type="primary" plain style="margin-left:auto" @click="openUploadDialog">
             <el-icon><Plus /></el-icon>
           </el-button>
         </div>
-        <div v-if="!users.length" class="empty-tip"><el-empty :image-size="50" description="请先初始化" /></div>
+        <div v-if="!users.length" class="empty-tip"><el-empty :image-size="50" :description="t('vec.initFirst')" /></div>
         <div v-else class="user-grid">
           <div
             v-for="u in users" :key="u.user_id"
@@ -45,8 +44,8 @@
           </div>
         </div>
 
-        <!-- 标签库 -->
-        <div class="panel-title" style="margin-top:12px">标签库</div>
+        <!-- {{ t('vec.formTags') }}库 -->
+        <div class="panel-title" style="margin-top:12px">{{ t('vec.labelLib') }}</div>
         <div class="label-chips">
           <div
             v-for="lb in labels" :key="lb.label_id"
@@ -84,8 +83,8 @@
             <!-- 照片上传（向量 / 混合模式） -->
             <div v-if="searchMode !== 'scalar'" class="input-block">
               <div class="input-label">
-                <el-icon><Picture /></el-icon> 查询照片
-                <span class="input-hint">上传后自动提取 8 维特征向量</span>
+                <el-icon><Picture /></el-icon> {{ t('vec.queryPhoto') }}
+                <span class="input-hint">{{ t('vec.photoHint') }}</span>
               </div>
               <div class="photo-row">
                 <div
@@ -98,33 +97,33 @@
                   <img v-if="queryPhoto.previewUrl" :src="queryPhoto.previewUrl" class="photo-preview" />
                   <div v-else class="photo-hint">
                     <el-icon size="28" color="#c0c4cc"><Upload /></el-icon>
-                    <div style="font-size:12px;color:#c0c4cc;margin-top:6px">点击或拖拽</div>
+                    <div style="font-size:12px;color:#c0c4cc;margin-top:6px">{{ t('vec.clickDrag') }}</div>
                   </div>
                 </div>
                 <div v-if="queryPhoto.embedding.length" class="embed-preview">
-                  <div class="embed-title">提取向量（8维）</div>
+                  <div class="embed-title">{{ t('vec.embedTitle') }}</div>
                   <VecBar :vec="queryPhoto.embedding" :dim-labels="dimLabels" />
                   <div class="embed-from">
                     <el-tag size="small" :type="queryPhoto.userId ? 'primary' : 'success'" effect="plain">
-                      {{ queryPhoto.userId ? '来自用户库' : '来自上传照片' }}
+                      {{ queryPhoto.userId ? t('vec.fromUserLib') : t('vec.fromUpload') }}
                     </el-tag>
                   </div>
                 </div>
                 <div v-else-if="!queryPhoto.previewUrl" class="embed-preview empty-embed">
                   <div style="text-align:center;color:#c0c4cc">
                     <div style="font-size:28px;margin-bottom:8px">📷</div>
-                    上传照片后自动生成向量
+                    {{ t('vec.uploadHint') }}
                   </div>
                 </div>
               </div>
               <input ref="fileInputRef" type="file" accept="image/*" style="display:none" @change="onFileChange" />
             </div>
 
-            <!-- 标签标量过滤（标量 / 混合模式） -->
+            <!-- {{ t('vec.formTags') }}标量过滤（标量 / 混合模式） -->
             <div v-if="searchMode !== 'vector'" class="input-block">
               <div class="input-label">
-                <el-icon><PriceTag /></el-icon> 标签过滤
-                <span class="input-hint">AND 逻辑，选择的标签必须全部命中</span>
+                <el-icon><PriceTag /></el-icon> {{ t('vec.labelFilter') }}
+                <span class="input-hint">{{ t('vec.andHint') }}</span>
               </div>
               <div class="tag-selector">
                 <div
@@ -137,17 +136,17 @@
               </div>
             </div>
 
-            <!-- 描述文本（混合模式） -->
+            <!-- {{ t('vec.formDesc') }}文本（混合模式） -->
             <div v-if="searchMode === 'hybrid'" class="input-block">
               <div class="input-label">
-                <el-icon><ChatLineRound /></el-icon> 描述文本
-                <span class="input-hint">关键词自动映射为向量维度权重</span>
+                <el-icon><ChatLineRound /></el-icon> {{ t('vec.descText') }}
+                <span class="input-hint">{{ t('vec.descHint') }}</span>
               </div>
               <el-input
                 v-model="description"
                 type="textarea"
                 :rows="2"
-                placeholder="如：活跃热情 冒险进取 科技创新 社交外向…"
+                :placeholder="t('vec.descPlaceholder')"
               />
               <div v-if="description" class="desc-keywords">
                 <span v-for="kw in matchedKeywords" :key="kw" class="kw-tag">{{ kw }}</span>
@@ -169,7 +168,7 @@
                 <el-icon><Search /></el-icon>
                 {{ MODE_BTN[searchMode] }}
               </el-button>
-              <el-button v-if="result" @click="clearResult">清除</el-button>
+              <el-button v-if="result" @click="clearResult">{{ t('common.clear') }}</el-button>
             </div>
           </div>
         </div>
@@ -179,11 +178,11 @@
           <div class="sql-header" @click="sqlOpen = !sqlOpen">
             <div style="display:flex;align-items:center;gap:8px">
               <el-tag :type="MODE_COLOR[result.mode]" size="small" effect="dark">{{ MODE_LABEL[result.mode] }}</el-tag>
-              <span style="font-size:13px;font-weight:600;color:#1a1a1a">执行的 HASP SQL</span>
+              <span style="font-size:13px;font-weight:600;color:#1a1a1a">{{ t('vec.sqlTitle') }}</span>
               <el-tag size="small" effect="plain" type="success">cosine_distance</el-tag>
-              <el-tag v-if="result.label_filters.length" size="small" effect="plain" type="warning">标量过滤</el-tag>
+              <el-tag v-if="result.label_filters.length" size="small" effect="plain" type="warning">{{ t('vec.scalarFilter') }}</el-tag>
             </div>
-            <span style="font-size:12px;color:#67c23a;cursor:pointer">{{ sqlOpen ? '▲ 收起' : '▼ 展开' }}</span>
+            <span style="font-size:12px;color:#67c23a;cursor:pointer">{{ sqlOpen ? t('common.collapse') : t('common.expand') }}</span>
           </div>
           <pre v-if="sqlOpen" class="sql-code">{{ result.sql }}</pre>
         </div>
@@ -191,12 +190,12 @@
         <!-- 结果 -->
         <div v-if="result" class="card">
           <div class="card-title">
-            检索结果
-            <el-tag size="small" style="margin-left:8px">{{ result.results.length }} 条</el-tag>
-            <span v-if="result.mode !== 'scalar'" style="font-size:12px;color:#909399;margin-left:12px">按相似度排序</span>
+            {{ t('vec.resultTitle') }}
+            <el-tag size="small" style="margin-left:8px">{{ result.results.length }} {{ t('metrics.rows') }}</el-tag>
+            <span v-if="result.mode !== 'scalar'" style="font-size:12px;color:#909399;margin-left:12px">{{ t('vec.similaritySort') }}</span>
           </div>
           <div v-if="!result.results.length" class="empty-tip" style="padding:20px 0">
-            <el-empty description="无匹配结果" :image-size="60" />
+            <el-empty :description="t('vec.noMatch')" :image-size="60" />
           </div>
           <div v-else class="result-list">
             <div v-for="(r, idx) in result.results" :key="r.user_id" class="result-item">
@@ -218,7 +217,7 @@
                 <div class="score-val" :style="{color: scoreColor(r.similarity)}">
                   {{ (r.similarity * 100).toFixed(1) }}%
                 </div>
-                <div class="score-label">相似度</div>
+                <div class="score-label">{{ t('vec.similarity') }}</div>
                 <el-progress
                   :percentage="+(r.similarity * 100).toFixed(1)"
                   :stroke-width="6"
@@ -236,40 +235,40 @@
     </div>
 
     <!-- 新增用户 Dialog（保留原有功能） -->
-    <el-dialog v-model="uploadDialog" title="新增用户画像" width="560px" :close-on-click-modal="false">
+    <el-dialog v-model="uploadDialog" :title="t('vec.newUser')" width="560px" :close-on-click-modal="false">
       <div class="upload-body">
         <div class="upload-left">
           <div class="photo-drop" :class="{'has-photo': addForm.previewUrl}" @click="triggerAddFile" @dragover.prevent @drop.prevent="onAddDrop">
             <img v-if="addForm.previewUrl" :src="addForm.previewUrl" class="photo-preview" />
-            <div v-else class="photo-hint"><el-icon size="32" color="#c0c4cc"><Upload /></el-icon><div style="margin-top:8px;font-size:13px;color:#909399">点击或拖拽上传照片</div></div>
+            <div v-else class="photo-hint"><el-icon size="32" color="#c0c4cc"><Upload /></el-icon><div style="margin-top:8px;font-size:13px;color:#909399">{{ t('vec.clickDrag') }}</div></div>
           </div>
           <input ref="addFileRef" type="file" accept="image/*" style="display:none" @change="onAddFileChange" />
           <div v-if="addForm.embedding.length" class="embed-preview" style="margin-top:8px">
-            <div class="embed-title">生成向量（8维）</div>
+            <div class="embed-title">{{ t('vec.embedTitle') }}</div>
             <VecBar :vec="addForm.embedding" :dim-labels="dimLabels" />
           </div>
         </div>
         <div class="upload-right">
           <div style="display:flex;justify-content:flex-end;margin-bottom:10px">
-            <el-button size="small" type="info" plain @click="randomFill"><el-icon><Refresh /></el-icon> 随机填写</el-button>
+            <el-button size="small" type="info" plain @click="randomFill"><el-icon><Refresh /></el-icon> {{ t('vec.randomFill') }}</el-button>
           </div>
           <el-form :model="addForm" label-width="68px" size="small">
-            <el-form-item label="用户名"><el-input v-model="addForm.user_name" /></el-form-item>
-            <el-form-item label="描述"><el-input v-model="addForm.description" type="textarea" :rows="3" /></el-form-item>
-            <el-form-item label="标签">
+            <el-form-item :label="t('vec.formUserName')"><el-input v-model="addForm.user_name" /></el-form-item>
+            <el-form-item :label="t('vec.formDesc')"><el-input v-model="addForm.description" type="textarea" :rows="3" /></el-form-item>
+            <el-form-item :label="t('vec.formTags')">
               <el-select v-model="addForm.labels" multiple style="width:100%">
                 <el-option v-for="lb in labels" :key="lb.label_name" :label="lb.label_name" :value="lb.label_name">
                   <span :style="{color:lb.color}">● </span>{{ lb.label_name }}
                 </el-option>
               </el-select>
             </el-form-item>
-            <el-form-item label="头像种子"><el-input v-model="addForm.avatar_style" /></el-form-item>
+            <el-form-item :label="t('vec.formAvatarSeed')"><el-input v-model="addForm.avatar_style" /></el-form-item>
           </el-form>
         </div>
       </div>
       <template #footer>
-        <el-button @click="uploadDialog = false">取消</el-button>
-        <el-button type="primary" :loading="addLoading" :disabled="!addForm.photoFile || !addForm.user_name" @click="submitAdd">提交入库</el-button>
+        <el-button @click="uploadDialog = false">{{ t('common.cancel') }}</el-button>
+        <el-button type="primary" :loading="addLoading" :disabled="!addForm.photoFile || !addForm.user_name" @click="submitAdd">{{ t('vec.submitAdd') }}</el-button>
       </template>
     </el-dialog>
 
@@ -281,6 +280,7 @@ import { ref, computed, onMounted, defineComponent, h, reactive } from 'vue'
 import { ElMessage } from 'element-plus'
 import { RefreshRight, Search, Plus, Upload, Picture, PriceTag, ChatLineRound, Refresh } from '@element-plus/icons-vue'
 import { vectorApi } from '@/api'
+import { t, locale } from '@/i18n'
 
 // ── 向量柱状图组件 ──────────────────────────────────────────────
 const VecBar = defineComponent({
@@ -304,16 +304,16 @@ const VecBar = defineComponent({
 
 // ── 常量 ────────────────────────────────────────────────────────
 const MODES = [
-  { key: 'vector', icon: '📷', title: '图片向量检索', desc: '上传照片 → cosine_distance 近似最近邻' },
-  { key: 'scalar', icon: '🏷️', title: '标量标签检索', desc: '选择标签 → WHERE JSON 精确过滤' },
-  { key: 'hybrid', icon: '🔀', title: '混合检索',    desc: '照片向量 + 标签过滤 + 描述文本协同' },
+  { key: 'vector', icon: '📷', title: t('vec.modeVectorTitle'), desc: t('vec.modeVectorDesc') },
+  { key: 'scalar', icon: '🏷️', title: t('vec.modeScalarTitle'), desc: t('vec.modeScalarDesc') },
+  { key: 'hybrid', icon: '🔀', title: t('vec.modeHybridTitle'), desc: t('vec.modeHybridDesc') },
 ]
-const MODE_BTN   = { vector: '向量检索', scalar: '标签检索', hybrid: '混合检索' }
+const MODE_BTN   = { vector: t('vec.modeVectorBtn'), scalar: t('vec.modeScalarBtn'), hybrid: t('vec.modeHybridBtn') }
 const MODE_COLOR = { vector: 'primary', scalar: 'success', hybrid: 'warning' }
-const MODE_LABEL = { vector: '向量检索', scalar: '标量过滤', hybrid: '混合检索' }
+const MODE_LABEL = { vector: t('vec.modeVectorLabel'), scalar: t('vec.modeScalarLabel'), hybrid: t('vec.modeHybridLabel') }
 
-const RANDOM_NAMES = ['闪光霆','云端影','墨痕客','星尘灵','火焰凤','翡翠龙','幻影猫','风暴鹰','月光兔','晨曦虎']
-const RANDOM_DESCS = ['阳光活泼，热爱探索新事物','沉稳睿智，擅长分析决策','幽默风趣，人缘极好','冒险进取，偏好高风险高收益','科技达人，深度数字用户']
+const RANDOM_NAMES = ['Nova','Cloud','Ink','Star','Phoenix','Jade','Phantom','Storm','Moon','Dawn']
+const RANDOM_DESCS = ['Energetic and curious','Calm and analytical','Humorous and sociable','Adventurous and bold','Tech-savvy digital native']
 const AVATAR_SEEDS = ['fox','cat','dog','lion','bear','tiger','wolf','panda','rabbit','owl']
 
 // ── 状态 ────────────────────────────────────────────────────────
@@ -349,7 +349,7 @@ const canSearch = computed(() => {
 
 const matchedKeywords = computed(() => {
   if (!description.value) return []
-  const KWS = ['活跃','活泼','积极','热情','智慧','聪明','幽默','搞笑','冒险','勇敢','探索','科技','技术','运动','健身','艺术','创意','社交','友善','外向']
+  const KWS = ['active','energetic','positive','warm','smart','clever','humor','funny','adventure','brave','explore','tech','technology','sport','fitness','art','creative','social','friendly','outgoing']
   return KWS.filter(kw => description.value.includes(kw))
 })
 
@@ -410,7 +410,7 @@ async function doSearch() {
       result.value = await vectorApi.searchByPhoto(fd)
       queryPhoto.embedding = result.value.photo_embedding || queryPhoto.embedding
     } else {
-      // 用现有向量 or 仅标签/描述
+      // 用现有向量 or 仅{{ t('vec.formTags') }}/{{ t('vec.formDesc') }}
       result.value = await vectorApi.searchHybrid({
         query_vector:  (searchMode.value !== 'scalar' && queryPhoto.embedding.length) ? queryPhoto.embedding : null,
         label_filters: searchMode.value !== 'vector' ? labelFilters.value : [],
@@ -433,7 +433,7 @@ async function initData() {
   initing.value = true
   try {
     const res = await vectorApi.init()
-    ElMessage.success(`初始化完成：${res.users} 用户、${res.labels} 标签`)
+    ElMessage.success(`初始化完成：${res.users} 用户、${res.labels} {{ t('vec.formTags') }}`)
     await loadData()
   } finally { initing.value = false }
 }
@@ -474,7 +474,7 @@ async function submitAdd() {
     fd.append('labels', JSON.stringify(addForm.labels))
     const res = await vectorApi.uploadUser(fd)
     addForm.embedding = res.embedding
-    ElMessage.success(`用户 "${res.user_name}" 已入库（ID: ${res.user_id}）`)
+    ElMessage.success(t('vec.userSaved', [res.user_name, res.user_id]))
     uploadDialog.value = false
     await loadData()
   } finally { addLoading.value = false }

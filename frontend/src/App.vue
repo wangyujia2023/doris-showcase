@@ -4,7 +4,7 @@
     <el-aside width="188px" class="aside">
       <div class="logo">
         <el-icon size="18" color="#409eff"><DataBoard /></el-icon>
-        <span>Doris 特性展示</span>
+        <span>{{ t('app.title') }}</span>
       </div>
       <el-menu
         :default-active="activeMenu"
@@ -14,93 +14,96 @@
         active-text-color="#409eff"
       >
         <el-menu-item index="/dashboard">
-          <el-icon><Odometer /></el-icon><span>首页大盘</span>
+          <el-icon><Odometer /></el-icon><span>{{ t('menu.dashboard') }}</span>
         </el-menu-item>
         <el-menu-item index="/management">
-          <el-icon><DataAnalysis /></el-icon><span>经营管理大屏</span>
+          <el-icon><DataAnalysis /></el-icon><span>{{ t('menu.management') }}</span>
         </el-menu-item>
 
-        <div class="menu-group-title">用户画像</div>
+        <div class="menu-group-title">{{ t('group.userProfile') }}</div>
         <el-menu-item index="/user">
-          <el-icon><User /></el-icon><span>宽表查询</span>
+          <el-icon><User /></el-icon><span>{{ t('menu.userWide') }}</span>
         </el-menu-item>
         <el-menu-item index="/segment">
-          <el-icon><Grid /></el-icon><span>人群圈选</span>
+          <el-icon><Grid /></el-icon><span>{{ t('menu.segment') }}</span>
         </el-menu-item>
         <el-menu-item index="/behavior">
-          <el-icon><TrendCharts /></el-icon><span>行为分析</span>
+          <el-icon><TrendCharts /></el-icon><span>{{ t('menu.behavior') }}</span>
         </el-menu-item>
         <el-menu-item index="/user-tag">
-          <el-icon><Files /></el-icon><span>用户行为分析</span>
+          <el-icon><Files /></el-icon><span>{{ t('menu.userTag') }}</span>
         </el-menu-item>
         <el-menu-item index="/log-classify">
-          <el-icon><Cpu /></el-icon><span>AI 日志标签</span>
+          <el-icon><Cpu /></el-icon><span>{{ t('menu.logClassify') }}</span>
         </el-menu-item>
 
-        <div class="menu-group-title">HASP 场景</div>
+        <div class="menu-group-title">{{ t('group.hasp') }}</div>
         <el-menu-item index="/vector">
-          <el-icon><Coin /></el-icon><span>图片向量检索</span>
+          <el-icon><Coin /></el-icon><span>{{ t('menu.vector') }}</span>
         </el-menu-item>
         <el-menu-item index="/satellite">
-          <el-icon><Promotion /></el-icon><span>卫星数据分析</span>
+          <el-icon><Promotion /></el-icon><span>{{ t('menu.satellite') }}</span>
         </el-menu-item>
 
-        <div class="menu-group-title">数据能力</div>
+        <div class="menu-group-title">{{ t('group.dataCapability') }}</div>
+        <el-menu-item index="/regulatory">
+          <el-icon><Tickets /></el-icon><span>{{ t('menu.regulatory') }}</span>
+        </el-menu-item>
         <el-menu-item index="/report">
-          <el-icon><Document /></el-icon><span>银行报表</span>
+          <el-icon><Document /></el-icon><span>{{ t('menu.report') }}</span>
         </el-menu-item>
         <el-menu-item index="/metrics">
-          <el-icon><DataAnalysis /></el-icon><span>指标平台</span>
+          <el-icon><DataAnalysis /></el-icon><span>{{ t('menu.metrics') }}</span>
         </el-menu-item>
         <el-menu-item index="/observe">
-          <el-icon><Monitor /></el-icon><span>日志可观测性</span>
+          <el-icon><Monitor /></el-icon><span>{{ t('menu.observe') }}</span>
         </el-menu-item>
         <el-menu-item index="/log-tag-stats">
-          <el-icon><PriceTag /></el-icon><span>日志标签分析</span>
+          <el-icon><PriceTag /></el-icon><span>{{ t('menu.logTagStats') }}</span>
         </el-menu-item>
         <el-menu-item index="/trace">
-          <el-icon><Share /></el-icon><span>链路追踪</span>
+          <el-icon><Share /></el-icon><span>{{ t('menu.trace') }}</span>
         </el-menu-item>
         <el-menu-item index="/benchmark">
-          <el-icon><Histogram /></el-icon><span>高并发点查</span>
+          <el-icon><Histogram /></el-icon><span>{{ t('menu.benchmark') }}</span>
         </el-menu-item>
 
-        <div class="menu-group-title">智能制造</div>
+        <div class="menu-group-title">{{ t('group.manufacturing') }}</div>
         <el-menu-item index="/manufacturing">
-          <el-icon><SetUp /></el-icon><span>数字孪生沙盘</span>
+          <el-icon><SetUp /></el-icon><span>{{ t('menu.manufacturing') }}</span>
         </el-menu-item>
 
-        <div class="menu-group-title">城市交通</div>
+        <div class="menu-group-title">{{ t('group.traffic') }}</div>
         <el-menu-item index="/bjmetro">
-          <el-icon><DataAnalysis /></el-icon><span>地铁运营分析</span>
+          <el-icon><DataAnalysis /></el-icon><span>{{ t('menu.bjmetro') }}</span>
         </el-menu-item>
 
-        <div class="menu-group-title">证券场景</div>
+        <div class="menu-group-title">{{ t('group.securities') }}</div>
         <el-menu-item index="/securities">
-          <el-icon><WalletFilled /></el-icon><span>证券实时数仓</span>
+          <el-icon><WalletFilled /></el-icon><span>{{ t('menu.securities') }}</span>
         </el-menu-item>
 
-        <div class="menu-group-title">基金场景</div>
+        <div class="menu-group-title">{{ t('group.fund') }}</div>
         <el-menu-item index="/fund">
-          <el-icon><TrendCharts /></el-icon><span>基金投研沙盘</span>
+          <el-icon><TrendCharts /></el-icon><span>{{ t('menu.fund') }}</span>
         </el-menu-item>
         <el-menu-item index="/news">
-          <el-icon><Cpu /></el-icon><span>资讯 AI 分析</span>
+          <el-icon><Cpu /></el-icon><span>{{ t('menu.news') }}</span>
         </el-menu-item>
         <el-menu-item index="/lineage">
-          <el-icon><Share /></el-icon><span>数据血缘</span>
+          <el-icon><Share /></el-icon><span>{{ t('menu.lineage') }}</span>
         </el-menu-item>
 
-        <div class="menu-group-title">系统</div>
+        <div class="menu-group-title">{{ t('group.system') }}</div>
         <el-menu-item index="/config">
-          <el-icon><Setting /></el-icon><span>系统配置</span>
+          <el-icon><Setting /></el-icon><span>{{ t('menu.config') }}</span>
         </el-menu-item>
       </el-menu>
 
       <!-- Doris 状态指示 -->
       <div class="doris-status">
         <span class="dot" :class="dorisOk ? 'ok' : 'err'"></span>
-        <span>Doris 4.0 {{ dorisOk ? '已连接' : '未连接' }}</span>
+        <span>{{ dorisOk ? t('app.dorisConnected') : t('app.dorisDisconnected') }}</span>
       </div>
     </el-aside>
 
@@ -109,9 +112,20 @@
       <el-header class="header">
         <span class="page-title">{{ currentTitle }}</span>
         <div class="header-right">
-          <el-tag type="success" size="small" effect="plain">HASP 已启用</el-tag>
-          <el-tag type="warning" size="small" effect="plain" style="margin-left:8px">AI Function 就绪</el-tag>
-          <span class="username">数据分析师</span>
+          <el-tag type="warning" size="small" effect="plain" style="margin-left:8px">{{ t('app.ai') }}</el-tag>
+          <el-dropdown trigger="click" @command="setLocale">
+            <el-button size="small" plain>
+              {{ locale === 'zh' ? '中文' : 'English' }}
+              <el-icon class="el-icon--right"><ArrowDown /></el-icon>
+            </el-button>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item command="zh">{{ t('locale.zh') }}</el-dropdown-item>
+                <el-dropdown-item command="en">{{ t('locale.en') }}</el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
+          <span class="username">{{ t('app.analyst') }}</span>
         </div>
       </el-header>
       <el-main class="main-content">
@@ -125,12 +139,13 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { systemApi } from '@/api'
-import { Document, DataAnalysis, Monitor, Share, Histogram, Files, SetUp } from '@element-plus/icons-vue'
+import { Document, DataAnalysis, Monitor, Share, Histogram, Files, SetUp, Tickets, ArrowDown, Odometer, User, Grid, TrendCharts, Cpu, Coin, Promotion, WalletFilled, Setting, DataBoard } from '@element-plus/icons-vue'
+import { t, locale, setLocale } from '@/i18n'
 
 const route = useRoute()
 const dorisOk = ref(false)
 const activeMenu = computed(() => route.path)
-const currentTitle = computed(() => route.meta?.title || 'CDP 平台')
+const currentTitle = computed(() => (route.meta?.titleKey ? t(route.meta.titleKey) : 'CDP 平台'))
 
 onMounted(async () => {
   try {

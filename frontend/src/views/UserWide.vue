@@ -2,62 +2,60 @@
   <div>
     <!-- 查询条件 -->
     <div class="card">
-      <div class="card-title">🔍 多条件查询（Apache Doris 4.0 HASP 加速）</div>
+      <div class="card-title">{{ t('user.queryTitle') }}</div>
       <el-form :model="query" inline label-width="80px">
-        <el-form-item label="用户姓名">
-          <el-input v-model="query.user_name" placeholder="模糊搜索" clearable style="width:140px" />
+        <el-form-item :label="t('user.labelName')">
+          <el-input v-model="query.user_name" :placeholder="t('user.phFuzzy')" clearable style="width:140px" />
         </el-form-item>
-        <el-form-item label="身份证号">
-          <el-input v-model="query.id_card" placeholder="精确匹配" clearable style="width:180px" />
+        <el-form-item :label="t('user.labelIdCard')">
+          <el-input v-model="query.id_card" :placeholder="t('user.phExact')" clearable style="width:180px" />
         </el-form-item>
-        <el-form-item label="手机号">
-          <el-input v-model="query.phone" placeholder="精确匹配" clearable style="width:140px" />
+        <el-form-item :label="t('user.labelPhone')">
+          <el-input v-model="query.phone" :placeholder="t('user.phExact')" clearable style="width:140px" />
         </el-form-item>
-        <el-form-item label="资产等级">
-          <el-select v-model="query.asset_level" clearable placeholder="全部" style="width:130px">
+        <el-form-item :label="t('user.labelAsset')">
+          <el-select v-model="query.asset_level" clearable :placeholder="t('user.phAll')" style="width:130px">
             <el-option v-for="o in assetLevels" :key="o" :label="o" :value="o" />
           </el-select>
         </el-form-item>
-        <el-form-item label="活跃等级">
-          <el-select v-model="query.active_level" clearable placeholder="全部" style="width:110px">
+        <el-form-item :label="t('user.labelActive')">
+          <el-select v-model="query.active_level" clearable :placeholder="t('user.phAll')" style="width:110px">
             <el-option v-for="o in activeLevels" :key="o" :label="o" :value="o" />
           </el-select>
         </el-form-item>
-        <el-form-item label="生命周期">
-          <el-select v-model="query.lifecycle_stage" clearable placeholder="全部" style="width:120px">
+        <el-form-item :label="t('user.labelLifecycle')">
+          <el-select v-model="query.lifecycle_stage" clearable :placeholder="t('user.phAll')" style="width:120px">
             <el-option v-for="o in lifecycles" :key="o" :label="o" :value="o" />
           </el-select>
         </el-form-item>
-        <el-form-item label="偏好渠道">
-          <el-select v-model="query.preferred_channel" clearable placeholder="全部" style="width:110px">
+        <el-form-item :label="t('user.labelChannel')">
+          <el-select v-model="query.preferred_channel" clearable :placeholder="t('user.phAll')" style="width:110px">
             <el-option v-for="o in channels" :key="o" :label="o" :value="o" />
           </el-select>
         </el-form-item>
-        <el-form-item label="年龄范围">
+        <el-form-item :label="t('user.labelAge')">
           <el-input-number v-model="query.age_min" :min="18" :max="99" style="width:90px" controls-position="right" />
           <span style="margin:0 6px">-</span>
           <el-input-number v-model="query.age_max" :min="18" :max="99" style="width:90px" controls-position="right" />
         </el-form-item>
-        <el-form-item label="AUM(万)">
+        <el-form-item :label="t('user.labelAum')">
           <el-input-number v-model="query.aum_min" :min="0" style="width:90px" controls-position="right" />
           <span style="margin:0 6px">-</span>
           <el-input-number v-model="query.aum_max" :min="0" style="width:90px" controls-position="right" />
         </el-form-item>
-        <el-form-item label="异常用户">
-          <el-select v-model="query.anomaly_flag" clearable placeholder="全部" style="width:90px">
-            <el-option label="是" :value="1" />
-            <el-option label="否" :value="0" />
+        <el-form-item :label="t('user.labelAnomaly')">
+          <el-select v-model="query.anomaly_flag" clearable :placeholder="t('user.phAll')" style="width:90px">
+            <el-option :label="t('common.yes')" :value="1" />
+            <el-option :label="t('common.no')" :value="0" />
           </el-select>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" :loading="loading" @click="handleSearch">查询</el-button>
-          <el-button @click="handleReset">重置</el-button>
-          <el-button type="success" :loading="exporting" @click="handleExport">导出 Excel</el-button>
+          <el-button type="primary" :loading="loading" @click="handleSearch">{{ t('common.search') }}</el-button>
+          <el-button @click="handleReset">{{ t('common.reset') }}</el-button>
+          <el-button type="success" :loading="exporting" @click="handleExport">{{ t('common.export') }}</el-button>
         </el-form-item>
       </el-form>
-      <div style="font-size:12px;color:#909399;margin-top:4px">
-        ✅ 已启用 Doris 4.0 HASP 列存加速 · 分区裁剪优化 · 查询时间通常 &lt;1s
-      </div>
+      <div style="font-size:12px;color:#909399;margin-top:4px">{{ t('user.haspHint') }}</div>
     </div>
 
     <!-- 结果统计 -->
@@ -65,7 +63,7 @@
       <el-row align="middle">
         <el-col :span="12">
           <span style="font-size:13px;color:#606266">
-            共查询到 <strong style="color:#409eff;font-size:16px">{{ total.toLocaleString() }}</strong> 名用户
+            <span v-html="t('user.resultCount').replace('{0}', `<strong style=\'color:#409eff;font-size:16px\'>${total.toLocaleString()}</strong>`)" />
           </span>
         </el-col>
         <el-col :span="12" style="text-align:right">
@@ -79,63 +77,59 @@
       <el-table
         :data="rows"
         v-loading="loading"
-        stripe
-        border
-        size="small"
-        style="width:100%"
+        stripe border size="small" style="width:100%"
         :row-class-name="rowClass"
         @row-click="showDetail"
       >
-        <el-table-column prop="user_id"   label="用户ID"   width="90" fixed />
-        <el-table-column prop="user_name" label="姓名"     width="80" fixed />
-        <el-table-column prop="phone"     label="手机号"   width="130" />
-        <el-table-column prop="id_card"   label="身份证"   width="150" />
-        <el-table-column prop="age"       label="年龄"     width="60" />
-        <el-table-column prop="city"      label="城市"     width="80" />
-        <el-table-column prop="asset_level" label="资产等级" width="100">
+        <el-table-column prop="user_id"   :label="t('user.colId')"     width="90" fixed />
+        <el-table-column prop="user_name" :label="t('user.colName')"   width="80" fixed />
+        <el-table-column prop="phone"     :label="t('user.colPhone')"  width="130" />
+        <el-table-column prop="id_card"   :label="t('user.colIdCard')" width="150" />
+        <el-table-column prop="age"       :label="t('user.colAge')"    width="60" />
+        <el-table-column prop="city"      :label="t('user.colCity')"   width="80" />
+        <el-table-column prop="asset_level" :label="t('user.colAsset')" width="100">
           <template #default="{row}">
             <el-tag :type="assetTagType(row.asset_level)" size="small">{{ row.asset_level }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="aum_total" label="AUM(万)" width="100" sortable>
+        <el-table-column prop="aum_total" :label="t('user.colAum')" width="100" sortable>
           <template #default="{row}">{{ fmtNum(row.aum_total) }}</template>
         </el-table-column>
-        <el-table-column prop="deposit_amount" label="存款(万)" width="90">
+        <el-table-column prop="deposit_amount" :label="t('user.colDeposit')" width="90">
           <template #default="{row}">{{ fmtNum(row.deposit_amount) }}</template>
         </el-table-column>
-        <el-table-column prop="fund_amount"    label="基金(万)" width="90">
+        <el-table-column prop="fund_amount"    :label="t('user.colFund')" width="90">
           <template #default="{row}">{{ fmtNum(row.fund_amount) }}</template>
         </el-table-column>
-        <el-table-column prop="loan_amount"    label="贷款(万)" width="90">
+        <el-table-column prop="loan_amount"    :label="t('user.colLoan')" width="90">
           <template #default="{row}">{{ fmtNum(row.loan_amount) }}</template>
         </el-table-column>
-        <el-table-column prop="preferred_channel" label="偏好渠道" width="90" />
-        <el-table-column prop="active_level"   label="活跃等级" width="90">
+        <el-table-column prop="preferred_channel" :label="t('user.colChannel')" width="90" />
+        <el-table-column prop="active_level"   :label="t('user.colActiveLevel')" width="90">
           <template #default="{row}">
             <el-tag :type="activeTagType(row.active_level)" size="small">{{ row.active_level }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="lifecycle_stage" label="生命周期" width="100" />
-        <el-table-column prop="credit_score"   label="信用分" width="80" />
-        <el-table-column prop="churn_prob"     label="流失概率" width="90">
+        <el-table-column prop="lifecycle_stage" :label="t('user.colLifecycle')" width="100" />
+        <el-table-column prop="credit_score"   :label="t('user.colCredit')" width="80" />
+        <el-table-column prop="churn_prob"     :label="t('user.colChurn')" width="90">
           <template #default="{row}">
             <el-progress
               :percentage="Math.round((row.churn_prob || 0) * 100)"
               :color="row.churn_prob > 0.5 ? '#f56c6c' : '#67c23a'"
-              :stroke-width="8"
-              style="width:70px"
+              :stroke-width="8" style="width:70px"
             />
           </template>
         </el-table-column>
-        <el-table-column prop="anomaly_flag"   label="异常" width="70">
+        <el-table-column prop="anomaly_flag"   :label="t('user.colAnomaly')" width="70">
           <template #default="{row}">
-            <el-tag v-if="row.anomaly_flag" type="danger" size="small">⚠ 异常</el-tag>
-            <el-tag v-else type="success" size="small">正常</el-tag>
+            <el-tag v-if="row.anomaly_flag" type="danger" size="small">{{ t('common.anomaly') }}</el-tag>
+            <el-tag v-else type="success" size="small">{{ t('common.normal') }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="100" fixed="right">
+        <el-table-column :label="t('common.operation')" width="100" fixed="right">
           <template #default="{row}">
-            <el-button type="primary" size="small" link @click.stop="showDetail(row)">360°视图</el-button>
+            <el-button type="primary" size="small" link @click.stop="showDetail(row)">{{ t('user.col360') }}</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -152,41 +146,41 @@
     </div>
 
     <!-- 用户360°视图抽屉 -->
-    <el-drawer v-model="drawerVisible" title="用户 360° 视图" size="500px">
+    <el-drawer v-model="drawerVisible" :title="t('user.drawerTitle')" size="500px">
       <div v-if="selectedUser">
         <el-descriptions :column="2" border size="small">
-          <el-descriptions-item label="用户ID">{{ selectedUser.user_id }}</el-descriptions-item>
-          <el-descriptions-item label="姓名">{{ selectedUser.user_name }}</el-descriptions-item>
-          <el-descriptions-item label="手机号">{{ selectedUser.phone }}</el-descriptions-item>
-          <el-descriptions-item label="身份证">{{ selectedUser.id_card }}</el-descriptions-item>
-          <el-descriptions-item label="年龄">{{ selectedUser.age }}</el-descriptions-item>
-          <el-descriptions-item label="城市">{{ selectedUser.city }}</el-descriptions-item>
-          <el-descriptions-item label="资产等级">
+          <el-descriptions-item :label="t('user.dUserId')">{{ selectedUser.user_id }}</el-descriptions-item>
+          <el-descriptions-item :label="t('user.dName')">{{ selectedUser.user_name }}</el-descriptions-item>
+          <el-descriptions-item :label="t('user.dPhone')">{{ selectedUser.phone }}</el-descriptions-item>
+          <el-descriptions-item :label="t('user.dIdCard')">{{ selectedUser.id_card }}</el-descriptions-item>
+          <el-descriptions-item :label="t('user.dAge')">{{ selectedUser.age }}</el-descriptions-item>
+          <el-descriptions-item :label="t('user.dCity')">{{ selectedUser.city }}</el-descriptions-item>
+          <el-descriptions-item :label="t('user.dAsset')">
             <el-tag :type="assetTagType(selectedUser.asset_level)" size="small">{{ selectedUser.asset_level }}</el-tag>
           </el-descriptions-item>
-          <el-descriptions-item label="AUM总资产">{{ fmtNum(selectedUser.aum_total) }} 万</el-descriptions-item>
-          <el-descriptions-item label="存款余额">{{ fmtNum(selectedUser.deposit_amount) }} 万</el-descriptions-item>
-          <el-descriptions-item label="基金持有">{{ fmtNum(selectedUser.fund_amount) }} 万</el-descriptions-item>
-          <el-descriptions-item label="理财余额">{{ fmtNum(selectedUser.wm_amount) }} 万</el-descriptions-item>
-          <el-descriptions-item label="贷款余额">{{ fmtNum(selectedUser.loan_amount) }} 万</el-descriptions-item>
-          <el-descriptions-item label="信用评分">{{ selectedUser.credit_score }}</el-descriptions-item>
-          <el-descriptions-item label="信用等级">{{ selectedUser.credit_grade }}</el-descriptions-item>
-          <el-descriptions-item label="风险偏好">{{ ['','保守','稳健','平衡','进取','激进'][selectedUser.risk_level] }}</el-descriptions-item>
-          <el-descriptions-item label="偏好渠道">{{ selectedUser.preferred_channel }}</el-descriptions-item>
-          <el-descriptions-item label="APP登录(月)">{{ selectedUser.app_login_30d }} 次</el-descriptions-item>
-          <el-descriptions-item label="活跃等级">{{ selectedUser.active_level }}</el-descriptions-item>
-          <el-descriptions-item label="生命周期">{{ selectedUser.lifecycle_stage }}</el-descriptions-item>
-          <el-descriptions-item label="流失概率">{{ ((selectedUser.churn_prob || 0) * 100).toFixed(1) }}%</el-descriptions-item>
-          <el-descriptions-item label="异常标记">
+          <el-descriptions-item :label="t('user.dAum')">{{ fmtNum(selectedUser.aum_total) }} {{ t('user.wan') }}</el-descriptions-item>
+          <el-descriptions-item :label="t('user.dDeposit')">{{ fmtNum(selectedUser.deposit_amount) }} {{ t('user.wan') }}</el-descriptions-item>
+          <el-descriptions-item :label="t('user.dFund')">{{ fmtNum(selectedUser.fund_amount) }} {{ t('user.wan') }}</el-descriptions-item>
+          <el-descriptions-item :label="t('user.dWm')">{{ fmtNum(selectedUser.wm_amount) }} {{ t('user.wan') }}</el-descriptions-item>
+          <el-descriptions-item :label="t('user.dLoan')">{{ fmtNum(selectedUser.loan_amount) }} {{ t('user.wan') }}</el-descriptions-item>
+          <el-descriptions-item :label="t('user.dCredit')">{{ selectedUser.credit_score }}</el-descriptions-item>
+          <el-descriptions-item :label="t('user.dCreditGrade')">{{ selectedUser.credit_grade }}</el-descriptions-item>
+          <el-descriptions-item :label="t('user.dRisk')">{{ ['','保守','稳健','平衡','进取','激进'][selectedUser.risk_level] }}</el-descriptions-item>
+          <el-descriptions-item :label="t('user.dChannel')">{{ selectedUser.preferred_channel }}</el-descriptions-item>
+          <el-descriptions-item :label="t('user.dLogin')">{{ selectedUser.app_login_30d }} {{ t('user.times') }}</el-descriptions-item>
+          <el-descriptions-item :label="t('user.dActiveLevel')">{{ selectedUser.active_level }}</el-descriptions-item>
+          <el-descriptions-item :label="t('user.dLifecycle')">{{ selectedUser.lifecycle_stage }}</el-descriptions-item>
+          <el-descriptions-item :label="t('user.dChurn')">{{ ((selectedUser.churn_prob || 0) * 100).toFixed(1) }}%</el-descriptions-item>
+          <el-descriptions-item :label="t('user.dAnomalyFlag')">
             <el-tag :type="selectedUser.anomaly_flag ? 'danger' : 'success'" size="small">
-              {{ selectedUser.anomaly_flag ? '⚠ 异常' : '正常' }}
+              {{ selectedUser.anomaly_flag ? t('common.anomaly') : t('common.normal') }}
             </el-tag>
           </el-descriptions-item>
-          <el-descriptions-item label="注册日期" :span="2">{{ selectedUser.register_date }}</el-descriptions-item>
+          <el-descriptions-item :label="t('user.dRegDate')" :span="2">{{ selectedUser.register_date }}</el-descriptions-item>
         </el-descriptions>
 
         <div v-if="selectedUser.log_tags" style="margin-top:16px">
-          <div style="font-size:13px;font-weight:600;margin-bottom:8px">🏷️ AI 日志标签</div>
+          <div style="font-size:13px;font-weight:600;margin-bottom:8px">{{ t('user.dAiTags') }}</div>
           <el-tag
             v-for="tag in parseTags(selectedUser.log_tags)"
             :key="tag" style="margin:3px" size="small" type="warning"
@@ -201,6 +195,7 @@
 import { ref, reactive, onMounted } from 'vue'
 import { userApi } from '@/api'
 import { ElMessage } from 'element-plus'
+import { t, locale } from '@/i18n'
 
 const assetLevels = ['VIP私行', 'VIP钻石', 'VIP铂金', 'VIP黄金', '普通']
 const activeLevels = ['高活', '中活', '低活', '沉睡']
@@ -256,7 +251,7 @@ function showDetail(row) { selectedUser.value = row; drawerVisible.value = true 
 async function handleExport() {
   exporting.value = true
   try {
-    ElMessage.info('导出功能：将当前查询结果导出为 Excel（实际部署时接入后端 /api/user/export 接口）')
+    ElMessage.info(t('user.exportMsg'))
   } finally { exporting.value = false }
 }
 

@@ -2,8 +2,8 @@
   <div class="arch-wrap">
     <!-- 标题 -->
     <div class="arch-title">
-      <span class="title-text">智慧城轨数据平台 · 技术架构</span>
-      <span class="title-sub">基于 SelectDB 的统一数据底座</span>
+      <span class="title-text">{{ t('bjm.archTitle') }}</span>
+      <span class="title-sub">{{ t('bjm.archSub') }}</span>
     </div>
 
     <!-- 主架构图 -->
@@ -11,7 +11,7 @@
 
       <!-- 第一层：数据源 -->
       <div class="layer">
-        <div class="layer-label">数据源层</div>
+        <div class="layer-label">{{ t('bjm.sourceLayer') }}</div>
         <div class="layer-cards">
           <div class="src-card" v-for="s in sources" :key="s.name">
             <span class="src-icon">{{ s.icon }}</span>
@@ -23,7 +23,7 @@
 
       <!-- 第二层：采集接入 -->
       <div class="layer layer-ingestion">
-        <div class="layer-label">采集接入层</div>
+        <div class="layer-label">{{ t('bjm.ingestLayer') }}</div>
         <div class="layer-cards">
           <div class="ing-card" v-for="i in ingestion" :key="i.name">
             <span class="ing-icon">{{ i.icon }}</span>
@@ -37,11 +37,11 @@
 
       <!-- 第三层：Doris 核心 -->
       <div class="layer layer-doris">
-        <div class="layer-label doris-label">核心存储层</div>
+        <div class="layer-label doris-label">{{ t('bjm.coreLayer') }}</div>
         <div class="doris-block">
           <div class="doris-header">
             <span class="doris-logo">🔥 SelectDB </span>
-            <span class="doris-subtitle">统一 OLAP 数据仓库</span>
+            <span class="doris-subtitle">{{ t('bjm.coreWarehouse') }}</span>
           </div>
           <div class="doris-content">
             <div class="doris-layers">
@@ -51,7 +51,7 @@
               </div>
             </div>
             <div class="doris-features">
-              <div class="feat-title">核心技术特性</div>
+              <div class="feat-title">{{ t('bjm.coreFeatures') }}</div>
               <div class="feat-tags">
                 <span class="feat-tag" v-for="f in dorisFeatures" :key="f">{{ f }}</span>
               </div>
@@ -62,7 +62,7 @@
 
       <!-- 第四层：服务计算 -->
       <div class="layer layer-service">
-        <div class="layer-label">服务计算层</div>
+        <div class="layer-label">{{ t('bjm.serviceLayer') }}</div>
         <div class="layer-cards">
           <div class="svc-card" v-for="s in services" :key="s.name">
             <span class="svc-icon">{{ s.icon }}</span>
@@ -76,7 +76,7 @@
 
       <!-- 第五层：应用展现 -->
       <div class="layer layer-app">
-        <div class="layer-label">应用展现层</div>
+        <div class="layer-label">{{ t('bjm.appLayer') }}</div>
         <div class="layer-cards">
           <div class="app-card" v-for="a in apps" :key="a.name">
             <span class="app-icon">{{ a.icon }}</span>
@@ -98,57 +98,58 @@
 </template>
 
 <script setup>
+import { t } from '@/i18n'
 const sources = [
-  { icon: '🎫', name: 'AFC 票务系统',    type: 'rt',  typeLabel: '实时' },
-  { icon: '🚆', name: '车辆 IoT 传感器', type: 'rt',  typeLabel: '实时' },
-  { icon: '📡', name: '信号控制系统',    type: 'rt',  typeLabel: '实时' },
-  { icon: '👁️', name: '客流视频分析',    type: 'rt',  typeLabel: '实时' },
-  { icon: '🔧', name: '设备运维系统',    type: 'bat', typeLabel: '批处理' },
-  { icon: '💼', name: '商业经营系统',    type: 'bat', typeLabel: '批处理' },
+  { icon: '🎫', name: t('bjm.srcAfc'),    type: 'rt',  typeLabel: t('bjm.rt') },
+  { icon: '🚆', name: t('bjm.srcVehicle'), type: 'rt',  typeLabel: t('bjm.rt') },
+  { icon: '📡', name: t('bjm.srcSignal'),  type: 'rt',  typeLabel: t('bjm.rt') },
+  { icon: '👁️', name: t('bjm.srcVideo'),   type: 'rt',  typeLabel: t('bjm.rt') },
+  { icon: '🔧', name: t('bjm.srcMaintain'), type: 'bat', typeLabel: t('bjm.batch') },
+  { icon: '💼', name: t('bjm.srcBusiness'), type: 'bat', typeLabel: t('bjm.batch') },
 ]
 
 const ingestion = [
-  { icon: '⚡', name: 'Apache Kafka',      desc: '实时消息队列 · 百万 TPS' },
-  { icon: '🌊', name: 'Apache Flink',      desc: '流式计算 · 毫秒级延迟' },
-  { icon: '🔄', name: 'DataX / SeaTunnel', desc: '离线批量同步 · T+1' },
+  { icon: '⚡', name: 'Apache Kafka',      desc: t('bjm.kafkaDesc') },
+  { icon: '🌊', name: 'Apache Flink',      desc: t('bjm.flinkDesc') },
+  { icon: '🔄', name: 'DataX / SeaTunnel', desc: t('bjm.etlDesc') },
 ]
 
 const dorisLayers = [
-  { name: 'ODS 贴源层', desc: '原始数据落地\n保留全量历史' },
-  { name: 'DWD 明细层', desc: '清洗 · 标准化\n关联维表' },
-  { name: 'DWS 汇总层', desc: '按主题聚合\n支持快速查询' },
-  { name: 'ADS 应用层', desc: '业务宽表\n指标集市' },
+  { name: t('bjm.odsLayer'), desc: t('bjm.odsDesc') },
+  { name: t('bjm.dwdLayer'), desc: t('bjm.dwdDesc') },
+  { name: t('bjm.dwsLayer'), desc: t('bjm.dwsDesc') },
+  { name: t('bjm.adsLayer'), desc: t('bjm.adsDesc') },
 ]
 
 const dorisFeatures = [
-  'Unique Key 模型', 'Duplicate Key',
-  '倒排全文索引', 'Rollup 物化视图',
-  'Stream Load 实时写入', 'Bitmap 精确去重',
-  '向量化执行引擎', '列式存储压缩',
+  t('bjm.uniqueKey'), t('bjm.duplicateKey'),
+  t('bjm.invertedIndex'), t('bjm.rollup'),
+  t('bjm.streamLoad'), t('bjm.bitmap'),
+  t('bjm.vectorEngine'), t('bjm.columnCompress'),
 ]
 
 const services = [
-  { icon: '📊', name: 'OLAP 即席查询', desc: '秒级多维分析' },
-  { icon: '🔍', name: '全文检索服务',  desc: '倒排索引加速' },
-  { icon: '🤖', name: 'AI / ML 服务',  desc: '特征工程 & 推理' },
-  { icon: '🔗', name: 'RESTful API',   desc: '统一数据出口' },
+  { icon: '📊', name: t('bjm.olapQuery'), desc: t('bjm.olapDesc') },
+  { icon: '🔍', name: t('bjm.searchSvc'),  desc: t('bjm.searchDesc') },
+  { icon: '🤖', name: t('bjm.aiSvc'),  desc: t('bjm.aiDesc') },
+  { icon: '🔗', name: t('bjm.apiSvc'),   desc: t('bjm.apiDesc') },
 ]
 
 const apps = [
-  { icon: '📊', name: '运营分析驾驶舱' },
-  { icon: '👥', name: '客流预测系统' },
-  { icon: '🚇', name: '列车调度优化' },
-  { icon: '⚙️', name: '设备预警平台' },
-  { icon: '💰', name: '经营管理大屏' },
+  { icon: '📊', name: t('bjm.appOps') },
+  { icon: '👥', name: t('bjm.appFlowPred') },
+  { icon: '🚇', name: t('bjm.appDispatch') },
+  { icon: '⚙️', name: t('bjm.appWarning') },
+  { icon: '💰', name: t('bjm.appScreen') },
 ]
 
 const metrics = [
-  { val: '< 1s',  label: '查询响应' },
-  { val: '10万+', label: '日均写入 QPS' },
-  { val: '30 天', label: '热数据窗口' },
-  { val: '99.9%', label: '服务可用性' },
-  { val: '10:1+', label: '数据压缩比' },
-  { val: '亿级',  label: '数据规模' },
+  { val: '< 1s',  label: t('bjm.metricResp') },
+  { val: '10万+', label: t('bjm.metricQps') },
+  { val: '30 天', label: t('bjm.metricHotWindow') },
+  { val: '99.9%', label: t('bjm.metricAvail') },
+  { val: '10:1+', label: t('bjm.metricCompress') },
+  { val: '亿级',  label: t('bjm.metricScale') },
 ]
 </script>
 

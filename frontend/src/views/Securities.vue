@@ -3,9 +3,9 @@
     <CollapseCard v-model:open="archOpen">
       <template #header-left>
         <span>📈</span>
-        <span class="ch-title">券商经营与风控 · Doris 实时数仓链路</span>
-        <span class="badge green">UNIQUE KEY 严谨模型</span>
-        <span class="badge orange">经纪 + 财富 + 两融</span>
+        <span class="ch-title">{{ t('securities.archTitle') }}</span>
+        <span class="badge green">{{ t('securities.badgeModel') }}</span>
+        <span class="badge orange">{{ t('securities.badgeBiz') }}</span>
       </template>
       <div>
         <div class="arch-flow">
@@ -36,7 +36,7 @@ sec_branch_metrics     UNIQUE KEY(ts,branch_id)      -- 营业部分钟经营指
             <div class="ss"><div class="sv">4家</div><div class="sk">营业部</div></div>
             <div class="ss"><div class="sv">12只</div><div class="sk">核心股票</div></div>
             <div class="ss-btn">
-              <el-button type="primary" size="small" :loading="loading" @click="doInit">一键初始化演示</el-button>
+              <el-button type="primary" size="small" :loading="loading" @click="doInit">{{ t('securities.initBtn') }}</el-button>
             </div>
           </div>
         </div>
@@ -45,8 +45,8 @@ sec_branch_metrics     UNIQUE KEY(ts,branch_id)      -- 营业部分钟经营指
 
     <div v-if="overview.empty" class="card empty-card">
       <div class="empty-icon">🏦</div>
-      <div class="empty-title">证券实时数仓尚未初始化</div>
-      <div class="empty-sub">点击上方「一键初始化演示」后即可看到真实业务风格的账户、成交、持仓与两融预警。</div>
+      <div class="empty-title">{{ t('securities.emptyTitle') }}</div>
+      <div class="empty-sub">{{ t('securities.emptySub') }}</div>
     </div>
 
     <template v-else>
@@ -68,8 +68,8 @@ sec_branch_metrics     UNIQUE KEY(ts,branch_id)      -- 营业部分钟经营指
             type="datetimerange"
             size="small"
             unlink-panels
-            start-placeholder="开始时间"
-            end-placeholder="结束时间"
+            :start-placeholder="t('securities.startPh')"
+            :end-placeholder="t('securities.endPh')"
             style="width:360px"
           />
         </div>
@@ -77,7 +77,7 @@ sec_branch_metrics     UNIQUE KEY(ts,branch_id)      -- 营业部分钟经营指
 
       <div class="card tabs-card">
         <el-tabs v-model="activeTab">
-          <el-tab-pane label="经营总览" name="overview" lazy>
+          <el-tab-pane :label="t('securities.tabOverview')" name="overview" lazy>
             <div class="two-col">
               <div>
                 <div class="ct">分钟成交趋势</div>
@@ -106,7 +106,7 @@ sec_branch_metrics     UNIQUE KEY(ts,branch_id)      -- 营业部分钟经营指
             </el-table>
           </el-tab-pane>
 
-          <el-tab-pane label="实时成交" name="trades" lazy>
+          <el-tab-pane :label="t('securities.tabTrades')" name="trades" lazy>
             <el-table :data="filteredTrades" border stripe size="small">
               <el-table-column prop="ts" label="成交时间" width="160" />
               <el-table-column prop="branch_name" label="营业部" width="140" />
@@ -128,7 +128,7 @@ sec_branch_metrics     UNIQUE KEY(ts,branch_id)      -- 营业部分钟经营指
             </el-table>
           </el-tab-pane>
 
-          <el-tab-pane label="客户资产" name="accounts" lazy>
+          <el-tab-pane :label="t('securities.tabAccounts')" name="accounts" lazy>
             <el-table :data="filteredAccounts" border stripe size="small">
               <el-table-column prop="account_id" label="账户" width="88" />
               <el-table-column prop="client_name" label="客户" width="80" />
@@ -152,7 +152,7 @@ sec_branch_metrics     UNIQUE KEY(ts,branch_id)      -- 营业部分钟经营指
             </el-table>
           </el-tab-pane>
 
-          <el-tab-pane label="持仓热度" name="positions" lazy>
+          <el-tab-pane :label="t('securities.tabPositions')" name="positions" lazy>
             <div class="two-col">
               <div>
                 <div class="ct">板块热度</div>
@@ -191,7 +191,7 @@ sec_branch_metrics     UNIQUE KEY(ts,branch_id)      -- 营业部分钟经营指
             </el-table>
           </el-tab-pane>
 
-          <el-tab-pane label="风险预警" name="risk" lazy>
+          <el-tab-pane :label="t('securities.tabRisk')" name="risk" lazy>
             <el-table :data="filteredRisks" border stripe size="small">
               <el-table-column prop="branch_name" label="营业部" width="140" />
               <el-table-column prop="client_name" label="客户" width="80" />
@@ -227,6 +227,7 @@ import { ElMessage } from 'element-plus'
 import VChart from 'vue-echarts'
 import { securitiesApi } from '@/api'
 import CollapseCard from '@/components/common/CollapseCard.vue'
+import { t, locale } from '@/i18n'
 
 const archOpen = ref(false)
 const ctrlOpen = ref(true)

@@ -1,15 +1,15 @@
 <template>
   <div class="ts-wrap">
     <div class="card toolbar">
-      <span style="font-weight:600;font-size:14px">日志标签统计分析</span>
+      <span style="font-weight:600;font-size:14px">{{ t('logTag.tagDetail') }}</span>
       <el-tag v-if="data.total>0" size="small" effect="plain">
         已标签 {{ data.tagged?.toLocaleString() }} / 共 {{ data.total?.toLocaleString() }} 条
       </el-tag>
       <el-button type="primary" :loading="loading" style="margin-left:auto" @click="load">
-        <el-icon><Refresh /></el-icon> 刷新
+        <el-icon><Refresh /></el-icon> {{ t('common.refresh') }}
       </el-button>
       <el-button type="warning" :loading="classifying" @click="runClassify">
-        <el-icon><MagicStick /></el-icon> AI打标签
+        <el-icon><MagicStick /></el-icon> {{ t('logTag.aiBtn') }}
       </el-button>
     </div>
 
@@ -21,11 +21,11 @@
       <!-- 标签分布 + 耗时热力 -->
       <div class="row2">
         <div class="card chart-card">
-          <div class="card-title">标签分布</div>
+          <div class="card-title">{{ t('logTag.tagDist') }}</div>
           <v-chart :option="pieOpt" style="height:280px" autoresize />
         </div>
         <div class="card chart-card">
-          <div class="card-title">各标签平均耗时 (ms)</div>
+          <div class="card-title">{{ t('logTag.avgDuration') }}</div>
           <v-chart :option="perfOpt" style="height:280px" autoresize />
         </div>
       </div>
@@ -44,9 +44,9 @@
 
       <!-- 明细表 -->
       <div class="card">
-        <div class="card-title">标签明细</div>
+        <div class="card-title">{{ t('logTag.tagDetail') }}</div>
         <el-table :data="data.tag_distribution" size="small" stripe>
-          <el-table-column prop="log_tag" label="标签" width="160">
+          <el-table-column prop="log_tag" :label="t('logTag.colTag')" width="160">
             <template #default="{row}">
               <el-tag :type="tagType(row.log_tag)" size="small">{{ row.log_tag }}</el-tag>
             </template>
@@ -82,6 +82,7 @@ import { PieChart, BarChart } from 'echarts/charts'
 import { GridComponent, TooltipComponent, LegendComponent } from 'echarts/components'
 import VChart from 'vue-echarts'
 import { observeApi } from '@/api'
+import { t, locale } from '@/i18n'
 
 use([CanvasRenderer, PieChart, BarChart, GridComponent, TooltipComponent, LegendComponent])
 

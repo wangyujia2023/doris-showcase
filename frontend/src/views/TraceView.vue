@@ -3,12 +3,12 @@
 
     <!-- 工具栏 -->
     <div class="card toolbar">
-      <el-select v-model="filters.status" clearable placeholder="状态" style="width:110px" @change="loadTraces">
+      <el-select v-model="filters.status" clearable :placeholder="t('trace.phStatus')" style="width:110px" @change="loadTraces">
         <el-option value="OK" label="✅ OK"/>
         <el-option value="ERROR" label="❌ ERROR"/>
       </el-select>
       <el-button type="primary" :loading="loading" @click="loadTraces">
-        <el-icon><Refresh /></el-icon> 刷新
+        <el-icon><Refresh /></el-icon> {{ t('trace.refreshBtn') }}
       </el-button>
       <div style="margin-left:auto;font-size:12px;color:#909399">
         基于内存 sys_logs 实时采集 · Doris 链路还原
@@ -20,13 +20,13 @@
       <!-- 左：Trace 列表 -->
       <div class="card trace-panel">
         <div class="panel-title">
-          Trace 列表
+          {{ t('trace.listTitle') }}
           <el-tag size="small" style="margin-left:6px">{{ traces.length }}</el-tag>
         </div>
         <div v-loading="loading">
           <div v-if="!loading && !traces.length"
             style="text-align:center;padding:40px 0;color:#c0c4cc;font-size:13px">
-            暂无链路数据
+            {{ t('trace.emptyList') }}
           </div>
           <div v-for="t in traces" :key="t.trace_id"
             class="trace-row"
@@ -55,7 +55,7 @@
 
       <!-- 右：Trace 详情 瀑布图 -->
       <div class="card detail-panel">
-        <div v-if="!selected" class="empty-hint">← 点击左侧 Trace 查看执行链路</div>
+        <div v-if="!selected" class="empty-hint">{{ t('trace.hint') }}</div>
 
         <div v-else v-loading="detailLoading">
 
@@ -167,19 +167,19 @@
           <div class="stat-row">
             <div class="stat-card">
               <div class="stat-val">{{ dbSpans.length }}</div>
-              <div class="stat-lbl">DB Spans</div>
+              <div class="stat-lbl">{{ t('trace.dbSpans') }}</div>
             </div>
             <div class="stat-card">
               <div class="stat-val" style="color:#f56c6c">{{ errSpans.length }}</div>
-              <div class="stat-lbl">错误 Spans</div>
+              <div class="stat-lbl">Error Spans</div>
             </div>
             <div class="stat-card">
               <div class="stat-val" style="color:#67c23a">{{ fmtMs(dbTotalMs) }}</div>
-              <div class="stat-lbl">DB 总耗时</div>
+              <div class="stat-lbl">{{ t('trace.dbTime') }}</div>
             </div>
             <div class="stat-card">
               <div class="stat-val" style="color:#e6a23c">{{ dbPct }}%</div>
-              <div class="stat-lbl">DB 时间占比</div>
+              <div class="stat-lbl">{{ t('trace.dbPct') }}</div>
             </div>
           </div>
 
@@ -193,6 +193,7 @@
 import { ref, computed, onMounted, reactive } from 'vue'
 import { Refresh } from '@element-plus/icons-vue'
 import { traceApi } from '@/api'
+import { t, locale } from '@/i18n'
 
 const SVC_COLORS = {
   'CDP后台':   '#409eff', 'api-gateway': '#409eff',

@@ -1,17 +1,17 @@
 <template>
   <div class="lo-wrap">
     <div class="card toolbar">
-      <el-input v-model="filters.path" placeholder="过滤路径..." clearable style="flex:1;max-width:280px" @keyup.enter="load">
+      <el-input v-model="filters.path" :placeholder="t('observe.phPath')" clearable style="flex:1;max-width:280px" @keyup.enter="load">
         <template #prefix><el-icon><Search /></el-icon></template>
       </el-input>
-      <el-select v-model="filters.level" clearable placeholder="级别" style="width:110px" @change="load">
+      <el-select v-model="filters.level" clearable :placeholder="t('observe.phLevel')" style="width:110px" @change="load">
         <el-option value="INFO" label="INFO" /><el-option value="WARN" label="WARN" /><el-option value="ERROR" label="ERROR" />
       </el-select>
-      <el-select v-model="filters.service" clearable placeholder="服务" style="width:130px" @change="load">
+      <el-select v-model="filters.service" clearable :placeholder="t('observe.phService')" style="width:130px" @change="load">
         <el-option v-for="s in (stats.svc_counts||[])" :key="s.service" :value="s.service" :label="s.service" />
       </el-select>
-      <el-button type="primary" :loading="loading" @click="() => { page=1; load() }"><el-icon><Refresh /></el-icon> 刷新</el-button>
-      <el-button type="warning" :loading="classifying" @click="runClassify"><el-icon><MagicStick /></el-icon> AI打标签</el-button>
+      <el-button type="primary" :loading="loading" @click="() => { page=1; load() }"><el-icon><Refresh /></el-icon> {{ t('observe.refreshBtn') }}</el-button>
+      <el-button type="warning" :loading="classifying" @click="runClassify"><el-icon><MagicStick /></el-icon> {{ t('observe.aiTagBtn') }}</el-button>
       <el-tag size="small" effect="plain" style="margin-left:auto">{{ dataSource }}</el-tag>
     </div>
 
@@ -23,7 +23,7 @@
         </div>
         <div class="facet-divider"/>
         <div class="facet-section">
-          <div class="facet-title">日志级别</div>
+          <div class="facet-title">{{ t('observe.facetLevel') }}</div>
           <div v-for="l in (stats.level_counts||[])" :key="l.level"
             class="facet-item" :class="{active:filters.level===l.level}"
             @click="toggleFilter('level',l.level)">
@@ -33,7 +33,7 @@
         </div>
         <div class="facet-divider"/>
         <div class="facet-section">
-          <div class="facet-title">服务</div>
+          <div class="facet-title">{{ t('observe.facetService') }}</div>
           <div v-for="s in (stats.svc_counts||[])" :key="s.service"
             class="facet-item" :class="{active:filters.service===s.service}"
             @click="toggleFilter('service',s.service)">
@@ -44,7 +44,7 @@
         </div>
         <div class="facet-divider"/>
         <div class="facet-section">
-          <div class="facet-title">Top 路径</div>
+          <div class="facet-title">{{ t('observe.facetTopPath') }}</div>
           <div v-for="p in (stats.top_paths||[]).slice(0,5)" :key="p.path"
             class="facet-item path-item" @click="filters.path=p.path;load()">
             <div style="font-size:11px;color:#409eff;word-break:break-all">{{p.path}}</div>
@@ -63,7 +63,7 @@
         </div>
 
         <div class="card log-card" v-loading="loading">
-          <div v-if="!loading && logs.length===0" style="text-align:center;padding:40px;color:#c0c4cc">暂无日志，请先操作页面产生请求</div>
+          <div v-if="!loading && logs.length===0" style="text-align:center;padding:40px;color:#c0c4cc">{{ t('observe.noLogs') }}</div>
           <div v-for="(log,idx) in logs" :key="idx">
             <div class="log-row" :class="rowCls(log)" @click="toggleExpand(idx)">
               <span :class="`lv-badge lv-${log.level?.toLowerCase()}`">{{log.level}}</span>
@@ -107,6 +107,7 @@ import { BarChart } from 'echarts/charts'
 import { GridComponent, TooltipComponent } from 'echarts/components'
 import VChart from 'vue-echarts'
 import { observeApi } from '@/api'
+import { t, locale } from '@/i18n'
 
 use([CanvasRenderer, BarChart, GridComponent, TooltipComponent])
 

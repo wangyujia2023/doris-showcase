@@ -2,47 +2,47 @@
   <div class="tab-wrap">
     <div class="kpi-row" v-if="kpi">
       <div class="kpi-card" style="--top:#67c23a">
-        <div class="kc-label">全网准点率</div>
+        <div class="kc-label">{{ t('bjm.trainPunctuality') }}</div>
         <div class="kc-value">{{ (kpi.punctuality_rate*100).toFixed(1) }}<span class="kc-unit">%</span></div>
       </div>
       <div class="kpi-card" style="--top:#409eff">
-        <div class="kc-label">在线列车</div>
-        <div class="kc-value">{{ kpi.active_trains }}<span class="kc-unit">列</span></div>
+        <div class="kc-label">{{ t('bjm.trainActive') }}</div>
+        <div class="kc-value">{{ kpi.active_trains }}<span class="kc-unit">{{ t('bjm.unitTrain') }}</span></div>
       </div>
       <div class="kpi-card" style="--top:#e6a23c">
-        <div class="kc-label">当前延误</div>
-        <div class="kc-value">{{ kpi.delay_count }}<span class="kc-unit">列</span></div>
+        <div class="kc-label">{{ t('bjm.trainDelay') }}</div>
+        <div class="kc-value">{{ kpi.delay_count }}<span class="kc-unit">{{ t('bjm.unitTrain') }}</span></div>
       </div>
       <div class="kpi-card" style="--top:#f56c6c">
-        <div class="kc-label">今日故障</div>
-        <div class="kc-value" style="color:#f56c6c">{{ kpi.fault_count }}<span class="kc-unit">起</span></div>
+        <div class="kc-label">{{ t('bjm.trainFaultToday') }}</div>
+        <div class="kc-value" style="color:#f56c6c">{{ kpi.fault_count }}<span class="kc-unit">{{ t('bjm.unitFault') }}</span></div>
       </div>
       <div class="kpi-card" style="--top:#9c6cd4">
-        <div class="kc-label">最大延误</div>
-        <div class="kc-value">{{ Math.floor((kpi.max_delay_sec||0)/60) }}<span class="kc-unit">分{{ (kpi.max_delay_sec||0)%60 }}秒</span></div>
+        <div class="kc-label">{{ t('bjm.trainMaxDelay') }}</div>
+        <div class="kc-value">{{ Math.floor((kpi.max_delay_sec||0)/60) }}<span class="kc-unit">{{ t('bjm.unitMin') }}{{ (kpi.max_delay_sec||0)%60 }}{{ t('bjm.unitSec') }}</span></div>
       </div>
       <div class="kpi-card" style="--top:#17b3a3">
-        <div class="kc-label">今日总里程</div>
-        <div class="kc-value">{{ Math.round((kpi.total_mileage_km||0)/10000) }}<span class="kc-unit">万km</span></div>
+        <div class="kc-label">{{ t('bjm.trainMileage') }}</div>
+        <div class="kc-value">{{ Math.round((kpi.total_mileage_km||0)/10000) }}<span class="kc-unit">{{ t('bjm.unitWanKm') }}</span></div>
       </div>
     </div>
 
     <div class="grid-2">
       <el-card class="chart-card">
-        <template #header><div class="ch">📉 准点率趋势（30天）</div></template>
+        <template #header><div class="ch">📉 {{ t('bjm.trainPunctTrend') }}</div></template>
         <div id="bj-punct-trend" style="height:250px"></div>
       </el-card>
 
       <el-card class="chart-card">
-        <template #header><div class="ch">🔧 故障原因分类</div></template>
+        <template #header><div class="ch">🔧 {{ t('bjm.trainFaultReason') }}</div></template>
         <div id="bj-fault-pie" style="height:250px"></div>
       </el-card>
     </div>
 
     <el-card class="chart-card">
-      <template #header><div class="ch">🚇 各线路运营情况（今日）</div></template>
+      <template #header><div class="ch">🚇 {{ t('bjm.trainLineStatus') }}</div></template>
       <el-table :data="trainList" stripe size="small" style="width:100%">
-        <el-table-column label="线路" width="90">
+        <el-table-column :label="t('bjm.line')" width="90">
           <template #default="{ row }">
             <div style="display:flex;align-items:center;gap:6px">
               <span :style="{ display:'inline-block', width:'10px', height:'10px', borderRadius:'50%', background:row.line_color }"></span>
@@ -50,25 +50,25 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column prop="actual_trains" label="在线车数" width="80"/>
-        <el-table-column prop="planned_trains" label="计划车数" width="80"/>
-        <el-table-column label="准点率" width="90">
+        <el-table-column prop="actual_trains" :label="t('bjm.trainActual')" width="80"/>
+        <el-table-column prop="planned_trains" :label="t('bjm.trainPlan')" width="80"/>
+        <el-table-column :label="t('bjm.punctuality')" width="90">
           <template #default="{ row }">
             <el-progress :percentage="+(row.punctuality_rate*100).toFixed(1)"
                          :status="row.punctuality_rate >= 0.99 ? 'success' : row.punctuality_rate >= 0.97 ? '' : 'exception'"
                          :stroke-width="6" style="width:120px"/>
           </template>
         </el-table-column>
-        <el-table-column prop="delay_count" label="延误次数" width="80"/>
-        <el-table-column label="最大延误" width="90">
+        <el-table-column prop="delay_count" :label="t('bjm.trainDelayCnt')" width="80"/>
+        <el-table-column :label="t('bjm.trainMaxDelay')" width="90">
           <template #default="{ row }">
             {{ row.max_delay_sec > 0 ? Math.floor(row.max_delay_sec/60)+"'"+row.max_delay_sec%60+'"' : '—' }}
           </template>
         </el-table-column>
-        <el-table-column label="状态" width="80">
+        <el-table-column :label="t('bjm.status')" width="80">
           <template #default="{ row }">
             <el-tag :type="row.delay_count > 2 ? 'danger' : row.delay_count > 0 ? 'warning' : 'success'" size="small">
-              {{ row.delay_count > 2 ? '告警' : row.delay_count > 0 ? '延误' : '正常' }}
+              {{ row.delay_count > 2 ? t('bjm.delayedWarn') : row.delay_count > 0 ? t('bjm.delayed') : t('bjm.normal') }}
             </el-tag>
           </template>
         </el-table-column>
@@ -81,6 +81,7 @@
 import { ref, onMounted } from 'vue'
 import * as echarts from 'echarts'
 import { bjMetroApi } from '@/api'
+import { t } from '@/i18n'
 
 const kpi        = ref(null)
 const punctTrend = ref([])
@@ -113,7 +114,7 @@ const renderPunctTrend = () => {
       data: punctTrend.value.map(d => d.punctuality_pct),
       lineStyle: { color: '#67c23a', width: 2.5 },
       areaStyle: { color: 'rgba(103,194,58,.12)' },
-      markLine: { data: [{ yAxis: 99, name: '目标线', lineStyle: { color: '#f56c6c', type: 'dashed' } }] }
+      markLine: { data: [{ yAxis: 99, name: t('bjm.targetLine'), lineStyle: { color: '#f56c6c', type: 'dashed' } }] }
     }]
   })
   window.addEventListener('resize', () => c.resize())

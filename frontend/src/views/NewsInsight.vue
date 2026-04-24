@@ -6,22 +6,22 @@
       <div class="ai-bar-left">
         <div class="ai-bar-title">
           <span class="doris-badge">⚡ Doris 4.0</span>
-          基金资讯 AI Function 分析平台
+          {{ t('news.bannerTitle') }}
         </div>
-        <div class="ai-bar-sub">AI_SUMMARIZE · AI_SENTIMENT · AI_EXTRACT — 文本语义分析在 Doris 引擎内完成，数据不出库</div>
+        <div class="ai-bar-sub">{{ t('news.bannerDesc') }}</div>
       </div>
       <div class="ai-actions">
         <el-button class="ai-btn import-btn" :loading="importing" @click="doImport">
-          <span class="fn-name">📥 导入资讯</span>
-          <span class="fn-desc">生成 1 条随机新闻</span>
+          <span class="fn-name">{{ t('news.importBtn') }}</span>
+          <span class="fn-desc">{{ t('news.importDesc') }}</span>
         </el-button>
         <el-button class="ai-btn import-btn" @click="showAddDialog">
-          <span class="fn-name">✏️ 手动添加</span>
-          <span class="fn-desc">自定义资讯内容</span>
+          <span class="fn-name">{{ t('news.addBtn') }}</span>
+          <span class="fn-desc">{{ t('news.addDesc') }}</span>
         </el-button>
         <el-button class="ai-btn run-all" :loading="running==='all'" :disabled="!canRun" @click="runAllAI">
-          <span class="fn-name">🚀 运行 AI 分析</span>
-          <span class="fn-desc">SUMMARIZE + SENTIMENT + EXTRACT</span>
+          <span class="fn-name">{{ t('news.runAllBtn') }}</span>
+          <span class="fn-desc">{{ t('news.runAllDesc') }}</span>
         </el-button>
       </div>
     </div>
@@ -30,65 +30,65 @@
     <div class="progress-bar card" v-if="stats.total > 0">
       <div class="prog-item">
         <div class="prog-num">{{ stats.total }}</div>
-        <div class="prog-label">资讯总量</div>
+        <div class="prog-label">{{ t('news.progressTotal') }}</div>
       </div>
       <div class="prog-divider"></div>
       <div class="prog-item">
         <div class="prog-num blue">{{ stats.summarized }}</div>
-        <div class="prog-label">已概括</div>
+        <div class="prog-label">{{ t('news.progressSummarized') }}</div>
         <el-progress :percentage="pct(stats.summarized, stats.total)" color="#409eff" :stroke-width="4" :show-text="false" style="width:80px;margin-top:4px" />
       </div>
       <div class="prog-divider"></div>
       <div class="prog-item">
         <div class="prog-num green">{{ stats.sentiment_done }}</div>
-        <div class="prog-label">已情感分析</div>
+        <div class="prog-label">{{ t('news.progressSentiment') }}</div>
         <el-progress :percentage="pct(stats.sentiment_done, stats.total)" color="#67c23a" :stroke-width="4" :show-text="false" style="width:80px;margin-top:4px" />
       </div>
       <div class="prog-divider"></div>
       <div class="prog-item">
         <div class="prog-num orange">{{ stats.extracted }}</div>
-        <div class="prog-label">已提取标签</div>
+        <div class="prog-label">{{ t('news.progressExtracted') }}</div>
         <el-progress :percentage="pct(stats.extracted, stats.total)" color="#e6a23c" :stroke-width="4" :show-text="false" style="width:80px;margin-top:4px" />
       </div>
       <div class="prog-divider"></div>
       <div class="prog-item" v-if="lastSql">
-        <el-button size="small" type="info" plain @click="sqlVisible = true">查看执行 SQL</el-button>
+        <el-button size="small" type="info" plain @click="sqlVisible = true">{{ t('news.btnViewSql') }}</el-button>
       </div>
     </div>
 
     <!-- SQL 弹窗 -->
-    <el-dialog v-model="sqlVisible" title="Doris AI Function SQL" width="700px">
+    <el-dialog v-model="sqlVisible" :title="t('news.sqlDialogTitle')" width="700px">
       <pre class="sql-dialog-code">{{ lastSql }}</pre>
-      <div class="sql-dialog-tip">⚡ 该 SQL 在 Doris 引擎内部直接调用 AI Function，数据无需离开数据库</div>
+      <div class="sql-dialog-tip">{{ t('news.sqlTip') }}</div>
     </el-dialog>
 
     <!-- 手动添加资讯对话框 -->
-    <el-dialog v-model="addDialogVisible" title="手动添加资讯" width="600px" @close="resetAddForm">
+    <el-dialog v-model="addDialogVisible" :title="t('news.addDialogTitle')" width="600px" @close="resetAddForm">
       <el-form :model="addForm" label-width="80px">
-        <el-form-item label="标题" required>
-          <el-input v-model="addForm.title" placeholder="输入资讯标题" maxlength="100" show-word-limit />
+        <el-form-item :label="t('news.formLabelTitle')" required>
+          <el-input v-model="addForm.title" :placeholder="t('news.formPhTitle')" maxlength="100" show-word-limit />
         </el-form-item>
-        <el-form-item label="内容" required>
-          <el-input v-model="addForm.content" type="textarea" placeholder="输入资讯内容" rows="5" maxlength="1000" show-word-limit />
+        <el-form-item :label="t('news.formLabelContent')" required>
+          <el-input v-model="addForm.content" type="textarea" :placeholder="t('news.formPhContent')" rows="5" maxlength="1000" show-word-limit />
         </el-form-item>
-        <el-form-item label="来源" required>
-          <el-select v-model="addForm.source" placeholder="选择或输入来源">
-            <el-option label="财联社" value="财联社" />
-            <el-option label="证券时报" value="证券时报" />
-            <el-option label="上海证券报" value="上海证券报" />
-            <el-option label="中国证券报" value="中国证券报" />
-            <el-option label="其他" value="其他" />
+        <el-form-item :label="t('news.formLabelSource')" required>
+          <el-select v-model="addForm.source" :placeholder="t('news.formPhSource')">
+            <el-option :label="t('news.formSourceCailian')" value="财联社" />
+            <el-option :label="t('news.formSourceZqsb')" value="证券时报" />
+            <el-option :label="t('news.formSourceShzq')" value="上海证券报" />
+            <el-option :label="t('news.formSourceZgzq')" value="中国证券报" />
+            <el-option :label="t('news.formSourceOther')" value="其他" />
           </el-select>
         </el-form-item>
-        <el-form-item label="板块" required>
-          <el-select v-model="addForm.sector" placeholder="选择板块">
+        <el-form-item :label="t('news.formLabelSector')" required>
+          <el-select v-model="addForm.sector" :placeholder="t('news.formPhSector')">
             <el-option v-for="s in sectors" :key="s" :label="s" :value="s" />
           </el-select>
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="addDialogVisible = false">取消</el-button>
-        <el-button type="primary" :loading="adding" @click="doAddManual">添加</el-button>
+        <el-button @click="addDialogVisible = false">{{ t('news.btnCancel') }}</el-button>
+        <el-button type="primary" :loading="adding" @click="doAddManual">{{ t('news.btnAdd') }}</el-button>
       </template>
     </el-dialog>
 
@@ -97,40 +97,40 @@
       <el-tabs v-model="activeTab" @tab-click="onTab" class="top-tabs">
 
         <!-- ── Tab1: 资讯列表 ── -->
-        <el-tab-pane label="📰 资讯列表" name="articles">
+        <el-tab-pane :label="t('news.tabArticles')" name="articles">
           <div v-if="!stats.total" class="tab-empty">
             <div style="font-size:48px;margin-bottom:12px">📰</div>
-            <div style="font-size:16px;font-weight:700;margin-bottom:8px;color:#1a1a1a">资讯 AI 分析平台</div>
+            <div style="font-size:16px;font-weight:700;margin-bottom:8px;color:#1a1a1a">{{ t('news.emptyTitle') }}</div>
             <div style="font-size:13px;color:#606266;margin-bottom:20px;line-height:1.6">
-              <div>工作流程：</div>
+              <div>{{ t('news.emptyWorkflow') }}</div>
               <div style="margin-top:8px;padding-left:16px">
-                <div>1️⃣ 点击「📥 导入资讯」生成1条随机新闻</div>
-                <div>2️⃣ 点击「🚀 运行 AI 分析」执行：</div>
+                <div>{{ t('news.emptyStep1') }}</div>
+                <div>{{ t('news.emptyStep2') }}</div>
                 <div style="margin-left:16px;margin-top:4px">
-                  <div>• AI_SUMMARIZE — 文本摘要</div>
-                  <div>• AI_SENTIMENT — 情感分析与评分</div>
-                  <div>• AI_EXTRACT — 标签提取（事件、公司、板块）</div>
+                  <div>{{ t('news.emptyStepSub1') }}</div>
+                  <div>{{ t('news.emptyStepSub2') }}</div>
+                  <div>{{ t('news.emptyStepSub3') }}</div>
                 </div>
-                <div style="margin-top:8px">3️⃣ 查看各标签页的分析结果：情感全景、标签分析、板块指标、投资信号等</div>
+                <div style="margin-top:8px">{{ t('news.emptyStep3') }}</div>
               </div>
             </div>
             <el-button type="primary" size="large" :loading="importing" @click="doImport" style="font-size:14px;padding:8px 32px">
-              📥 {{ importing ? '生成中...' : '生成随机资讯' }}
+              📥 {{ importing ? t('common.generating') : '生成随机资讯' }}
             </el-button>
           </div>
           <div v-else class="article-layout">
             <!-- 左：列表 -->
             <div class="list-panel">
               <div class="list-hd">
-                <el-input v-model="keyword" placeholder="搜索关键词…" size="small" clearable style="flex:1" @change="loadList" />
-                <el-select v-model="filterSector" size="small" placeholder="板块" clearable style="width:82px" @change="loadList">
+                <el-input v-model="keyword" :placeholder="t('news.searchPhrase')" size="small" clearable style="flex:1" @change="loadList" />
+                <el-select v-model="filterSector" size="small" :placeholder="t('news.filterSector')" clearable style="width:82px" @change="loadList">
                   <el-option v-for="s in sectors" :key="s" :label="s" :value="s" />
                 </el-select>
-                <el-select v-model="filterSentiment" size="small" placeholder="情感" clearable style="width:80px" @change="loadList">
-                  <el-option label="正面" value="positive" />
-                  <el-option label="负面" value="negative" />
-                  <el-option label="中性" value="neutral" />
-                  <el-option label="混合" value="mixed" />
+                <el-select v-model="filterSentiment" size="small" :placeholder="t('news.filterSentiment')" clearable style="width:80px" @change="loadList">
+                  <el-option :label="t('news.sentimentPositive')" value="positive" />
+                  <el-option :label="t('news.sentimentNegative')" value="negative" />
+                  <el-option :label="t('news.sentimentNeutral')" value="neutral" />
+                  <el-option :label="t('news.sentimentMixed')" value="mixed" />
                 </el-select>
               </div>
               <div class="news-list">
@@ -146,17 +146,17 @@
                   </div>
                   <div class="nc-title">{{ a.title }}</div>
                   <div class="nc-status">
-                    <span :class="['ns-badge', a.summarized ? 'done' : 'pending']">摘要</span>
-                    <span :class="['ns-badge', a.sentiment_done ? 'done' : 'pending']">情感</span>
-                    <span :class="['ns-badge', a.extracted ? 'done' : 'pending']">标签</span>
+                    <span :class="['ns-badge', a.summarized ? 'done' : 'pending']">{{ t('news.badgeSummary') }}</span>
+                    <span :class="['ns-badge', a.sentiment_done ? 'done' : 'pending']">{{ t('news.badgeSentiment') }}</span>
+                    <span :class="['ns-badge', a.extracted ? 'done' : 'pending']">{{ t('news.badgeTags') }}</span>
                     <span v-if="a.ai_sentiment" :class="['sentiment-tag', a.ai_sentiment]">
                       {{ sentimentLabel(a.ai_sentiment) }}
                       <span v-if="a.sentiment_score !== null" class="score">{{ a.sentiment_score > 0 ? '+' : '' }}{{ a.sentiment_score }}</span>
                     </span>
-                    <span class="method-tag" v-if="a.ai_method && a.ai_method !== 'PENDING'">{{ a.ai_method === 'MOCK' ? '模拟' : 'Doris AI' }}</span>
+                    <span class="method-tag" v-if="a.ai_method && a.ai_method !== 'PENDING'">{{ a.ai_method === 'MOCK' ? t('news.methodMock') : t('news.methodDoris') }}</span>
                   </div>
                 </div>
-                <div v-if="!articles.length" class="list-empty">暂无数据</div>
+                <div v-if="!articles.length" class="list-empty">{{ t('news.noData') }}</div>
               </div>
             </div>
             <!-- 右：AI 对比 -->
@@ -164,7 +164,7 @@
               <div v-if="selArticle">
                 <div class="compare-layout">
                   <div class="orig-panel">
-                    <div class="panel-hd">📰 原始资讯</div>
+                    <div class="panel-hd">{{ t('news.origNews') }}</div>
                     <div class="orig-title">{{ selArticle.title }}</div>
                     <div class="orig-meta">
                       <el-tag size="small" :class="sectorClass(selArticle.sector_tag)">{{ selArticle.sector_tag }}</el-tag>
@@ -177,22 +177,22 @@
                     <!-- AI_SUMMARIZE -->
                     <div :class="['ai-card', selArticle.summarized ? 'done' : 'empty']">
                       <div class="ai-card-hd">
-                        <span class="fn-chip blue">AI_SUMMARIZE</span>
-                        <span class="ai-status">{{ selArticle.summarized ? '✓ 已完成' : '待执行' }}</span>
-                        <el-button v-if="!selArticle.summarized" size="small" type="primary" plain :loading="running === 'summarize'" @click="runAI('summarize', [selArticle.article_id])">执行</el-button>
+                        <span class="fn-chip blue">{{ t('news.cardSummarize') }}</span>
+                        <span class="ai-status">{{ selArticle.summarized ? t('news.statusDone') : t('news.statusPending') }}</span>
+                        <el-button v-if="!selArticle.summarized" size="small" type="primary" plain :loading="running === 'summarize'" @click="runAI('summarize', [selArticle.article_id])">{{ t('news.btnExecute') }}</el-button>
                       </div>
                       <div class="ai-card-body" v-if="selArticle.summarized">
                         <div class="ai-result-text">{{ selArticle.ai_summary }}</div>
                       </div>
-                      <div class="ai-card-empty" v-else>点击执行后显示摘要结果</div>
+                      <div class="ai-card-empty" v-else>{{ t('news.emptyAfterExecute') }}</div>
                       <div class="ai-sql-snippet"><code>AI_SUMMARIZE('qwen_llm', content)</code></div>
                     </div>
                     <!-- AI_SENTIMENT -->
                     <div :class="['ai-card', selArticle.sentiment_done ? 'done' : 'empty']">
                       <div class="ai-card-hd">
-                        <span class="fn-chip green">AI_SENTIMENT</span>
-                        <span class="ai-status">{{ selArticle.sentiment_done ? '✓ 已完成' : '待执行' }}</span>
-                        <el-button v-if="!selArticle.sentiment_done" size="small" type="success" plain :loading="running === 'sentiment'" @click="runAI('sentiment', [selArticle.article_id])">执行</el-button>
+                        <span class="fn-chip green">{{ t('news.cardSentiment') }}</span>
+                        <span class="ai-status">{{ selArticle.sentiment_done ? t('news.statusDone') : t('news.statusPending') }}</span>
+                        <el-button v-if="!selArticle.sentiment_done" size="small" type="success" plain :loading="running === 'sentiment'" @click="runAI('sentiment', [selArticle.article_id])">{{ t('news.btnExecute') }}</el-button>
                       </div>
                       <div class="ai-card-body" v-if="selArticle.sentiment_done">
                         <div class="sentiment-display">
@@ -207,18 +207,18 @@
                             </div>
                             <span class="score-hi">+100</span>
                           </div>
-                          <div class="score-val">情感分：{{ selArticle.sentiment_score > 0 ? '+' : '' }}{{ selArticle.sentiment_score }}</div>
+                          <div class="score-val">{{ t('news.emptyStep2') }}：{{ selArticle.sentiment_score > 0 ? '+' : '' }}{{ selArticle.sentiment_score }}</div>
                         </div>
                       </div>
-                      <div class="ai-card-empty" v-else>返回值: positive | negative | neutral | mixed</div>
+                      <div class="ai-card-empty" v-else>{{ t('news.returnFormat') }}</div>
                       <div class="ai-sql-snippet"><code>AI_SENTIMENT('qwen_llm', content)</code></div>
                     </div>
                     <!-- AI_EXTRACT -->
                     <div :class="['ai-card', selArticle.extracted ? 'done' : 'empty']">
                       <div class="ai-card-hd">
-                        <span class="fn-chip orange">AI_EXTRACT</span>
-                        <span class="ai-status">{{ selArticle.extracted ? '✓ 已完成' : '待执行' }}</span>
-                        <el-button v-if="!selArticle.extracted" size="small" type="warning" plain :loading="running === 'extract'" @click="runAI('extract', [selArticle.article_id])">执行</el-button>
+                        <span class="fn-chip orange">{{ t('news.cardExtract') }}</span>
+                        <span class="ai-status">{{ selArticle.extracted ? t('news.statusDone') : t('news.statusPending') }}</span>
+                        <el-button v-if="!selArticle.extracted" size="small" type="warning" plain :loading="running === 'extract'" @click="runAI('extract', [selArticle.article_id])">{{ t('news.btnExecute') }}</el-button>
                       </div>
                       <div class="ai-card-body" v-if="selArticle.extracted && parsedExtract">
                         <div class="extract-labels">
@@ -232,45 +232,45 @@
                           </div>
                         </div>
                       </div>
-                      <div class="ai-card-empty" v-else>按给定标签列表从文本中提取结构化信息</div>
+                      <div class="ai-card-empty" v-else>{{ t('news.extractDesc') }}</div>
                       <div class="ai-sql-snippet"><code>AI_EXTRACT('qwen_llm', content, ARRAY(...))</code></div>
                     </div>
                   </div>
                 </div>
               </div>
-              <div class="empty-tip" v-else>← 点击左侧资讯查看 AI 分析对比</div>
+              <div class="empty-tip" v-else>{{ t('news.emptyDetail') }}</div>
             </div>
           </div>
         </el-tab-pane>
 
         <!-- ── Tab2: 情感全景 ── -->
-        <el-tab-pane label="📊 情感全景" name="sentiment">
+        <el-tab-pane :label="t('news.tabSentiment')" name="sentiment">
           <div class="two-col">
             <div>
-              <div class="ct">情感分布</div>
+              <div class="ct">{{ t('news.sentimentDistTitle') }}</div>
               <div ref="sentPieChart" class="chart-h260"></div>
             </div>
             <div>
-              <div class="ct">各板块情感分布</div>
+              <div class="ct">{{ t('news.sectorSentimentTitle') }}</div>
               <div ref="sentSecChart" class="chart-h260"></div>
             </div>
           </div>
           <div class="two-col" style="margin-top:14px">
             <div>
-              <div class="ct">情感分值分布（-100~+100）</div>
+              <div class="ct">{{ t('news.scoreDistTitle') }}</div>
               <div ref="scoreChart" class="chart-h220"></div>
             </div>
             <div>
-              <div class="ct">情感分析进度</div>
+              <div class="ct">{{ t('news.sentimentProgressTitle') }}</div>
               <div class="sent-table">
-                <div class="sent-row hd"><span>情感</span><span>数量</span><span>占比</span></div>
+                <div class="sent-row hd"><span>{{ t('news.sentimentTable.sentiment') }}</span><span>{{ t('news.sentimentTable.count') }}</span><span>{{ t('news.sentimentTable.ratio') }}</span></div>
                 <div class="sent-row" v-for="(cnt, s) in tagData?.sentiment_dist || {}" :key="s">
                   <span><span :class="['sentiment-dot', s]"></span>{{ sentimentLabel(s) }}</span>
                   <span>{{ cnt }}</span>
                   <span>{{ tagData?.total ? (cnt / tagData.total * 100).toFixed(1) : 0 }}%</span>
                 </div>
               </div>
-              <div class="ct" style="margin-top:14px">SQL 技术说明</div>
+              <div class="ct" style="margin-top:14px">{{ t('news.sqlExplainTitle') }}</div>
               <div class="sql-mini">
                 <pre>SELECT ai_sentiment, COUNT(*) AS cnt,
   AVG(sentiment_score) AS avg_score
@@ -280,14 +280,14 @@ GROUP BY ai_sentiment</pre>
               </div>
             </div>
           </div>
-          <div class="empty-tip" v-if="!tagData">请先执行 AI_SENTIMENT 分析</div>
+          <div class="empty-tip" v-if="!tagData">{{ t('news.emptySentiment') }}</div>
         </el-tab-pane>
 
         <!-- ── Tab3: 标签分析 ── -->
-        <el-tab-pane label="🏷️ 标签分析" name="tags">
+        <el-tab-pane :label="t('news.tabTags')" name="tags">
           <div class="two-col">
             <div>
-              <div class="ct">AI 提取热词 Top30</div>
+              <div class="ct">{{ t('news.tagCloudTitle') }}</div>
               <div class="tag-cloud">
                 <span
                   v-for="t in tagData?.top_tags || []" :key="t.tag"
@@ -300,17 +300,17 @@ GROUP BY ai_sentiment</pre>
               </div>
             </div>
             <div>
-              <div class="ct">标签类型分布</div>
+              <div class="ct">{{ t('news.tagTypeTitle') }}</div>
               <div ref="tagTypeChart" class="chart-h260"></div>
             </div>
           </div>
           <div class="two-col" style="margin-top:14px">
             <div>
-              <div class="ct">板块 × 市场影响方向</div>
+              <div class="ct">{{ t('news.impactTitle') }}</div>
               <div ref="impactChart" class="chart-h240"></div>
             </div>
             <div>
-              <div class="ct">AI_EXTRACT 标签详情</div>
+              <div class="ct">{{ t('news.tagDetailTitle') }}</div>
               <div class="tag-list-panel">
                 <div v-for="t in tagData?.top_tags?.slice(0, 15) || []" :key="t.tag" class="tl-row">
                   <span class="tl-type">{{ t.tag.split(':')[0] }}</span>
@@ -321,45 +321,45 @@ GROUP BY ai_sentiment</pre>
               </div>
             </div>
           </div>
-          <div class="empty-tip" v-if="!tagData">请先执行 AI_EXTRACT 提取标签</div>
+          <div class="empty-tip" v-if="!tagData">{{ t('news.emptyTags') }}</div>
         </el-tab-pane>
 
         <!-- ── Tab4: 指标大盘 ── -->
-        <el-tab-pane label="📈 指标大盘" name="metrics">
+        <el-tab-pane :label="t('news.tabMetrics')" name="metrics">
           <div class="kpi-row" v-if="sectorMetrics.length">
             <div class="kpi-card">
               <div class="kpi-val">{{ sectorMetrics.length }}</div>
-              <div class="kpi-label">覆盖板块数</div>
+              <div class="kpi-label">{{ t('news.kpiSectors') }}</div>
             </div>
             <div class="kpi-card bullish">
               <div class="kpi-val">{{ sectorMetrics.filter(r => r.avg_score >= 35).length }}</div>
-              <div class="kpi-label">看多板块</div>
+              <div class="kpi-label">{{ t('news.kpiBullish') }}</div>
             </div>
             <div class="kpi-card bearish">
               <div class="kpi-val">{{ sectorMetrics.filter(r => r.avg_score <= -20).length }}</div>
-              <div class="kpi-label">看空板块</div>
+              <div class="kpi-label">{{ t('news.kpiBearish') }}</div>
             </div>
             <div class="kpi-card">
               <div class="kpi-val" :class="overallScore >= 0 ? 'pos-val' : 'neg-val'">
                 {{ overallScore >= 0 ? '+' : '' }}{{ overallScore }}
               </div>
-              <div class="kpi-label">市场情感均分</div>
+              <div class="kpi-label">{{ t('news.kpiAvgScore') }}</div>
             </div>
             <div class="kpi-card">
               <div class="kpi-val blue-val">{{ sectorMetrics.reduce((s, r) => s + (r.article_count || 0), 0) }}</div>
-              <div class="kpi-label">已分析资讯</div>
+              <div class="kpi-label">{{ t('news.kpiAnalyzed') }}</div>
             </div>
           </div>
           <div class="two-col" style="margin-top:14px">
             <div>
-              <div class="ct">板块情感分值对比</div>
+              <div class="ct">{{ t('news.sectorScoreTitle') }}</div>
               <div ref="sectorBarChart" class="chart-h300"></div>
             </div>
             <div>
-              <div class="ct">板块量化指标明细</div>
+              <div class="ct">{{ t('news.metricsTableTitle') }}</div>
               <div class="metrics-table">
                 <div class="mt-hd mt-row">
-                  <span>板块</span><span>文章数</span><span>均分</span><span>正面%</span><span>负面%</span><span>信号</span>
+                  <span>{{ t('news.metricsTableCol.sector') }}</span><span>{{ t('news.metricsTableCol.articles') }}</span><span>{{ t('news.metricsTableCol.score') }}</span><span>{{ t('news.metricsTableCol.positive') }}</span><span>{{ t('news.metricsTableCol.negative') }}</span><span>{{ t('news.metricsTableCol.signal') }}</span>
                 </div>
                 <div v-for="r in sectorMetrics" :key="r.sector_tag" class="mt-row">
                   <span><span :class="['nc-sector', sectorClass(r.sector_tag)]">{{ r.sector_tag }}</span></span>
@@ -371,7 +371,7 @@ GROUP BY ai_sentiment</pre>
                   <span class="neg-val">{{ r.negative_ratio }}%</span>
                   <span>
                     <span :class="['sig-badge', r.avg_score >= 35 ? 'bull' : r.avg_score <= -20 ? 'bear' : 'flat']">
-                      {{ r.avg_score >= 35 ? '看多' : r.avg_score <= -20 ? '看空' : '中性' }}
+                      {{ r.avg_score >= 35 ? t('news.signalBullish') : r.avg_score <= -20 ? t('news.signalBearish') : t('news.signalNeutral') }}
                     </span>
                   </span>
                 </div>
@@ -379,32 +379,32 @@ GROUP BY ai_sentiment</pre>
             </div>
           </div>
           <div style="margin-top:14px">
-            <div class="ct">各板块正负情感分布（堆叠占比）</div>
+            <div class="ct">{{ t('news.mixedSentimentTitle') }}</div>
             <div ref="posNegChart" class="chart-h220"></div>
           </div>
-          <div class="empty-tip" v-if="!sectorMetrics.length">请先执行 AI_SENTIMENT 分析</div>
+          <div class="empty-tip" v-if="!sectorMetrics.length">{{ t('news.emptySentiment') }}</div>
         </el-tab-pane>
 
         <!-- ── Tab5: 投资信号 ── -->
-        <el-tab-pane label="⚡ 投资信号" name="signals">
+        <el-tab-pane :label="t('news.tabSignals')" name="signals">
           <div class="two-col">
             <div>
-              <div class="ct">板块投资信号</div>
+              <div class="ct">{{ t('news.signalListTitle') }}</div>
               <div class="signal-list">
                 <div v-for="s in signalData" :key="s.sector" :class="['signal-card', s.signal]">
                   <div class="sc-top">
                     <span class="sc-sector">{{ s.sector }}</span>
                     <span :class="['sc-signal', s.signal]">
-                      {{ s.signal === 'bullish' ? '📈 看多' : s.signal === 'bearish' ? '📉 看空' : '➖ 中性' }}
+                      {{ s.signal === 'bullish' ? t('news.signalEmoji.bullish') : s.signal === 'bearish' ? t('news.signalEmoji.bearish') : t('news.signalEmoji.neutral') }}
                     </span>
                   </div>
                   <div class="sc-mid">
                     <div class="sc-score" :class="s.avg_score >= 0 ? 'pos-val' : 'neg-val'">
                       {{ s.avg_score >= 0 ? '+' : '' }}{{ s.avg_score }}
-                      <span class="sc-unit">情感分</span>
+                      <span class="sc-unit">{{ t('news.emptyStep2') }}</span>
                     </div>
                     <div class="sc-conf">
-                      置信度 {{ s.confidence }}%
+                      {{ t('news.signalConfidence') }} {{ s.confidence }}%
                       <el-progress
                         :percentage="s.confidence"
                         :color="s.signal === 'bullish' ? '#f56c6c' : s.signal === 'bearish' ? '#67c23a' : '#909399'"
@@ -414,17 +414,17 @@ GROUP BY ai_sentiment</pre>
                     </div>
                   </div>
                   <div class="sc-detail">
-                    <span>共 {{ s.article_count }} 篇</span>
-                    <span class="pos-val">正面 {{ s.positive }}</span>
-                    <span class="neg-val">负面 {{ s.negative }}</span>
-                    <span style="color:#909399">中性 {{ s.neutral }}</span>
+                    <span>{{ t('news.signalArticles').replace('{0}', s.article_count) }}</span>
+                    <span class="pos-val">{{ t('news.signalPosNeg.pos').replace('{0}', s.positive) }}</span>
+                    <span class="neg-val">{{ t('news.signalPosNeg.neg').replace('{0}', s.negative) }}</span>
+                    <span style="color:#909399">{{ t('news.signalPosNeg.neutral').replace('{0}', s.neutral) }}</span>
                   </div>
                 </div>
               </div>
-              <div class="empty-tip" v-if="!signalData.length">请先执行 AI_SENTIMENT 分析</div>
+              <div class="empty-tip" v-if="!signalData.length">{{ t('news.emptySentiment') }}</div>
             </div>
             <div>
-              <div class="ct">热点公司（AI_EXTRACT 核心公司 Top20）</div>
+              <div class="ct">{{ t('news.companyListTitle') }}</div>
               <div class="company-list">
                 <div v-for="c in hotCompanies" :key="c.company" class="co-row">
                   <span class="co-name">{{ c.company }}</span>
@@ -435,9 +435,9 @@ GROUP BY ai_sentiment</pre>
                   <el-progress :percentage="Math.min(c.count * 20, 100)" :stroke-width="4" :show-text="false" color="#409eff" style="flex:1;margin-left:8px;min-width:60px" />
                 </div>
               </div>
-              <div class="empty-tip" v-if="!hotCompanies.length">请先执行 AI_EXTRACT 提取标签</div>
+              <div class="empty-tip" v-if="!hotCompanies.length">{{ t('news.emptyTags') }}</div>
               <div style="margin-top:14px">
-                <div class="ct">板块情感雷达</div>
+                <div class="ct">{{ t('news.radarTitle') }}</div>
                 <div ref="radarChart" class="chart-h300"></div>
               </div>
             </div>
@@ -445,61 +445,58 @@ GROUP BY ai_sentiment</pre>
         </el-tab-pane>
 
         <!-- ── Tab6: 函数说明 ── -->
-        <el-tab-pane label="📖 函数说明" name="docs">
+        <el-tab-pane :label="t('news.tabDocs')" name="docs">
           <div class="docs-grid">
             <div class="doc-card blue">
-              <div class="doc-fn">AI_SUMMARIZE</div>
-              <div class="doc-desc">对文本进行高度总结概括，返回简洁摘要</div>
+              <div class="doc-fn">{{ t('news.docSummarizeTitle') }}</div>
+              <div class="doc-desc">{{ t('news.docSummarizeDesc') }}</div>
               <div class="doc-sql">
-                <pre>AI_SUMMARIZE('qwen_llm', text_column) → VARCHAR</pre>
+                <pre>{{ t('news.docSummarizeSql') }}</pre>
               </div>
-              <div class="doc-use">📌 适用：资讯摘要、报告概括、长文压缩</div>
-              <div class="doc-stat">本批次处理：<b>{{ stats.summarized }}</b> / {{ stats.total }} 条</div>
+              <div class="doc-use">{{ t('news.docSummarizeUse') }}</div>
+              <div class="doc-stat">{{ t('news.docSummarizeStat').replace('{0}', stats.summarized).replace('{1}', stats.total) }}</div>
             </div>
             <div class="doc-card green">
-              <div class="doc-fn">AI_SENTIMENT</div>
-              <div class="doc-desc">分析文本情感倾向，返回枚举值</div>
+              <div class="doc-fn">{{ t('news.docSentimentTitle') }}</div>
+              <div class="doc-desc">{{ t('news.docSentimentDesc') }}</div>
               <div class="doc-sql">
-                <pre>AI_SENTIMENT('qwen_llm', text_column)
-→ 'positive' | 'negative' | 'neutral' | 'mixed'</pre>
+                <pre>{{ t('news.docSentimentSql') }}</pre>
               </div>
-              <div class="doc-use">📌 适用：资讯情绪监控、舆情预警、投资信号</div>
-              <div class="doc-stat">本批次处理：<b>{{ stats.sentiment_done }}</b> / {{ stats.total }} 条</div>
+              <div class="doc-use">{{ t('news.docSentimentUse') }}</div>
+              <div class="doc-stat">{{ t('news.docSentimentStat').replace('{0}', stats.sentiment_done).replace('{1}', stats.total) }}</div>
             </div>
             <div class="doc-card orange">
-              <div class="doc-fn">AI_EXTRACT</div>
-              <div class="doc-desc">根据给定标签列表，从文本中提取对应结构化信息</div>
+              <div class="doc-fn">{{ t('news.docExtractTitle') }}</div>
+              <div class="doc-desc">{{ t('news.docExtractDesc') }}</div>
               <div class="doc-sql">
-                <pre>AI_EXTRACT('qwen_llm', text_column,
-  ARRAY('事件类型','影响板块','核心公司','市场影响方向')
-) → JSON</pre>
+                <pre>{{ t('news.docExtractSql') }}</pre>
               </div>
-              <div class="doc-use">📌 适用：实体抽取、事件分类、知识图谱构建</div>
-              <div class="doc-stat">本批次处理：<b>{{ stats.extracted }}</b> / {{ stats.total }} 条</div>
+              <div class="doc-use">{{ t('news.docExtractUse') }}</div>
+              <div class="doc-stat">{{ t('news.docExtractStat').replace('{0}', stats.extracted).replace('{1}', stats.total) }}</div>
             </div>
           </div>
           <div class="arch-explain">
-            <div class="ae-title">⚡ 为什么用 Doris AI Function 而不是外部调用？</div>
+            <div class="ae-title">{{ t('news.archTitle') }}</div>
             <div class="ae-grid">
               <div class="ae-item">
                 <div class="ae-icon">🏃</div>
-                <div class="ae-label">零数据搬运</div>
-                <div class="ae-desc">文本数据无需从 Doris 导出，AI 分析在库内完成，延迟降低 60%+</div>
+                <div class="ae-label">{{ t('news.archZeroMove') }}</div>
+                <div class="ae-desc">{{ t('news.archZeroMoveDesc') }}</div>
               </div>
               <div class="ae-item">
                 <div class="ae-icon">🔗</div>
-                <div class="ae-label">结果即时可查</div>
-                <div class="ae-desc">AI 输出直接写回同一张表，可立即用 SQL 进行聚合、JOIN 等二次分析</div>
+                <div class="ae-label">{{ t('news.archInstant') }}</div>
+                <div class="ae-desc">{{ t('news.archInstantDesc') }}</div>
               </div>
               <div class="ae-item">
                 <div class="ae-icon">📊</div>
-                <div class="ae-label">大批量并行</div>
-                <div class="ae-desc">Doris 并行执行框架支持多行同时调用 AI Function，吞吐量远超串行方案</div>
+                <div class="ae-label">{{ t('news.archBatch') }}</div>
+                <div class="ae-desc">{{ t('news.archBatchDesc') }}</div>
               </div>
               <div class="ae-item">
                 <div class="ae-icon">🔒</div>
-                <div class="ae-label">数据安全</div>
-                <div class="ae-desc">敏感数据不经过应用服务器，降低数据泄露风险，满足合规要求</div>
+                <div class="ae-label">{{ t('news.archSecurity') }}</div>
+                <div class="ae-desc">{{ t('news.archSecurityDesc') }}</div>
               </div>
             </div>
           </div>
@@ -520,6 +517,7 @@ import { PieChart, BarChart, RadarChart } from 'echarts/charts'
 import { GridComponent, TooltipComponent, LegendComponent, RadarComponent } from 'echarts/components'
 import * as echarts from 'echarts/core'
 import { newsApi } from '@/api'
+import { t, locale } from '@/i18n'
 
 use([CanvasRenderer, PieChart, BarChart, RadarChart, GridComponent, TooltipComponent, LegendComponent, RadarComponent])
 
@@ -595,7 +593,7 @@ const parsedExtract = computed(() => parseExtract(selArticle.value?.ai_extract))
 const pct = (a, b) => b ? Math.round(a / b * 100) : 0
 
 function sentimentLabel(s) {
-  return { positive: '正面', negative: '负面', neutral: '中性', mixed: '混合' }[s] || s
+  return { positive: t('news.sentimentPositive'), negative: t('news.sentimentNegative'), neutral: t('news.sentimentNeutral'), mixed: t('news.sentimentMixed') }[s] || s
 }
 function sentimentEmoji(s) {
   return { positive: '📈', negative: '📉', neutral: '➖', mixed: '↕️' }[s] || ''
@@ -632,14 +630,14 @@ async function doImport() {
   try {
     await newsApi.init()
     const r = await newsApi.import()
-    ElMessage.success(r.msg)
+    ElMessage.success(t('news.successImport'))
     await loadAll()
     loadTagData()
     loadMetrics()
     loadSignals()
   } catch (e) {
     console.error(e)
-    ElMessage.error('导入失败：' + (e.message || '未知错误'))
+    ElMessage.error(t('news.msgImportFail').replace('{0}', e.message || '未知错误'))
   }
   finally { importing.value = false }
 }
@@ -648,7 +646,7 @@ async function runAllAI() {
   running.value = 'all'
   try {
     const r = await newsApi.runAllAI()
-    ElMessage.success(r.msg)
+    ElMessage.success(t('news.successAi'))
     if (r.sql) lastSql.value = r.sql
     await loadAll()
     // 重新加载所有图表数据
@@ -660,7 +658,7 @@ async function runAllAI() {
     }
   } catch (e) {
     console.error(e)
-    ElMessage.error('AI 分析失败：' + (e.message || '未知错误'))
+    ElMessage.error(t('news.msgAiFail').replace('{0}', e.message || '未知错误'))
   }
   finally { running.value = '' }
 }
@@ -675,13 +673,13 @@ function resetAddForm() {
 
 async function doAddManual() {
   if (!addForm.value.title || !addForm.value.content || !addForm.value.source || !addForm.value.sector) {
-    ElMessage.warning('请填写所有字段')
+    ElMessage.warning(t('news.msgFillAll'))
     return
   }
   adding.value = true
   try {
     const r = await newsApi.addManual(addForm.value.title, addForm.value.content, addForm.value.source, addForm.value.sector)
-    ElMessage.success(r.msg)
+    ElMessage.success(t('news.successAdd'))
     addDialogVisible.value = false
     resetAddForm()
     await loadAll()
@@ -690,7 +688,7 @@ async function doAddManual() {
     loadSignals()
   } catch (e) {
     console.error(e)
-    ElMessage.error('添加失败：' + (e.message || '未知错误'))
+    ElMessage.error(t('news.msgAddFail').replace('{0}', e.message || '未知错误'))
   }
   finally { adding.value = false }
 }
@@ -763,7 +761,7 @@ async function loadSignals() {
 
 // chart renderers
 const SENT_COLORS = { positive: '#f56c6c', negative: '#67c23a', neutral: '#909399', mixed: '#e6a23c' }
-const SENT_LABELS = { positive: '正面', negative: '负面', neutral: '中性', mixed: '混合' }
+const SENT_LABELS = { positive: t('news.sentimentPositive'), negative: t('news.sentimentNegative'), neutral: t('news.sentimentNeutral'), mixed: t('news.sentimentMixed') }
 
 function renderSentimentCharts() {
   if (!tagData.value) return
@@ -772,7 +770,7 @@ function renderSentimentCharts() {
   // 第一个图表：立即渲染
   const c1 = initChart(sentPieChart, 'sentpie')
   if (c1) c1.setOption({
-    tooltip: { trigger: 'item', formatter: '{b}: {c}条 ({d}%)' },
+    tooltip: { trigger: 'item' },
     legend: { bottom: 0, textStyle: { fontSize: 10 } },
     series: [{ type: 'pie', radius: ['40%', '70%'], center: ['50%', '48%'],
       data: Object.entries(dist).map(([k, v]) => ({ name: SENT_LABELS[k] || k, value: v, itemStyle: { color: SENT_COLORS[k] } })),

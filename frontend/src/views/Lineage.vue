@@ -5,38 +5,38 @@
         <el-collapse-item name="flow">
           <template #title>
             <div class="flow-title">
-              <span>📚 血缘流程说明</span>
-              <span class="flow-hint">默认折叠，展开查看 Doris -> 程序 -> OpenMetadata -> 程序查询链路</span>
+              <span>{{ t('lineage.flowTitle') }}</span>
+              <span class="flow-hint">{{ t('lineage.flowHint') }}</span>
             </div>
           </template>
           <div class="flow-diagram">
-            <div class="flow-lane doris" style="grid-column:1">Doris</div>
-            <div class="flow-lane app" style="grid-column:3">导入血缘</div>
-            <div class="flow-lane om" style="grid-column:5">OpenMetadata</div>
-            <div class="flow-lane app" style="grid-column:7">查询血缘</div>
+            <div class="flow-lane doris" style="grid-column:1">{{ t('lineage.flowLaneDoris') }}</div>
+            <div class="flow-lane app" style="grid-column:3">{{ t('lineage.flowLaneImport') }}</div>
+            <div class="flow-lane om" style="grid-column:5">{{ t('lineage.flowLaneOM') }}</div>
+            <div class="flow-lane app" style="grid-column:7">{{ t('lineage.flowLaneQuery') }}</div>
 
             <div class="flow-node doris" style="grid-column:1">
-              <div class="flow-step-no">1</div>
-              <div class="flow-step-title">审计日志表</div>
-              <div class="flow-step-desc">读取 `__internal_schema.audit_log`</div>
+              <div class="flow-step-no">{{ t('lineage.flowStep1No') }}</div>
+              <div class="flow-step-title">{{ t('lineage.flowStep1Title') }}</div>
+              <div class="flow-step-desc">{{ t('lineage.flowStep1Desc') }}</div>
             </div>
             <div class="flow-arrow" style="grid-column:2">→</div>
             <div class="flow-node app" style="grid-column:3">
-              <div class="flow-step-no">2</div>
-              <div class="flow-step-title">同步按钮</div>
-              <div class="flow-step-desc">解析 SQL，提取源表 / 目标表 / 关系</div>
+              <div class="flow-step-no">{{ t('lineage.flowStep2No') }}</div>
+              <div class="flow-step-title">{{ t('lineage.flowStep2Title') }}</div>
+              <div class="flow-step-desc">{{ t('lineage.flowStep2Desc') }}</div>
             </div>
             <div class="flow-arrow" style="grid-column:4">→</div>
             <div class="flow-node om" style="grid-column:5">
-              <div class="flow-step-no">3</div>
-              <div class="flow-step-title">血缘写入</div>
-              <div class="flow-step-desc">推送 lineage 到 OpenMetadata</div>
+              <div class="flow-step-no">{{ t('lineage.flowStep3No') }}</div>
+              <div class="flow-step-title">{{ t('lineage.flowStep3Title') }}</div>
+              <div class="flow-step-desc">{{ t('lineage.flowStep3Desc') }}</div>
             </div>
             <div class="flow-arrow" style="grid-column:6">→</div>
             <div class="flow-node app" style="grid-column:7">
-              <div class="flow-step-no">4</div>
-              <div class="flow-step-title">API 查询</div>
-              <div class="flow-step-desc">回读 OpenMetadata 血缘并展示图谱</div>
+              <div class="flow-step-no">{{ t('lineage.flowStep4No') }}</div>
+              <div class="flow-step-title">{{ t('lineage.flowStep4Title') }}</div>
+              <div class="flow-step-desc">{{ t('lineage.flowStep4Desc') }}</div>
             </div>
           </div>
         </el-collapse-item>
@@ -45,73 +45,73 @@
 
     <!-- Tab 切换 -->
     <el-tabs v-model="activeTab" type="card" style="margin-bottom:0">
-        <el-tab-pane label="📥 导入记录" name="sync">
+        <el-tab-pane :label="t('lineage.tabImportRecords')" name="sync">
           <div class="card" style="border-top-left-radius:0">
             <el-form inline>
-              <el-form-item label="开始日期">
-                <el-date-picker v-model="startDate" type="date" value-format="YYYY-MM-DD" placeholder="开始日期" />
+              <el-form-item :label="t('lineage.labelStartDate')">
+                <el-date-picker v-model="startDate" type="date" value-format="YYYY-MM-DD" :placeholder="t('lineage.labelStartDate')" />
               </el-form-item>
-              <el-form-item label="结束日期">
-                <el-date-picker v-model="endDate" type="date" value-format="YYYY-MM-DD" placeholder="结束日期" />
+              <el-form-item :label="t('lineage.labelEndDate')">
+                <el-date-picker v-model="endDate" type="date" value-format="YYYY-MM-DD" :placeholder="t('lineage.labelEndDate')" />
               </el-form-item>
-              <el-form-item label="数量限制">
-                <el-input v-model="auditLimit" type="number" min="0" max="5000" placeholder="0=全量" style="width:120px" />
+              <el-form-item :label="t('lineage.labelLimit')">
+                <el-input v-model="auditLimit" type="number" min="0" max="5000" :placeholder="t('lineage.limitHint')" style="width:120px" />
               </el-form-item>
               <el-form-item>
-                <el-button type="primary" :loading="syncing" @click="syncFromAudit">🔄 导入血缘</el-button>
+                <el-button type="primary" :loading="syncing" @click="syncFromAudit">{{ t('lineage.btnSync') }}</el-button>
               </el-form-item>
             </el-form>
 
             <div style="margin-top:12px">
-              <div style="font-size:13px;font-weight:600;margin-bottom:10px">同步结果 ({{ syncRows.length }} 条)</div>
-              <el-table :data="syncRows" size="small" border max-height="360" empty-text="同步后在这里查看每条 SQL 的结果" class="lineage-compact-table">
-            <el-table-column prop="time" label="时间" width="180" />
-            <el-table-column prop="stmt_type" label="类型" width="110" />
-            <el-table-column prop="user" label="用户" width="120" />
-            <el-table-column prop="target" label="目标表" min-width="180" />
-            <el-table-column label="源表" min-width="240">
+              <div style="font-size:13px;font-weight:600;margin-bottom:10px">{{ t('lineage.syncResultTitle') }} {{ t('lineage.syncResultCount').replace('{0}', syncRows.length) }}</div>
+              <el-table :data="syncRows" size="small" border max-height="360" :empty-text="t('lineage.syncEmptyText')" class="lineage-compact-table">
+            <el-table-column prop="time" :label="t('lineage.syncTableCol.time')" width="180" />
+            <el-table-column prop="stmt_type" :label="t('lineage.syncTableCol.type')" width="110" />
+            <el-table-column prop="user" :label="t('lineage.syncTableCol.user')" width="120" />
+            <el-table-column prop="target" :label="t('lineage.syncTableCol.target')" min-width="180" />
+            <el-table-column :label="t('lineage.syncTableCol.sources')" min-width="240">
               <template #default="{ row }">
                 <span>{{ row.sources?.join(', ') }}</span>
               </template>
             </el-table-column>
-            <el-table-column prop="success" label="状态" width="100">
+            <el-table-column prop="success" :label="t('lineage.syncTableCol.status')" width="100">
               <template #default="{ row }">
                 <el-tag :type="row.success ? 'success' : 'danger'">
-                  {{ row.success ? '✓ 成功' : '✗ 失败' }}
+                  {{ row.success ? t('lineage.syncStatusSuccess') : t('lineage.syncStatusFail') }}
                 </el-tag>
               </template>
             </el-table-column>
-            <el-table-column label="计算方式" min-width="260" show-overflow-tooltip>
+            <el-table-column :label="t('lineage.syncTableCol.expressions')" min-width="260" show-overflow-tooltip>
               <template #default="{ row }">
                 <span>{{ formatExpressionSummary(row.expressions) }}</span>
               </template>
             </el-table-column>
-            <el-table-column prop="error" label="错误信息" min-width="200" show-overflow-tooltip />
+            <el-table-column prop="error" :label="t('lineage.syncTableCol.error')" min-width="200" show-overflow-tooltip />
               </el-table>
             </div>
 
             <!-- 同步历史 -->
             <div style="margin-top:20px">
-              <div style="font-size:13px;font-weight:600;margin-bottom:10px">同步历史</div>
+              <div style="font-size:13px;font-weight:600;margin-bottom:10px">{{ t('lineage.syncHistoryTitle') }}</div>
               <el-table :data="syncLogs" size="small" border max-height="280" class="lineage-compact-table">
-                <el-table-column prop="sync_time" label="同步时间" width="180" />
-                <el-table-column prop="start_date" label="开始日期" width="120" />
-                <el-table-column prop="end_date" label="结束日期" width="120" />
-                <el-table-column prop="scanned" label="扫描数" width="90" />
-                <el-table-column prop="synced" label="成功" width="90">
+                <el-table-column prop="sync_time" :label="t('lineage.historyTableCol.time')" width="180" />
+                <el-table-column prop="start_date" :label="t('lineage.historyTableCol.startDate')" width="120" />
+                <el-table-column prop="end_date" :label="t('lineage.historyTableCol.endDate')" width="120" />
+                <el-table-column prop="scanned" :label="t('lineage.historyTableCol.scanned')" width="90" />
+                <el-table-column prop="synced" :label="t('lineage.historyTableCol.synced')" width="90">
                   <template #default="{ row }">
                     <span style="color:#67c23a;font-weight:600">{{ row.synced }}</span>
                   </template>
                 </el-table-column>
-                <el-table-column prop="failed" label="失败" width="90">
+                <el-table-column prop="failed" :label="t('lineage.historyTableCol.failed')" width="90">
                   <template #default="{ row }">
                     <span style="color:#f56c6c;font-weight:600">{{ row.failed }}</span>
                   </template>
                 </el-table-column>
-                <el-table-column prop="success" label="状态" width="100">
+                <el-table-column prop="success" :label="t('lineage.historyTableCol.status')" width="100">
                   <template #default="{ row }">
                     <el-tag :type="row.success ? 'success' : 'warning'">
-                      {{ row.success ? '✓ 完成' : '⚠ 部分失败' }}
+                      {{ row.success ? t('lineage.historyStatusDone') : t('lineage.historyStatusPartial') }}
                     </el-tag>
                   </template>
                 </el-table-column>
@@ -120,14 +120,14 @@
           </div>
         </el-tab-pane>
 
-        <el-tab-pane label="🔍 查询血缘" name="query">
+        <el-tab-pane :label="t('lineage.tabQueryLineage')" name="query">
           <div class="card" style="border-top-left-radius:0;padding:0">
             <div class="query-grid">
               <div class="table-list-card">
-                <div style="font-size:13px;font-weight:600;margin-bottom:12px;padding:20px 20px 0">数据表 ({{ tables.length }})</div>
+                <div style="font-size:13px;font-weight:600;margin-bottom:12px;padding:20px 20px 0">{{ t('lineage.tableListTitle') }} ({{ tables.length }})</div>
                 <div style="padding:0 20px">
                   <div style="margin-bottom:12px">
-              <el-input v-model="tableKeyword" placeholder="🔍 搜索表..." clearable @input="loadTables" />
+              <el-input v-model="tableKeyword" :placeholder="t('lineage.searchPlaceholder')" clearable @input="loadTables" />
                   </div>
                   <el-scrollbar style="height:640px">
                     <div style="padding:0 20px">
@@ -151,34 +151,34 @@
                 <!-- 当前表信息 -->
                 <div class="card">
                   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-                    <div style="font-size:13px;font-weight:600">📌 当前表</div>
-                    <el-button text type="primary" size="small" @click="exportLineage">📤 导出</el-button>
+                    <div style="font-size:13px;font-weight:600">{{ t('lineage.currentTableLabel') }}</div>
+                    <el-button text type="primary" size="small" @click="exportLineage">{{ t('lineage.btnExport') }}</el-button>
                   </div>
-                <div class="current-table">{{ selectedTable || '未选择' }}</div>
+                <div class="current-table">{{ selectedTable || t('lineage.unselected') }}</div>
                 <div class="current-sub">{{ selectedTableInfo.asset_name || '' }} {{ selectedTableInfo.description || '' }}</div>
               </div>
               <!-- 血缘关系图 -->
               <div class="card">
                   <el-tabs v-model="lineageViewMode" class="lineage-subtabs">
-                    <el-tab-pane label="table 血缘" name="table" />
-                    <el-tab-pane label="column 血缘" name="field" />
+                    <el-tab-pane :label="t('lineage.viewModeTable')" name="table" />
+                    <el-tab-pane :label="t('lineage.viewModeField')" name="field" />
                   </el-tabs>
 
                   <template v-if="lineageViewMode === 'table'">
                   <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:10px">
                     <div>
-                      <div style="font-size:13px;font-weight:600">🔗 血缘关系</div>
-                      <div style="font-size:12px;color:#909399;margin-top:4px">上游 → 当前表 → 下游</div>
+                      <div style="font-size:13px;font-weight:600">{{ t('lineage.lineageTitle') }}</div>
+                      <div style="font-size:12px;color:#909399;margin-top:4px">{{ t('lineage.lineageDesc') }}</div>
                     </div>
                     <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">
                       <div style="font-size:12px;padding:4px 10px;background:#f0f9ff;border:1px solid #b3d8ff;border-radius:4px;color:#0050b3">
-                        上游：{{ upstreamList.length }}
+                        {{ t('lineage.lineageUp').replace('{0}', upstreamList.length) }}
                       </div>
                       <div style="font-size:12px;padding:4px 10px;background:#f6ffed;border:1px solid #b7eb8f;border-radius:4px;color:#274e2b">
-                        下游：{{ downstreamList.length }}
+                        {{ t('lineage.lineageDown').replace('{0}', downstreamList.length) }}
                       </div>
                       <div style="font-size:12px;padding:4px 10px;background:#fffbe6;border:1px solid #ffe58f;border-radius:4px;color:#5c4a1a">
-                        节点：{{ omLineage?.nodes?.length || 0 }}
+                        {{ t('lineage.lineageNodes').replace('{0}', omLineage?.nodes?.length || 0) }}
                       </div>
                     </div>
                   </div>
@@ -186,8 +186,8 @@
                 <!-- 血缘关系图 -->
                 <div class="graph-shell">
                   <div class="graph-toolbar">
-                    <button class="graph-btn" @click="resetGraph">重置</button>
-                    <span class="graph-tip">拖拽平移，滚轮缩放</span>
+                    <button class="graph-btn" @click="resetGraph">{{ t('lineage.btnReset') }}</button>
+                    <span class="graph-tip">{{ t('lineage.graphTip') }}</span>
                   </div>
                   <svg
                     v-if="graphNodes.length"
@@ -220,34 +220,34 @@
                     </g>
                   </svg>
                   <div v-else class="graph-empty">
-                    暂无上下游依赖数据
+                    {{ t('lineage.graphEmpty') }}
                   </div>
                 </div>
 
                 <!-- 关系详情 -->
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
                   <div style="border:1px solid #f0f0f0;border-radius:8px;padding:10px;background:#f9f9f9">
-                    <div style="font-size:12px;font-weight:600;margin-bottom:10px">📥 上游 ({{ upstreamEdgesView.length }})</div>
+                    <div style="font-size:12px;font-weight:600;margin-bottom:10px">{{ t('lineage.upstreamTitle') }} ({{ upstreamEdgesView.length }})</div>
                     <div v-if="upstreamEdgesView.length" style="display:flex;flex-direction:column;gap:6px;max-height:150px;overflow-y:auto">
                       <div v-for="(e, i) in upstreamEdgesView" :key="i" style="font-size:11px;color:#666;padding:6px;background:#fff;border-radius:4px;border-left:3px solid #52c41a">
                         {{ e }}
                       </div>
                     </div>
-                    <el-empty v-else description="无上游" :image-size="48" />
+                    <el-empty v-else :description="t('lineage.upstreamEmpty')" :image-size="48" />
                   </div>
                   <div style="border:1px solid #f0f0f0;border-radius:8px;padding:10px;background:#f9f9f9">
-                    <div style="font-size:12px;font-weight:600;margin-bottom:10px">📤 下游 ({{ downstreamEdgesView.length }})</div>
+                    <div style="font-size:12px;font-weight:600;margin-bottom:10px">{{ t('lineage.downstreamTitle') }} ({{ downstreamEdgesView.length }})</div>
                     <div v-if="downstreamEdgesView.length" style="display:flex;flex-direction:column;gap:6px;max-height:150px;overflow-y:auto">
                       <div v-for="(e, i) in downstreamEdgesView" :key="i" style="font-size:11px;color:#666;padding:6px;background:#fff;border-radius:4px;border-left:3px solid #faad14">
                         {{ e }}
                       </div>
                     </div>
-                    <el-empty v-else description="无下游" :image-size="48" />
+                    <el-empty v-else :description="t('lineage.downstreamEmpty')" :image-size="48" />
                   </div>
                 </div>
 
                   <details style="margin-top:12px;border-top:1px solid #f0f0f0;padding-top:12px">
-                    <summary style="cursor:pointer;font-size:12px;color:#0050b3;font-weight:600;user-select:none">📄 查看原始 JSON</summary>
+                    <summary style="cursor:pointer;font-size:12px;color:#0050b3;font-weight:600;user-select:none">{{ t('lineage.btnViewJson') }}</summary>
                     <pre style="background:#f5f5f5;padding:10px;border-radius:4px;font-size:11px;overflow-x:auto;color:#333;line-height:1.4;margin-top:8px">{{ omLineageText }}</pre>
                   </details>
                   </template>
@@ -255,27 +255,27 @@
                   <template v-else>
                     <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:10px">
                       <div>
-                        <div style="font-size:13px;font-weight:600">🧬 字段级血缘</div>
-                        <div style="font-size:12px;color:#909399;margin-top:4px">直接读取 OpenMetadata `columnsLineage` 的上游/下游字段映射</div>
+                        <div style="font-size:13px;font-weight:600">{{ t('lineage.fieldLineageTitle') }}</div>
+                        <div style="font-size:12px;color:#909399;margin-top:4px">{{ t('lineage.fieldLineageDesc') }}</div>
                       </div>
                       <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">
                         <div style="font-size:12px;padding:4px 10px;background:#f0f9ff;border:1px solid #b3d8ff;border-radius:4px;color:#0050b3">
-                          上游映射：{{ fieldUpstreamRows.length }}
+                          {{ t('lineage.fieldUpstreamCount').replace('{0}', fieldUpstreamRows.length) }}
                         </div>
                         <div style="font-size:12px;padding:4px 10px;background:#f6ffed;border:1px solid #b7eb8f;border-radius:4px;color:#274e2b">
-                          下游映射：{{ fieldDownstreamRows.length }}
+                          {{ t('lineage.fieldDownstreamCount').replace('{0}', fieldDownstreamRows.length) }}
                         </div>
                       </div>
                     </div>
 
                     <el-tabs v-model="fieldDirectionTab" class="lineage-subtabs">
-                      <el-tab-pane :label="`上游(${fieldUpstreamRows.length})`" name="upstream" />
-                      <el-tab-pane :label="`下游(${fieldDownstreamRows.length})`" name="downstream" />
+                      <el-tab-pane :label="t('lineage.fieldTabUpstream').replace('{0}', fieldUpstreamRows.length)" name="upstream" />
+                      <el-tab-pane :label="t('lineage.fieldTabDownstream').replace('{0}', fieldDownstreamRows.length)" name="downstream" />
                     </el-tabs>
 
                     <div style="border:1px solid #f0f0f0;border-radius:8px;padding:10px;background:#f9f9f9">
                       <div style="font-size:12px;font-weight:600;margin-bottom:10px">
-                        {{ fieldDirectionTab === 'upstream' ? '📥 上游字段映射' : '📤 下游字段映射' }}
+                        {{ fieldDirectionTab === 'upstream' ? t('lineage.fieldUpstreamLabel') : t('lineage.fieldDownstreamLabel') }}
                       </div>
 
                       <el-table
@@ -283,12 +283,12 @@
                         :data="fieldUpstreamRows"
                         size="small"
                         max-height="380"
-                        empty-text="OpenMetadata 未返回上游字段级血缘"
+                        :empty-text="t('lineage.fieldEmptyUp')"
                         class="lineage-merged-table"
                         :span-method="spanMethod"
                       >
-                        <el-table-column prop="source_table" label="📦 来源表" width="160" show-overflow-tooltip />
-                        <el-table-column label="📝 来源字段" min-width="180">
+                        <el-table-column prop="source_table" :label="t('lineage.fieldColSourceTable')" width="160" show-overflow-tooltip />
+                        <el-table-column :label="t('lineage.fieldColSourceField')" min-width="180">
                           <template #default="{ row }">
                             <div class="field-badge upstream">{{ (row.source_fields || []).join(', ') || '-' }}</div>
                           </template>
@@ -298,13 +298,13 @@
                             <div class="flow-arrow-icon upstream">→</div>
                           </template>
                         </el-table-column>
-                        <el-table-column prop="target_table" label="📦 目标表" width="160" show-overflow-tooltip />
-                        <el-table-column label="📝 目标字段" min-width="140">
+                        <el-table-column prop="target_table" :label="t('lineage.fieldColTargetTable')" width="160" show-overflow-tooltip />
+                        <el-table-column :label="t('lineage.fieldColTargetField')" min-width="140">
                           <template #default="{ row }">
                             <span class="target-field">{{ row.target_field || '-' }}</span>
                           </template>
                         </el-table-column>
-                        <el-table-column label="⚙️ 计算方式" min-width="240" show-overflow-tooltip>
+                        <el-table-column :label="t('lineage.fieldColExpression')" min-width="240" show-overflow-tooltip>
                           <template #default="{ row }">
                             <span>{{ row.expression || '-' }}</span>
                           </template>
@@ -316,12 +316,12 @@
                         :data="fieldDownstreamRows"
                         size="small"
                         max-height="380"
-                        empty-text="OpenMetadata 未返回下游字段级血缘"
+                        :empty-text="t('lineage.fieldEmptyDown')"
                         class="lineage-merged-table"
                         :span-method="spanMethod"
                       >
-                        <el-table-column prop="source_table" label="📦 来源表" width="160" show-overflow-tooltip />
-                        <el-table-column label="📝 来源字段" min-width="180">
+                        <el-table-column prop="source_table" :label="t('lineage.fieldColSourceTable')" width="160" show-overflow-tooltip />
+                        <el-table-column :label="t('lineage.fieldColSourceField')" min-width="180">
                           <template #default="{ row }">
                             <div class="field-badge downstream">{{ (row.source_fields || []).join(', ') || '-' }}</div>
                           </template>
@@ -331,13 +331,13 @@
                             <div class="flow-arrow-icon downstream">→</div>
                           </template>
                         </el-table-column>
-                        <el-table-column prop="target_table" label="📦 目标表" width="160" show-overflow-tooltip />
-                        <el-table-column label="📝 目标字段" min-width="140">
+                        <el-table-column prop="target_table" :label="t('lineage.fieldColTargetTable')" width="160" show-overflow-tooltip />
+                        <el-table-column :label="t('lineage.fieldColTargetField')" min-width="140">
                           <template #default="{ row }">
                             <span class="target-field">{{ row.target_field || '-' }}</span>
                           </template>
                         </el-table-column>
-                        <el-table-column label="⚙️ 计算方式" min-width="240" show-overflow-tooltip>
+                        <el-table-column :label="t('lineage.fieldColExpression')" min-width="240" show-overflow-tooltip>
                           <template #default="{ row }">
                             <span>{{ row.expression || '-' }}</span>
                           </template>
@@ -346,7 +346,7 @@
                     </div>
 
                     <details style="margin-top:12px;border-top:1px solid #f0f0f0;padding-top:12px">
-                      <summary style="cursor:pointer;font-size:12px;color:#0050b3;font-weight:600;user-select:none">📄 查看 OpenMetadata 原始字段血缘</summary>
+                      <summary style="cursor:pointer;font-size:12px;color:#0050b3;font-weight:600;user-select:none">{{ t('lineage.btnViewFieldJson') }}</summary>
                       <pre style="background:#f5f5f5;padding:10px;border-radius:4px;font-size:11px;overflow-x:auto;color:#333;line-height:1.4;margin-top:8px">{{ fieldLineageText }}</pre>
                     </details>
                   </template>
@@ -354,7 +354,7 @@
 
                 <!-- 影响分析 -->
                 <div class="card">
-                  <div style="font-size:13px;font-weight:600;margin-bottom:10px">⚡ 影响分析 ({{ impactRows.length }})</div>
+                  <div style="font-size:13px;font-weight:600;margin-bottom:10px">{{ t('lineage.impactTitle') }} ({{ impactRows.length }})</div>
                   <div v-if="impactRows.length" style="display:flex;flex-direction:column;gap:8px">
                     <div
                       v-for="(row, idx) in impactRows"
@@ -375,7 +375,7 @@
                     </div>
                   </div>
                   <div v-else style="text-align:center;padding:30px;color:#999;font-size:13px">
-                    ✓ 无影响风险
+                    {{ t('lineage.impactEmpty') }}
                   </div>
                 </div>
               </div>
@@ -390,6 +390,7 @@
 import { computed, onMounted, onBeforeUnmount, ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import { lineageApi } from '@/api'
+import { t, locale } from '@/i18n'
 
 const activeTab = ref('sync')
 const syncing = ref(false)
@@ -445,7 +446,7 @@ const getImpactType = (level) => {
 }
 
 const getImpactLabel = (level) => {
-  const labels = { high: '🔴 高风险', medium: '🟡 中风险', low: '🟢 低风险' }
+  const labels = { high: t('lineage.impactRiskHigh'), medium: t('lineage.impactRiskMedium'), low: t('lineage.impactRiskLow') }
   return labels[level] || '未知'
 }
 
@@ -472,10 +473,10 @@ const exportLineage = () => {
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
-  a.download = `lineage-${selectedTable.value}-${new Date().toISOString().slice(0, 10)}.json`
+  a.download = t('lineage.exportFilename').replace('{0}', selectedTable.value).replace('{1}', new Date().toISOString().slice(0, 10))
   a.click()
   URL.revokeObjectURL(url)
-  ElMessage.success('导出成功')
+  ElMessage.success(t('common.export'))
 }
 
 async function refreshLogs() {
@@ -769,8 +770,8 @@ async function syncFromAudit() {
   try {
     const res = await lineageApi.syncFromAudit({ start_date: startDate.value, end_date: endDate.value, limit: Number(auditLimit.value) || 0 })
     syncRows.value = res.details || []
-    ElMessage.success(`同步完成：扫描 ${res.scanned} 条，成功 ${res.synced} 条，失败 ${res.failed} 条`)
-    if (res.errors?.length) ElMessage.warning(`有 ${res.errors.length} 条失败，请看下方明细`)
+    ElMessage.success(t('lineage.msgSyncSuccess').replace('{0}', res.scanned).replace('{1}', res.synced).replace('{2}', res.failed))
+    if (res.errors?.length) ElMessage.warning(t('lineage.msgSyncWarning').replace('{0}', res.errors.length))
     await refreshLogs()
     await loadTables()
   } finally {

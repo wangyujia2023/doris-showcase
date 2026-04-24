@@ -125,10 +125,10 @@ UNIQUE KEY(report_period, org_code)
 DISTRIBUTED BY HASH(org_code) BUCKETS 3
 PROPERTIES ("replication_num"="1");
 
--- 7. 报送日志（DUPLICATE KEY + 倒排索引）
+-- 7. 报送日志（UNIQUE KEY，以 log_id 去重）
 DROP TABLE IF EXISTS reg_submit_log;
 CREATE TABLE reg_submit_log (
-    log_id          VARCHAR(36)  NOT NULL,
+    log_id          VARCHAR(36)  NOT NULL  COMMENT 'UUID',
     report_code     VARCHAR(10)  NOT NULL,
     report_period   VARCHAR(10)  NOT NULL,
     org_code        VARCHAR(20)  NOT NULL,
@@ -137,13 +137,10 @@ CREATE TABLE reg_submit_log (
     action_time     DATETIME,
     qc_score        DECIMAL(5,2),
     fail_rules      VARCHAR(1000)          COMMENT 'JSON失败规则',
-    remark          VARCHAR(500),
-    INDEX idx_code   (report_code)  USING INVERTED,
-    INDEX idx_period (report_period) USING INVERTED,
-    INDEX idx_action (action)       USING INVERTED
+    remark          VARCHAR(500)
 ) ENGINE=OLAP
-DUPLICATE KEY(log_id, action_time)
-DISTRIBUTED BY HASH(org_code) BUCKETS 5
+UNIQUE KEY(log_id)
+DISTRIBUTED BY HASH(log_id) BUCKETS 5
 PROPERTIES ("replication_num"="1");
 
 -- 8. 一表通最终表（核心产出）

@@ -5,13 +5,10 @@
     <div class="card bench-banner">
       <div>
         <div class="banner-title">
-          <el-tag type="danger" size="small" effect="dark" style="margin-right:8px">HASP</el-tag>
-          Doris 高并发点查压测 · 模拟 JMeter 多线程场景
+          <el-tag type="danger" size="small" effect="dark" style="margin-right:8px">HSAP</el-tag>
+          {{ t('bench.bannerTitle') }}
         </div>
-        <div class="banner-desc">
-          基于 asyncio 并发协程对 <code>user_wide_point_query</code> 表执行点查，展示 Doris 在
-          <b>Unique Key + 主键索引</b> 下的极低延迟与高 QPS 能力，并与传统关系型数据库进行对比估算。
-        </div>
+        <div class="banner-desc">{{ t('bench.bannerDesc') }}</div>
       </div>
     </div>
 
@@ -19,21 +16,21 @@
     <div class="card config-card">
       <div class="config-grid">
         <div class="config-item">
-          <div class="config-label">并发线程数（协程）</div>
+          <div class="config-label">{{ t('bench.labelThreads') }}</div>
           <el-slider v-model="config.threads" :min="1" :max="50" :step="1" show-stops :marks="{1:'1',10:'10',20:'20',50:'50'}" />
-          <div class="config-val">{{ config.threads }} 线程</div>
+          <div class="config-val">{{ config.threads }} threads</div>
         </div>
         <div class="config-item">
-          <div class="config-label">每线程执行次数</div>
+          <div class="config-label">{{ t('bench.labelIter') }}</div>
           <el-slider v-model="config.iterations" :min="5" :max="200" :step="5" :marks="{5:'5',50:'50',100:'100',200:'200'}" />
-          <div class="config-val">{{ config.iterations }} 次（总 {{ config.threads * config.iterations }} 次查询）</div>
+          <div class="config-val">{{ config.iterations }} × ({{ t('bench.totalQueries').replace('{0}', config.threads * config.iterations) }})</div>
         </div>
         <div class="config-item">
-          <div class="config-label">查询类型</div>
+          <div class="config-label">{{ t('bench.labelType') }}</div>
           <el-radio-group v-model="config.query_type" style="margin-top:8px">
-            <el-radio-button value="point">点查（主键）</el-radio-button>
-            <el-radio-button value="range">范围查询</el-radio-button>
-            <el-radio-button value="aggregate">聚合查询</el-radio-button>
+            <el-radio-button value="point">{{ t('bench.typePoint') }}</el-radio-button>
+            <el-radio-button value="range">{{ t('bench.typeRange') }}</el-radio-button>
+            <el-radio-button value="aggregate">{{ t('bench.typeAgg') }}</el-radio-button>
           </el-radio-group>
           <div class="query-sql mono">{{ SQL_HINTS[config.query_type] }}</div>
         </div>
@@ -41,9 +38,9 @@
       <div class="config-footer">
         <el-button type="primary" size="large" :loading="running" @click="runBench">
           <el-icon><VideoPlay /></el-icon>
-          {{ running ? `执行中... ${progress}%` : '开始压测' }}
+          {{ running ? t('bench.running').replace('{0}', progress) : t('bench.start') }}
         </el-button>
-        <el-button v-if="result" size="large" @click="reset">重置</el-button>
+        <el-button v-if="result" size="large" @click="reset">{{ t('bench.reset') }}</el-button>
         <div v-if="running" style="flex:1;margin-left:16px">
           <el-progress :percentage="progress" :stroke-width="8" status="active" />
         </div>
@@ -56,29 +53,29 @@
       <!-- 核心指标卡片 -->
       <div class="metric-grid">
         <div class="metric-card qps">
-          <div class="metric-label">QPS</div>
+          <div class="metric-label">{{ t('bench.metricQps') }}</div>
           <div class="metric-val">{{ result.qps.toLocaleString() }}</div>
-          <div class="metric-sub">查询/秒</div>
+          <div class="metric-sub">{{ t('bench.metricQpsSub') }}</div>
         </div>
         <div class="metric-card avg">
-          <div class="metric-label">平均延迟</div>
+          <div class="metric-label">{{ t('bench.metricAvg') }}</div>
           <div class="metric-val">{{ result.avg_ms }}<span class="metric-unit">ms</span></div>
-          <div class="metric-sub">所有请求均值</div>
+          <div class="metric-sub">{{ t('bench.metricAvgSub') }}</div>
         </div>
         <div class="metric-card p50">
-          <div class="metric-label">P50</div>
+          <div class="metric-label">{{ t('bench.metricP50') }}</div>
           <div class="metric-val">{{ result.p50_ms }}<span class="metric-unit">ms</span></div>
-          <div class="metric-sub">中位数延迟</div>
+          <div class="metric-sub">{{ t('bench.metricP50Sub') }}</div>
         </div>
         <div class="metric-card p95">
-          <div class="metric-label">P95</div>
+          <div class="metric-label">{{ t('bench.metricP95') }}</div>
           <div class="metric-val">{{ result.p95_ms }}<span class="metric-unit">ms</span></div>
-          <div class="metric-sub">95 分位延迟</div>
+          <div class="metric-sub">{{ t('bench.metricP95Sub') }}</div>
         </div>
         <div class="metric-card p99">
-          <div class="metric-label">P99</div>
+          <div class="metric-label">{{ t('bench.metricP99') }}</div>
           <div class="metric-val">{{ result.p99_ms }}<span class="metric-unit">ms</span></div>
-          <div class="metric-sub">99 分位延迟</div>
+          <div class="metric-sub">{{ t('bench.metricP99Sub') }}</div>
         </div>
         <div class="metric-card total">
           <div class="metric-label">总查询</div>
@@ -206,6 +203,7 @@ import { BarChart, LineChart } from 'echarts/charts'
 import { GridComponent, TooltipComponent, MarkLineComponent } from 'echarts/components'
 import VChart from 'vue-echarts'
 import { benchmarkApi } from '@/api'
+import { t, locale } from '@/i18n'
 
 use([CanvasRenderer, BarChart, LineChart, GridComponent, TooltipComponent, MarkLineComponent])
 

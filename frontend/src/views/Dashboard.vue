@@ -3,40 +3,37 @@
     <!-- 核心指标 -->
     <div class="stat-row">
       <div class="stat-card">
-        <div class="stat-label">👤 存量用户总数</div>
+        <div class="stat-label">{{ t('dashboard.totalUsers') }}</div>
         <div class="stat-value" style="color:#409eff">{{ fmt(data.user_stat?.total_users) }}</div>
-        <div class="stat-sub">活跃用户 {{ fmt(data.user_stat?.active_users) }} 人</div>
+        <div class="stat-sub">{{ t('dashboard.activeUsersSub').replace('{0}', fmt(data.user_stat?.active_users)) }}</div>
       </div>
       <div class="stat-card">
-        <div class="stat-label">📋 今日日志量</div>
+        <div class="stat-label">{{ t('dashboard.todayLogs') }}</div>
         <div class="stat-value" style="color:#67c23a">{{ fmt(data.log_stat?.total_logs) }}</div>
-        <div class="stat-sub">AI已打标签 {{ fmt(data.log_stat?.log_users) }} 人次</div>
+        <div class="stat-sub">{{ t('dashboard.aiTaggedSub').replace('{0}', fmt(data.log_stat?.log_users)) }}</div>
       </div>
       <div class="stat-card">
-        <div class="stat-label">⚠️ 异常日志数</div>
+        <div class="stat-label">{{ t('dashboard.anomalyLogs') }}</div>
         <div class="stat-value" style="color:#f56c6c">{{ fmt(data.log_stat?.high_risk_logs) }}</div>
-        <div class="stat-sub">异常操作 {{ fmt(data.log_stat?.anomaly_logs) }} 条</div>
+        <div class="stat-sub">{{ t('dashboard.anomalyOpsSub').replace('{0}', fmt(data.log_stat?.anomaly_logs)) }}</div>
       </div>
       <div class="stat-card">
-        <div class="stat-label">👥 活跃人群包</div>
+        <div class="stat-label">{{ t('dashboard.activeCrowd') }}</div>
         <div class="stat-value" style="color:#e6a23c">{{ fmt(data.segment_stat?.total_segments) }}</div>
-        <div class="stat-sub">覆盖用户 {{ fmt(data.segment_stat?.total_crowd) }} 人</div>
+        <div class="stat-sub">{{ t('dashboard.coverUsersSub').replace('{0}', fmt(data.segment_stat?.total_crowd)) }}</div>
       </div>
     </div>
 
     <el-row :gutter="16">
-      <!-- 日志趋势图 -->
       <el-col :span="16">
         <div class="card">
-          <div class="card-title">📈 日志趋势（近14天）</div>
+          <div class="card-title">{{ t('dashboard.logTrend') }}</div>
           <v-chart :option="trendOption" style="height:280px" autoresize />
         </div>
       </el-col>
-
-      <!-- 资产等级分布 -->
       <el-col :span="8">
         <div class="card">
-          <div class="card-title">💰 用户资产等级分布</div>
+          <div class="card-title">{{ t('dashboard.assetDist') }}</div>
           <v-chart :option="assetOption" style="height:280px" autoresize />
         </div>
       </el-col>
@@ -44,7 +41,7 @@
 
     <!-- 快捷入口 -->
     <div class="card">
-      <div class="card-title">🚀 快速入口</div>
+      <div class="card-title">{{ t('dashboard.quickEntry') }}</div>
       <el-row :gutter="12">
         <el-col :span="6" v-for="item in shortcuts" :key="item.path">
           <el-card
@@ -62,28 +59,28 @@
 
     <!-- 异常用户预警 -->
     <div class="card">
-      <div class="card-title">🔴 异常用户预警（今日）</div>
+      <div class="card-title">{{ t('dashboard.anomalyAlert') }}</div>
       <el-table :data="anomalyUsers" stripe size="small">
-        <el-table-column prop="user_id"   label="用户ID" width="100" />
-        <el-table-column prop="user_name" label="姓名"   width="90" />
-        <el-table-column prop="asset_level" label="资产等级" width="100">
+        <el-table-column prop="user_id"   :label="t('dashboard.userId')" width="100" />
+        <el-table-column prop="user_name" :label="t('dashboard.name')"   width="90" />
+        <el-table-column prop="asset_level" :label="t('dashboard.assetLevel')" width="100">
           <template #default="{row}">
             <el-tag :type="assetTagType(row.asset_level)" size="small">{{ row.asset_level }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="city"      label="城市"   width="80" />
-        <el-table-column label="异常类型">
+        <el-table-column prop="city"      :label="t('dashboard.city')"   width="80" />
+        <el-table-column :label="t('dashboard.anomalyType')">
           <template #default>
-            <el-tag type="danger" size="small">异地登录 / 大额转账</el-tag>
+            <el-tag type="danger" size="small">{{ t('dashboard.anomalyTypeVal') }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="风险等级" width="90">
-          <template #default><el-tag type="danger" size="small">高风险</el-tag></template>
+        <el-table-column :label="t('dashboard.riskLevel')" width="90">
+          <template #default><el-tag type="danger" size="small">{{ t('dashboard.riskHigh') }}</el-tag></template>
         </el-table-column>
-        <el-table-column label="操作" width="120">
+        <el-table-column :label="t('common.operation')" width="120">
           <template #default="{row}">
             <el-button type="primary" size="small" link @click="$router.push(`/user?user_id=${row.user_id}`)">
-              查看详情
+              {{ t('common.detail') }}
             </el-button>
           </template>
         </el-table-column>
@@ -96,19 +93,19 @@
 import { ref, computed, onMounted } from 'vue'
 import VChart from 'vue-echarts'
 import { dashboardApi, userApi } from '@/api'
-// ✅ ECharts 已在 plugins/echarts.js 中全局导入，无需重复
+import { t, locale } from '@/i18n'
 
 const data = ref({ user_stat: {}, log_stat: {}, segment_stat: {}, asset_level_dist: [], log_trend: [] })
 const anomalyUsers = ref([])
 
 const fmt = (v) => v == null ? '-' : Number(v).toLocaleString()
 
-const shortcuts = [
-  { path: '/user',         icon: 'User',       color: '#409eff', label: '用户宽表查询', desc: '多条件筛选用户画像' },
-  { path: '/segment',      icon: 'Grid',       color: '#67c23a', label: '人群圈选',     desc: 'Bitmap 精准圈人' },
-  { path: '/behavior',     icon: 'TrendCharts',color: '#e6a23c', label: '行为分析',     desc: '漏斗/留存/RFM' },
-  { path: '/ai-tag',       icon: 'MagicStick', color: '#f56c6c', label: 'AI 打标签',   desc: 'Doris AI Function' },
-]
+const shortcuts = computed(() => [
+  { path: '/user',     icon: 'User',        color: '#409eff', ...t('dashboard.scUser') },
+  { path: '/segment',  icon: 'Grid',        color: '#67c23a', ...t('dashboard.scSegment') },
+  { path: '/behavior', icon: 'TrendCharts', color: '#e6a23c', ...t('dashboard.scBehavior') },
+  { path: '/ai-tag',   icon: 'MagicStick',  color: '#f56c6c', ...t('dashboard.scAiTag') },
+])
 
 const assetTagType = (level) => ({
   'VIP私行': 'danger', 'VIP钻石': 'warning', 'VIP铂金': '', 'VIP黄金': 'success'
@@ -118,19 +115,19 @@ const trendOption = computed(() => {
   const trend = data.value.log_trend || []
   return {
     tooltip: { trigger: 'axis' },
-    legend: { data: ['日志总量', '高风险日志'], top: 0 },
+    legend: { data: [t('dashboard.legendTotal'), t('dashboard.legendRisk')], top: 0 },
     grid: { left: 40, right: 20, top: 36, bottom: 30 },
     xAxis: { type: 'category', data: trend.map(r => r.date || r.log_date) },
     yAxis: { type: 'value' },
     series: [
       {
-        name: '日志总量', type: 'line', smooth: true,
+        name: t('dashboard.legendTotal'), type: 'line', smooth: true,
         data: trend.map(r => r.log_count),
         areaStyle: { opacity: 0.15 },
         lineStyle: { color: '#409eff' }, itemStyle: { color: '#409eff' }
       },
       {
-        name: '高风险日志', type: 'bar',
+        name: t('dashboard.legendRisk'), type: 'bar',
         data: trend.map(r => r.risk_count),
         itemStyle: { color: '#f56c6c' }
       }
@@ -149,14 +146,9 @@ const assetOption = computed(() => ({
 }))
 
 onMounted(async () => {
-  // 先加载首页核心指标，避免被次要表格阻塞首屏
   try {
     data.value = await dashboardApi.overview()
-  } catch {
-    // 保留默认结构，避免页面报错
-  }
-
-  // 异常用户异步补齐，不影响首页主内容首屏渲染
+  } catch {}
   userApi.queryWide({ anomaly_flag: 1, page_size: 5 })
     .then(res => { anomalyUsers.value = res.rows || [] })
     .catch(() => { anomalyUsers.value = [] })
