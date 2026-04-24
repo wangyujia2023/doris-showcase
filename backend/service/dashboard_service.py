@@ -121,7 +121,7 @@ FROM (
            NULL,
            NULL,
            NULL,
-           log_time AS date,
+           DATE(log_time) AS date,
            COUNT(*) AS log_count,
            COUNT(IF(level='高风险', 1, NULL)) AS risk_count
     FROM sys_logs

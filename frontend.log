@@ -30,3 +30,48 @@
 1:36:20 PM [vite] hmr update /src/views/LogClassifyAnalysis.vue
 1:39:37 PM [vite] hmr update /src/views/VectorSearch.vue
 1:42:26 PM [vite] hmr update /src/App.vue, /src/views/UserWide.vue, /src/views/VectorSearch.vue, /src/views/Regulatory.vue, /src/components/regulatory/LineageTab.vue, /src/components/regulatory/OverviewTab.vue, /src/components/regulatory/MasterTab.vue, /src/components/regulatory/QualityTab.vue, /src/views/Satellite.vue, /src/views/BankReport.vue, /src/views/LogClassifyAnalysis.vue, /src/views/UserTagAnalysis.vue, /src/views/Dashboard.vue, /src/views/ManagementDashboard.vue, /src/views/NewsInsight.vue
+2:10:23 PM [vite] ../.env changed, restarting server...
+2:10:24 PM [vite] ../.env changed, restarting server...
+2:10:24 PM [vite] server restarted.
+
+  ➜  Local:   http://localhost:5173/
+  ➜  Network: http://172.20.10.4:5173/
+  ➜  Network: http://192.168.1.98:5173/
+
+  ➜  Local:   http://localhost:5173/
+  ➜  Network: http://172.20.10.4:5173/
+  ➜  Network: http://192.168.1.98:5173/
+[unplugin-vue-components] component "OverviewTab"(/Users/yujia/Desktop/workspace/bank-cdp-doris4/frontend/src/components/regulatory/OverviewTab.vue) has naming conflicts with other components, ignored.
+2:11:50 PM [vite] http proxy error: /api/system/health
+Error: connect ECONNREFUSED 0.0.0.0:27713
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+2:11:50 PM [vite] http proxy error: /api/news/stats
+Error: connect ECONNREFUSED 0.0.0.0:27713
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+2:11:50 PM [vite] http proxy error: /api/news/list
+Error: connect ECONNREFUSED 0.0.0.0:27713
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+2:11:50 PM [vite] http proxy error: /api/news/tag-analysis
+Error: connect ECONNREFUSED 0.0.0.0:27713
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+2:11:50 PM [vite] http proxy error: /api/news/sector-metrics
+Error: connect ECONNREFUSED 0.0.0.0:27713
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+2:11:50 PM [vite] http proxy error: /api/news/signals
+Error: connect ECONNREFUSED 0.0.0.0:27713
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+2:11:50 PM [vite] http proxy error: /api/news/hot-companies
+Error: connect ECONNREFUSED 0.0.0.0:27713
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+2:26:17 PM [vite] http proxy error: /api/system/health
+Error: connect ECONNREFUSED 0.0.0.0:27713
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+2:26:18 PM [vite] http proxy error: /api/user/wide?page=1&page_size=20
+Error: connect ECONNREFUSED 0.0.0.0:27713
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+3:03:38 PM [vite] http proxy error: /api/dashboard
+Error: connect ECONNREFUSED 0.0.0.0:27713
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+3:03:39 PM [vite] http proxy error: /api/user/wide?anomaly_flag=1&page_size=5
+Error: connect ECONNREFUSED 0.0.0.0:27713
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
