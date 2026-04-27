@@ -53,7 +53,7 @@ class Settings:
         self.DORIS_DATABASE: str = os.getenv("DORIS_DATABASE", "bank_cdp")
         self.DB_WARMUP_ON_START: bool = _env_bool("DB_WARMUP_ON_START", "false")
         self.BACKEND_HOST: str = os.getenv("BACKEND_HOST", "0.0.0.0")
-        self.BACKEND_PORT: int = _env_int("BACKEND_PORT", "8000")
+        self.BACKEND_PORT: int = _env_int("BACKEND_PORT", "27713")
         self.FRONTEND_HOST: str = os.getenv("FRONTEND_HOST", "0.0.0.0")
         self.FRONTEND_PORT: int = _env_int("FRONTEND_PORT", "5173")
         self.APP_ENV: str = os.getenv("APP_ENV", "dev")

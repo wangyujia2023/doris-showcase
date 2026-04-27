@@ -1,77 +1,38 @@
-
-> bank-cdp-frontend@2.0.0 dev
-> vite --host --host 0.0.0.0 --port 5173
-
 [33mThe CJS build of Vite's Node API is deprecated. See https://vite.dev/guide/troubleshooting.html#vite-cjs-node-api-deprecated for more details.[39m
 
-  VITE v5.4.21  ready in 374 ms
+  VITE v5.4.21  ready in 441 ms
 
   ➜  Local:   http://localhost:5173/
   ➜  Network: http://192.168.3.30:5173/
-  ➜  Network: http://192.168.1.214:5173/
+  ➜  Network: http://192.168.0.130:5173/
 [unplugin-vue-components] component "OverviewTab"(/Users/yujia/Desktop/workspace/bank-cdp-doris4/frontend/src/components/regulatory/OverviewTab.vue) has naming conflicts with other components, ignored.
-12:58:17 PM [vite] hmr update /src/App.vue, /src/views/UserWide.vue, /src/views/VectorSearch.vue, /src/views/Regulatory.vue, /src/components/regulatory/LineageTab.vue, /src/components/regulatory/OverviewTab.vue, /src/components/regulatory/MasterTab.vue, /src/components/regulatory/QualityTab.vue, /src/views/Satellite.vue, /src/views/BankReport.vue, /src/views/LogClassifyAnalysis.vue, /src/views/UserTagAnalysis.vue
-12:58:17 PM [vite] hmr update /src/App.vue, /src/views/UserWide.vue, /src/views/VectorSearch.vue, /src/views/Regulatory.vue, /src/components/regulatory/LineageTab.vue, /src/components/regulatory/OverviewTab.vue, /src/components/regulatory/MasterTab.vue, /src/components/regulatory/QualityTab.vue, /src/views/Satellite.vue, /src/views/BankReport.vue, /src/views/LogClassifyAnalysis.vue, /src/views/UserTagAnalysis.vue
-12:58:18 PM [vite] hmr update /src/App.vue, /src/views/UserWide.vue, /src/views/VectorSearch.vue, /src/views/Regulatory.vue, /src/components/regulatory/LineageTab.vue, /src/components/regulatory/OverviewTab.vue, /src/components/regulatory/MasterTab.vue, /src/components/regulatory/QualityTab.vue, /src/views/Satellite.vue, /src/views/BankReport.vue, /src/views/LogClassifyAnalysis.vue, /src/views/UserTagAnalysis.vue
-12:58:18 PM [vite] hmr update /src/App.vue, /src/views/UserWide.vue, /src/views/VectorSearch.vue, /src/views/Regulatory.vue, /src/components/regulatory/LineageTab.vue, /src/components/regulatory/OverviewTab.vue, /src/components/regulatory/MasterTab.vue, /src/components/regulatory/QualityTab.vue, /src/views/Satellite.vue, /src/views/BankReport.vue, /src/views/LogClassifyAnalysis.vue, /src/views/UserTagAnalysis.vue
-12:58:45 PM [vite] hmr update /src/App.vue, /src/views/UserWide.vue, /src/views/VectorSearch.vue, /src/views/Regulatory.vue, /src/components/regulatory/LineageTab.vue, /src/components/regulatory/OverviewTab.vue, /src/components/regulatory/MasterTab.vue, /src/components/regulatory/QualityTab.vue, /src/views/Satellite.vue, /src/views/BankReport.vue, /src/views/LogClassifyAnalysis.vue, /src/views/UserTagAnalysis.vue, /src/views/Dashboard.vue, /src/views/ManagementDashboard.vue
-12:58:46 PM [vite] hmr update /src/App.vue, /src/views/UserWide.vue, /src/views/VectorSearch.vue, /src/views/Regulatory.vue, /src/components/regulatory/LineageTab.vue, /src/components/regulatory/OverviewTab.vue, /src/components/regulatory/MasterTab.vue, /src/components/regulatory/QualityTab.vue, /src/views/Satellite.vue, /src/views/BankReport.vue, /src/views/LogClassifyAnalysis.vue, /src/views/UserTagAnalysis.vue, /src/views/Dashboard.vue, /src/views/ManagementDashboard.vue
-12:58:46 PM [vite] hmr update /src/App.vue, /src/views/UserWide.vue, /src/views/VectorSearch.vue, /src/views/Regulatory.vue, /src/components/regulatory/LineageTab.vue, /src/components/regulatory/OverviewTab.vue, /src/components/regulatory/MasterTab.vue, /src/components/regulatory/QualityTab.vue, /src/views/Satellite.vue, /src/views/BankReport.vue, /src/views/LogClassifyAnalysis.vue, /src/views/UserTagAnalysis.vue, /src/views/Dashboard.vue, /src/views/ManagementDashboard.vue
-12:59:02 PM [vite] hmr update /src/App.vue, /src/views/UserWide.vue, /src/views/VectorSearch.vue, /src/views/Regulatory.vue, /src/components/regulatory/LineageTab.vue, /src/components/regulatory/OverviewTab.vue, /src/components/regulatory/MasterTab.vue, /src/components/regulatory/QualityTab.vue, /src/views/Satellite.vue, /src/views/BankReport.vue, /src/views/LogClassifyAnalysis.vue, /src/views/UserTagAnalysis.vue, /src/views/Dashboard.vue, /src/views/ManagementDashboard.vue
-12:59:02 PM [vite] hmr update /src/App.vue, /src/views/UserWide.vue, /src/views/VectorSearch.vue, /src/views/Regulatory.vue, /src/components/regulatory/LineageTab.vue, /src/components/regulatory/OverviewTab.vue, /src/components/regulatory/MasterTab.vue, /src/components/regulatory/QualityTab.vue, /src/views/Satellite.vue, /src/views/BankReport.vue, /src/views/LogClassifyAnalysis.vue, /src/views/UserTagAnalysis.vue, /src/views/Dashboard.vue, /src/views/ManagementDashboard.vue
-12:59:02 PM [vite] hmr update /src/App.vue, /src/views/UserWide.vue, /src/views/VectorSearch.vue, /src/views/Regulatory.vue, /src/components/regulatory/LineageTab.vue, /src/components/regulatory/OverviewTab.vue, /src/components/regulatory/MasterTab.vue, /src/components/regulatory/QualityTab.vue, /src/views/Satellite.vue, /src/views/BankReport.vue, /src/views/LogClassifyAnalysis.vue, /src/views/UserTagAnalysis.vue, /src/views/Dashboard.vue, /src/views/ManagementDashboard.vue
-12:59:35 PM [vite] hmr update /src/App.vue
-1:24:36 PM [vite] hmr update /src/App.vue, /src/views/UserWide.vue, /src/views/VectorSearch.vue, /src/views/Regulatory.vue, /src/components/regulatory/LineageTab.vue, /src/components/regulatory/OverviewTab.vue, /src/components/regulatory/MasterTab.vue, /src/components/regulatory/QualityTab.vue, /src/views/Satellite.vue, /src/views/BankReport.vue, /src/views/LogClassifyAnalysis.vue, /src/views/UserTagAnalysis.vue, /src/views/Dashboard.vue, /src/views/ManagementDashboard.vue
-1:28:37 PM [vite] hmr update /src/App.vue, /src/views/UserWide.vue, /src/views/VectorSearch.vue, /src/views/Regulatory.vue, /src/components/regulatory/LineageTab.vue, /src/components/regulatory/OverviewTab.vue, /src/components/regulatory/MasterTab.vue, /src/components/regulatory/QualityTab.vue, /src/views/Satellite.vue, /src/views/BankReport.vue, /src/views/LogClassifyAnalysis.vue, /src/views/UserTagAnalysis.vue, /src/views/Dashboard.vue, /src/views/ManagementDashboard.vue
-1:30:05 PM [vite] hmr update /src/views/LogClassifyAnalysis.vue
-1:31:55 PM [vite] hmr update /src/views/LogClassifyAnalysis.vue
-1:34:05 PM [vite] hmr update /src/App.vue, /src/views/UserWide.vue, /src/views/VectorSearch.vue, /src/views/Regulatory.vue, /src/components/regulatory/LineageTab.vue, /src/components/regulatory/OverviewTab.vue, /src/components/regulatory/MasterTab.vue, /src/components/regulatory/QualityTab.vue, /src/views/Satellite.vue, /src/views/BankReport.vue, /src/views/LogClassifyAnalysis.vue, /src/views/UserTagAnalysis.vue, /src/views/Dashboard.vue, /src/views/ManagementDashboard.vue
-1:34:38 PM [vite] hmr update /src/App.vue, /src/views/UserWide.vue, /src/views/VectorSearch.vue, /src/views/Regulatory.vue, /src/components/regulatory/LineageTab.vue, /src/components/regulatory/OverviewTab.vue, /src/components/regulatory/MasterTab.vue, /src/components/regulatory/QualityTab.vue, /src/views/Satellite.vue, /src/views/BankReport.vue, /src/views/LogClassifyAnalysis.vue, /src/views/UserTagAnalysis.vue, /src/views/Dashboard.vue, /src/views/ManagementDashboard.vue
-1:36:20 PM [vite] hmr update /src/views/LogClassifyAnalysis.vue
-1:39:37 PM [vite] hmr update /src/views/VectorSearch.vue
-1:42:26 PM [vite] hmr update /src/App.vue, /src/views/UserWide.vue, /src/views/VectorSearch.vue, /src/views/Regulatory.vue, /src/components/regulatory/LineageTab.vue, /src/components/regulatory/OverviewTab.vue, /src/components/regulatory/MasterTab.vue, /src/components/regulatory/QualityTab.vue, /src/views/Satellite.vue, /src/views/BankReport.vue, /src/views/LogClassifyAnalysis.vue, /src/views/UserTagAnalysis.vue, /src/views/Dashboard.vue, /src/views/ManagementDashboard.vue, /src/views/NewsInsight.vue
-2:10:23 PM [vite] ../.env changed, restarting server...
-2:10:24 PM [vite] ../.env changed, restarting server...
-2:10:24 PM [vite] server restarted.
-
-  ➜  Local:   http://localhost:5173/
-  ➜  Network: http://172.20.10.4:5173/
-  ➜  Network: http://192.168.1.98:5173/
-
-  ➜  Local:   http://localhost:5173/
-  ➜  Network: http://172.20.10.4:5173/
-  ➜  Network: http://192.168.1.98:5173/
-[unplugin-vue-components] component "OverviewTab"(/Users/yujia/Desktop/workspace/bank-cdp-doris4/frontend/src/components/regulatory/OverviewTab.vue) has naming conflicts with other components, ignored.
-2:11:50 PM [vite] http proxy error: /api/system/health
-Error: connect ECONNREFUSED 0.0.0.0:27713
-    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
-2:11:50 PM [vite] http proxy error: /api/news/stats
-Error: connect ECONNREFUSED 0.0.0.0:27713
-    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
-2:11:50 PM [vite] http proxy error: /api/news/list
-Error: connect ECONNREFUSED 0.0.0.0:27713
-    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
-2:11:50 PM [vite] http proxy error: /api/news/tag-analysis
-Error: connect ECONNREFUSED 0.0.0.0:27713
-    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
-2:11:50 PM [vite] http proxy error: /api/news/sector-metrics
-Error: connect ECONNREFUSED 0.0.0.0:27713
-    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
-2:11:50 PM [vite] http proxy error: /api/news/signals
-Error: connect ECONNREFUSED 0.0.0.0:27713
-    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
-2:11:50 PM [vite] http proxy error: /api/news/hot-companies
-Error: connect ECONNREFUSED 0.0.0.0:27713
-    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
-2:26:17 PM [vite] http proxy error: /api/system/health
-Error: connect ECONNREFUSED 0.0.0.0:27713
-    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
-2:26:18 PM [vite] http proxy error: /api/user/wide?page=1&page_size=20
-Error: connect ECONNREFUSED 0.0.0.0:27713
-    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
-3:03:38 PM [vite] http proxy error: /api/dashboard
-Error: connect ECONNREFUSED 0.0.0.0:27713
-    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
-3:03:39 PM [vite] http proxy error: /api/user/wide?anomaly_flag=1&page_size=5
-Error: connect ECONNREFUSED 0.0.0.0:27713
-    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+7:03:22 PM [vite] hmr update /src/views/UserTagAnalysis.vue
+7:05:49 PM [vite] hmr update /src/views/UserTagAnalysis.vue
+7:36:17 PM [vite] hmr update /src/App.vue, /src/views/Dashboard.vue, /src/views/ManagementDashboard.vue, /src/views/UserWide.vue, /src/views/Segment.vue, /src/views/UserTagAnalysis.vue, /src/views/Behavior.vue, /src/views/LogClassifyAnalysis.vue, /src/views/Satellite.vue, /src/views/VectorSearch.vue
+7:36:26 PM [vite] hmr update /src/App.vue, /src/views/Dashboard.vue, /src/views/ManagementDashboard.vue, /src/views/UserWide.vue, /src/views/Segment.vue, /src/views/UserTagAnalysis.vue, /src/views/Behavior.vue, /src/views/LogClassifyAnalysis.vue, /src/views/Satellite.vue, /src/views/VectorSearch.vue
+8:02:38 PM [vite] hmr update /src/views/UserTagAnalysis.vue
+9:28:56 PM [vite] hmr update /src/App.vue, /src/views/Dashboard.vue, /src/views/ManagementDashboard.vue, /src/views/UserWide.vue, /src/views/Segment.vue, /src/views/UserTagAnalysis.vue, /src/views/Behavior.vue, /src/views/LogClassifyAnalysis.vue, /src/views/Satellite.vue, /src/views/VectorSearch.vue
+9:28:57 PM [vite] hmr update /src/App.vue, /src/views/Dashboard.vue, /src/views/ManagementDashboard.vue, /src/views/UserWide.vue, /src/views/Segment.vue, /src/views/UserTagAnalysis.vue, /src/views/Behavior.vue, /src/views/LogClassifyAnalysis.vue, /src/views/Satellite.vue, /src/views/VectorSearch.vue
+9:28:57 PM [vite] hmr update /src/App.vue, /src/views/Dashboard.vue, /src/views/ManagementDashboard.vue, /src/views/UserWide.vue, /src/views/Segment.vue, /src/views/UserTagAnalysis.vue, /src/views/Behavior.vue, /src/views/LogClassifyAnalysis.vue, /src/views/Satellite.vue, /src/views/VectorSearch.vue
+9:28:57 PM [vite] hmr update /src/App.vue, /src/views/Dashboard.vue, /src/views/ManagementDashboard.vue, /src/views/UserWide.vue, /src/views/Segment.vue, /src/views/UserTagAnalysis.vue, /src/views/Behavior.vue, /src/views/LogClassifyAnalysis.vue, /src/views/Satellite.vue, /src/views/VectorSearch.vue
+9:28:58 PM [vite] hmr update /src/App.vue, /src/views/Dashboard.vue, /src/views/ManagementDashboard.vue, /src/views/UserWide.vue, /src/views/Segment.vue, /src/views/UserTagAnalysis.vue, /src/views/Behavior.vue, /src/views/LogClassifyAnalysis.vue, /src/views/Satellite.vue, /src/views/VectorSearch.vue
+9:28:58 PM [vite] hmr update /src/App.vue, /src/views/Dashboard.vue, /src/views/ManagementDashboard.vue, /src/views/UserWide.vue, /src/views/Segment.vue, /src/views/UserTagAnalysis.vue, /src/views/Behavior.vue, /src/views/LogClassifyAnalysis.vue, /src/views/Satellite.vue, /src/views/VectorSearch.vue
+9:28:58 PM [vite] hmr update /src/App.vue, /src/views/Dashboard.vue, /src/views/ManagementDashboard.vue, /src/views/UserWide.vue, /src/views/Segment.vue, /src/views/UserTagAnalysis.vue, /src/views/Behavior.vue, /src/views/LogClassifyAnalysis.vue, /src/views/Satellite.vue, /src/views/VectorSearch.vue
+9:28:58 PM [vite] hmr update /src/App.vue, /src/views/Dashboard.vue, /src/views/ManagementDashboard.vue, /src/views/UserWide.vue, /src/views/Segment.vue, /src/views/UserTagAnalysis.vue, /src/views/Behavior.vue, /src/views/LogClassifyAnalysis.vue, /src/views/Satellite.vue, /src/views/VectorSearch.vue
+9:29:16 PM [vite] hmr update /src/App.vue, /src/views/Dashboard.vue, /src/views/ManagementDashboard.vue, /src/views/UserWide.vue, /src/views/Segment.vue, /src/views/UserTagAnalysis.vue, /src/views/Behavior.vue, /src/views/LogClassifyAnalysis.vue, /src/views/Satellite.vue, /src/views/VectorSearch.vue
+9:29:16 PM [vite] hmr update /src/App.vue, /src/views/Dashboard.vue, /src/views/ManagementDashboard.vue, /src/views/UserWide.vue, /src/views/Segment.vue, /src/views/UserTagAnalysis.vue, /src/views/Behavior.vue, /src/views/LogClassifyAnalysis.vue, /src/views/Satellite.vue, /src/views/VectorSearch.vue
+9:29:16 PM [vite] hmr update /src/App.vue, /src/views/Dashboard.vue, /src/views/ManagementDashboard.vue, /src/views/UserWide.vue, /src/views/Segment.vue, /src/views/UserTagAnalysis.vue, /src/views/Behavior.vue, /src/views/LogClassifyAnalysis.vue, /src/views/Satellite.vue, /src/views/VectorSearch.vue
+9:29:17 PM [vite] hmr update /src/App.vue, /src/views/Dashboard.vue, /src/views/ManagementDashboard.vue, /src/views/UserWide.vue, /src/views/Segment.vue, /src/views/UserTagAnalysis.vue, /src/views/Behavior.vue, /src/views/LogClassifyAnalysis.vue, /src/views/Satellite.vue, /src/views/VectorSearch.vue
+9:29:30 PM [vite] hmr update /src/App.vue, /src/views/Dashboard.vue, /src/views/ManagementDashboard.vue, /src/views/UserWide.vue, /src/views/Segment.vue, /src/views/UserTagAnalysis.vue, /src/views/Behavior.vue, /src/views/LogClassifyAnalysis.vue, /src/views/Satellite.vue, /src/views/VectorSearch.vue
+9:29:30 PM [vite] hmr update /src/App.vue, /src/views/Dashboard.vue, /src/views/ManagementDashboard.vue, /src/views/UserWide.vue, /src/views/Segment.vue, /src/views/UserTagAnalysis.vue, /src/views/Behavior.vue, /src/views/LogClassifyAnalysis.vue, /src/views/Satellite.vue, /src/views/VectorSearch.vue
+9:29:31 PM [vite] hmr update /src/App.vue, /src/views/Dashboard.vue, /src/views/ManagementDashboard.vue, /src/views/UserWide.vue, /src/views/Segment.vue, /src/views/UserTagAnalysis.vue, /src/views/Behavior.vue, /src/views/LogClassifyAnalysis.vue, /src/views/Satellite.vue, /src/views/VectorSearch.vue
+9:29:31 PM [vite] hmr update /src/App.vue, /src/views/Dashboard.vue, /src/views/ManagementDashboard.vue, /src/views/UserWide.vue, /src/views/Segment.vue, /src/views/UserTagAnalysis.vue, /src/views/Behavior.vue, /src/views/LogClassifyAnalysis.vue, /src/views/Satellite.vue, /src/views/VectorSearch.vue
+9:29:31 PM [vite] hmr update /src/App.vue, /src/views/Dashboard.vue, /src/views/ManagementDashboard.vue, /src/views/UserWide.vue, /src/views/Segment.vue, /src/views/UserTagAnalysis.vue, /src/views/Behavior.vue, /src/views/LogClassifyAnalysis.vue, /src/views/Satellite.vue, /src/views/VectorSearch.vue
+9:29:31 PM [vite] hmr update /src/App.vue, /src/views/Dashboard.vue, /src/views/ManagementDashboard.vue, /src/views/UserWide.vue, /src/views/Segment.vue, /src/views/UserTagAnalysis.vue, /src/views/Behavior.vue, /src/views/LogClassifyAnalysis.vue, /src/views/Satellite.vue, /src/views/VectorSearch.vue
+9:29:31 PM [vite] hmr update /src/App.vue, /src/views/Dashboard.vue, /src/views/ManagementDashboard.vue, /src/views/UserWide.vue, /src/views/Segment.vue, /src/views/UserTagAnalysis.vue, /src/views/Behavior.vue, /src/views/LogClassifyAnalysis.vue, /src/views/Satellite.vue, /src/views/VectorSearch.vue
+9:29:51 PM [vite] hmr update /src/App.vue, /src/views/Dashboard.vue, /src/views/ManagementDashboard.vue, /src/views/UserWide.vue, /src/views/Segment.vue, /src/views/UserTagAnalysis.vue, /src/views/Behavior.vue, /src/views/LogClassifyAnalysis.vue, /src/views/Satellite.vue, /src/views/VectorSearch.vue
+9:29:51 PM [vite] hmr update /src/App.vue, /src/views/Dashboard.vue, /src/views/ManagementDashboard.vue, /src/views/UserWide.vue, /src/views/Segment.vue, /src/views/UserTagAnalysis.vue, /src/views/Behavior.vue, /src/views/LogClassifyAnalysis.vue, /src/views/Satellite.vue, /src/views/VectorSearch.vue
+9:29:52 PM [vite] hmr update /src/App.vue, /src/views/Dashboard.vue, /src/views/ManagementDashboard.vue, /src/views/UserWide.vue, /src/views/Segment.vue, /src/views/UserTagAnalysis.vue, /src/views/Behavior.vue, /src/views/LogClassifyAnalysis.vue, /src/views/Satellite.vue, /src/views/VectorSearch.vue
+9:29:52 PM [vite] hmr update /src/App.vue, /src/views/Dashboard.vue, /src/views/ManagementDashboard.vue, /src/views/UserWide.vue, /src/views/Segment.vue, /src/views/UserTagAnalysis.vue, /src/views/Behavior.vue, /src/views/LogClassifyAnalysis.vue, /src/views/Satellite.vue, /src/views/VectorSearch.vue
+9:29:52 PM [vite] hmr update /src/App.vue, /src/views/Dashboard.vue, /src/views/ManagementDashboard.vue, /src/views/UserWide.vue, /src/views/Segment.vue, /src/views/UserTagAnalysis.vue, /src/views/Behavior.vue, /src/views/LogClassifyAnalysis.vue, /src/views/Satellite.vue, /src/views/VectorSearch.vue
+9:30:05 PM [vite] hmr update /src/App.vue, /src/views/Dashboard.vue, /src/views/ManagementDashboard.vue, /src/views/UserWide.vue, /src/views/Segment.vue, /src/views/UserTagAnalysis.vue, /src/views/Behavior.vue, /src/views/LogClassifyAnalysis.vue, /src/views/Satellite.vue, /src/views/VectorSearch.vue

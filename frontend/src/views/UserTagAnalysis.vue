@@ -23,7 +23,7 @@
             </div>
           </div>
           <div v-for="grp in tagMeta" :key="grp.category" style="margin-bottom:12px">
-            <div style="font-size:11px;color:#909399;margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px">{{ grp.category }}</div>
+            <div style="font-size:11px;color:#909399;margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px">{{ groupLabel(grp.category) }}</div>
             <div style="display:flex;flex-wrap:wrap;gap:6px">
               <div
                 v-for="t in grp.tags" :key="t.tag_id"
@@ -31,7 +31,7 @@
                 @contextmenu.prevent="toggleExclude(t.tag_id)"
                 :class="tagClass(t.tag_id)"
                 class="tag-chip"
-              >{{ t.label }}</div>
+              >{{ tagLabel(t.tag_id) }}</div>
             </div>
           </div>
         </el-col>
@@ -135,10 +135,10 @@
         <!-- TGI -->
         <el-tab-pane label="TGI 指数分析" name="tgi">
           <div style="margin:10px 0;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-            <span style="font-size:13px">目标人群标签：</span>
-            <el-select v-model="tgiTagIds" multiple collapse-tags collapse-tags-tooltip placeholder="（可选）不选则分析全体" style="width:320px">
-              <el-option-group v-for="grp in tagMeta" :key="grp.category" :label="grp.category">
-                <el-option v-for="t in grp.tags" :key="t.tag_id" :label="t.label" :value="t.tag_id" />
+            <span style="font-size:13px">{{ t('ut.targetTags') }}：</span>
+            <el-select v-model="tgiTagIds" multiple collapse-tags collapse-tags-tooltip :placeholder="t('ut.optionalAll')" style="width:320px">
+              <el-option-group v-for="grp in tagMeta" :key="grp.category" :label="groupLabel(grp.category)">
+                <el-option v-for="tg in grp.tags" :key="tg.tag_id" :label="tagLabel(tg.tag_id)" :value="tg.tag_id" />
               </el-option-group>
             </el-select>
             <el-button type="primary" :loading="tgiLoading" @click="runTgi">分析</el-button>
@@ -157,12 +157,12 @@
         <!-- 交叉分析 -->
         <el-tab-pane label="交叉分析" name="cross">
           <div style="margin:10px 0;display:flex;gap:12px;align-items:center">
-            <el-select v-model="crossCat1" placeholder="分类 A" style="width:150px">
-              <el-option v-for="c in allCats" :key="c" :label="c" :value="c" />
+            <el-select v-model="crossCat1" :placeholder="t('ut.categoryA')" style="width:150px">
+              <el-option v-for="c in allCats" :key="c" :label="groupLabel(c)" :value="c" />
             </el-select>
             <span>×</span>
-            <el-select v-model="crossCat2" placeholder="分类 B" style="width:150px">
-              <el-option v-for="c in allCats" :key="c" :label="c" :value="c" />
+            <el-select v-model="crossCat2" :placeholder="t('ut.categoryB')" style="width:150px">
+              <el-option v-for="c in allCats" :key="c" :label="groupLabel(c)" :value="c" />
             </el-select>
             <el-button type="primary" :loading="crossLoading" @click="runCross">交叉分析</el-button>
           </div>
@@ -194,10 +194,10 @@
         <!-- 地域分布 -->
         <el-tab-pane label="地域分布" name="geo">
           <div style="margin:10px 0;display:flex;gap:8px;align-items:center">
-            <span style="font-size:13px">圈选标签（可选）：</span>
-            <el-select v-model="geoTagIds" multiple collapse-tags placeholder="不选=全体" style="width:280px">
-              <el-option-group v-for="grp in tagMeta" :key="grp.category" :label="grp.category">
-                <el-option v-for="t in grp.tags" :key="t.tag_id" :label="t.label" :value="t.tag_id" />
+            <span style="font-size:13px">{{ t('ut.filterTags') }}：</span>
+            <el-select v-model="geoTagIds" multiple collapse-tags :placeholder="t('ut.optionalAll')" style="width:280px">
+              <el-option-group v-for="grp in tagMeta" :key="grp.category" :label="groupLabel(grp.category)">
+                <el-option v-for="tg in grp.tags" :key="tg.tag_id" :label="tagLabel(tg.tag_id)" :value="tg.tag_id" />
               </el-option-group>
             </el-select>
             <el-button type="primary" :loading="geoLoading" @click="runGeo">查询</el-button>
@@ -311,9 +311,9 @@
         <!-- 标签权重 -->
         <el-tab-pane label="标签权重分析" name="weight">
           <div style="margin:10px 0;display:flex;gap:8px;align-items:center">
-            <el-select v-model="weightTagIds" multiple collapse-tags placeholder="选择目标人群标签" style="width:320px">
-              <el-option-group v-for="grp in tagMeta" :key="grp.category" :label="grp.category">
-                <el-option v-for="t in grp.tags" :key="t.tag_id" :label="t.label" :value="t.tag_id" />
+            <el-select v-model="weightTagIds" multiple collapse-tags :placeholder="t('ut.targetTags')" style="width:320px">
+              <el-option-group v-for="grp in tagMeta" :key="grp.category" :label="groupLabel(grp.category)">
+                <el-option v-for="tg in grp.tags" :key="tg.tag_id" :label="tagLabel(tg.tag_id)" :value="tg.tag_id" />
               </el-option-group>
             </el-select>
             <el-button type="primary" :loading="weightLoading" @click="runWeight">分析</el-button>
@@ -322,11 +322,11 @@
             <el-row :gutter="16">
               <el-col v-for="cat in weightData.categories.slice(0,6)" :key="cat.category" :span="12" style="margin-bottom:16px">
                 <div style="font-size:12px;font-weight:600;margin-bottom:6px">
-                  {{ cat.category }}
+                  {{ groupLabel(cat.category) }}
                   <el-tag size="small" style="margin-left:6px">均值TGI {{ cat.avg_tgi }}</el-tag>
                 </div>
                 <div v-for="item in cat.tags.slice(0,5)" :key="item.tag_id" style="display:flex;align-items:center;gap:8px;margin-bottom:3px;font-size:12px">
-                  <span style="width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ item.label }}</span>
+                  <span style="width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ tagText(item.label) }}</span>
                   <el-progress
                     :percentage="Math.min(item.tgi, 200)"
                     :stroke-width="8"
@@ -362,7 +362,7 @@
             </el-row>
             <el-table :data="anomalyData.tags.slice(0,20)" border size="small">
               <el-table-column prop="label" label="标签" width="140" />
-              <el-table-column prop="category" label="分类" width="80" />
+              <el-table-column prop="category" :label="t('ut.category')" width="80" />
               <el-table-column label="全体占比">
                 <template #default="{row}">
                   <el-progress :percentage="Math.min(row.base_pct,100)" :stroke-width="8" :format="()=>row.base_pct+'%'" />
@@ -392,12 +392,12 @@
             选择标签（多选为 AND 交集）
           </div>
           <div v-for="grp in tagMeta" :key="grp.category" style="margin-bottom:12px">
-            <div style="font-size:12px;color:#909399;margin-bottom:6px">{{ grp.category }}</div>
+            <div style="font-size:12px;color:#909399;margin-bottom:6px">{{ groupLabel(grp.category) }}</div>
             <el-checkbox-group v-model="selectedTagIds" style="display:flex;flex-wrap:wrap;gap:6px">
               <el-checkbox
                 v-for="t in grp.tags" :key="t.tag_id"
                 :value="t.tag_id" border size="small"
-              >{{ t.label }}</el-checkbox>
+              >{{ tagLabel(t.tag_id) }}</el-checkbox>
             </el-checkbox-group>
           </div>
         </el-col>
@@ -414,9 +414,9 @@
             <el-button type="primary" style="width:100%" :loading="wideLoading" @click="queryWide">查询</el-button>
           </div>
           <div style="margin-top:16px">
-            <div style="font-size:13px;font-weight:600;margin-bottom:8px">标签命中用户数（TOP 15）</div>
+            <div style="font-size:13px;font-weight:600;margin-bottom:8px">{{ t('ut.hitTop15') }}</div>
             <div v-for="item in distribution.slice(0,15)" :key="item.col" style="display:flex;align-items:center;gap:8px;margin-bottom:4px;font-size:12px">
-              <span style="width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ item.label }}</span>
+              <span style="width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ tagText(item.label) }}</span>
               <el-progress :percentage="distPercent(item.count)" :stroke-width="10" style="flex:1" :format="() => item.count.toLocaleString()" />
             </div>
             <el-button size="small" plain @click="loadDistribution" style="margin-top:6px">刷新分布</el-button>
@@ -461,8 +461,8 @@
             </el-form-item>
             <el-form-item label="人群过滤">
               <el-select v-model="funnelFilterTags" multiple collapse-tags placeholder="（可选）" style="width:200px">
-                <el-option-group v-for="grp in tagMeta" :key="grp.category" :label="grp.category">
-                  <el-option v-for="t in grp.tags" :key="t.tag_id" :label="t.label" :value="t.tag_id" />
+                <el-option-group v-for="grp in tagMeta" :key="grp.category" :label="groupLabel(grp.category)">
+                  <el-option v-for="tg in grp.tags" :key="tg.tag_id" :label="tagLabel(tg.tag_id)" :value="tg.tag_id" />
                 </el-option-group>
               </el-select>
             </el-form-item>
@@ -565,10 +565,10 @@
           <el-button size="small" plain @click="loadEtlOverview" style="margin-bottom:10px">刷新</el-button>
           <el-table :data="etlOverview" border size="small" max-height="420">
             <el-table-column prop="tag_id" label="tag_id" width="75" />
-            <el-table-column prop="tag_name" label="列名" width="170" />
-            <el-table-column prop="label" label="标签名" width="110" />
-            <el-table-column prop="category" label="分类" width="80" />
-            <el-table-column prop="user_count" label="命中用户数">
+            <el-table-column prop="tag_name" :label="t('ut.colTagName')" width="170" />
+            <el-table-column prop="label" :label="t('ut.tag')" width="110" />
+            <el-table-column prop="category" :label="t('ut.category')" width="80" />
+            <el-table-column prop="user_count" :label="t('ut.hitUsers')">
               <template #default="{row}">{{ (row.user_count || 0).toLocaleString() }}</template>
             </el-table-column>
           </el-table>
@@ -601,10 +601,20 @@ async function loadTagMeta() {
   const { data } = await axios.get(`${BASE}/cdp/wide/tag-meta`)
   tagMeta.value = data
 }
+function groupLabel(cat) {
+  const key = String(cat || '').trim()
+  const val = t(`segment.tagGroups.${key}`)
+  return val === `segment.tagGroups.${key}` ? key : val
+}
+function tagText(name) {
+  const key = String(name || '').trim()
+  const val = t(`segment.tagLabels.${key}`)
+  return val === `segment.tagLabels.${key}` ? key : val
+}
 function tagLabel(tid) {
   for (const grp of tagMeta.value) {
-    const t = grp.tags.find(x => x.tag_id === tid)
-    if (t) return t.label
+    const tg = grp.tags.find(x => x.tag_id === tid)
+    if (tg) return tagText(tg.label)
   }
   return String(tid)
 }
