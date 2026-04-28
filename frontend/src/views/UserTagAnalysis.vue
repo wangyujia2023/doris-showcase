@@ -106,8 +106,12 @@
       <div v-if="compareResult">
         <el-divider>{{ t('ut.compareTitle') }}：{{ compareResult.pkg_a.name }} vs {{ compareResult.pkg_b.name }}</el-divider>
         <el-table :data="compareResult.diffs.slice(0,20)" border size="small">
-          <el-table-column prop="label" :label="t('ut.tag')" width="140" />
-          <el-table-column prop="category" :label="t('ut.category')" width="80" />
+          <el-table-column :label="t('ut.tag')" width="140">
+            <template #default="{row}">{{ tagText(row.label) }}</template>
+          </el-table-column>
+          <el-table-column :label="t('ut.category')" width="80">
+            <template #default="{row}">{{ groupLabel(row.category) }}</template>
+          </el-table-column>
           <el-table-column :label="t('ut.pkgA')" width="160">
             <template #default="{row}">
               <el-progress :percentage="Math.min(row.pct_a,100)" :stroke-width="8" :format="()=>row.pct_a+'%'" />
@@ -145,7 +149,7 @@
           </div>
           <div v-if="tgiData.length">
             <el-select v-model="tgiCat" placeholder="按分类筛选" clearable size="small" style="margin-bottom:10px;width:160px">
-              <el-option v-for="c in tgiCats" :key="c" :label="c" :value="c" />
+              <el-option v-for="c in tgiCats" :key="c" :label="groupLabel(c)" :value="c" />
             </el-select>
             <v-chart :option="tgiOption" style="height:420px" autoresize />
             <div style="font-size:12px;color:#909399;margin-top:6px">
@@ -171,13 +175,13 @@
               <table class="cross-matrix">
                 <thead>
                   <tr>
-                    <th>{{ crossCat1 }} \ {{ crossCat2 }}</th>
-                    <th v-for="l in crossData.tags2" :key="l">{{ l }}</th>
+                    <th>{{ groupLabel(crossCat1) }} \ {{ groupLabel(crossCat2) }}</th>
+                    <th v-for="l in crossData.tags2" :key="l">{{ tagText(l) }}</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr v-for="row in crossData.matrix" :key="row.label">
-                    <td style="font-weight:600;background:#f5f7fa">{{ row.label }}</td>
+                    <td style="font-weight:600;background:#f5f7fa">{{ tagText(row.label) }}</td>
                     <td
                       v-for="cell in row.cells" :key="cell"
                       :style="{ background: crossColor(cell.pct, crossMaxPct) }"
@@ -361,8 +365,12 @@
               </el-col>
             </el-row>
             <el-table :data="anomalyData.tags.slice(0,20)" border size="small">
-              <el-table-column prop="label" label="标签" width="140" />
-              <el-table-column prop="category" :label="t('ut.category')" width="80" />
+              <el-table-column :label="t('ut.tag')" width="140">
+                <template #default="{row}">{{ tagText(row.label) }}</template>
+              </el-table-column>
+              <el-table-column :label="t('ut.category')" width="80">
+                <template #default="{row}">{{ groupLabel(row.category) }}</template>
+              </el-table-column>
               <el-table-column label="全体占比">
                 <template #default="{row}">
                   <el-progress :percentage="Math.min(row.base_pct,100)" :stroke-width="8" :format="()=>row.base_pct+'%'" />
@@ -411,7 +419,7 @@
             >{{ tagLabel(tid) }}</el-tag>
             <div v-if="!selectedTagIds.length" style="color:#c0c4cc;font-size:12px">未选择（查全部）</div>
             <el-divider />
-            <el-button type="primary" style="width:100%" :loading="wideLoading" @click="queryWide">查询</el-button>
+            <el-button type="primary" style="width:100%" :loading="wideLoading" @click="queryWide()">查询</el-button>
           </div>
           <div style="margin-top:16px">
             <div style="font-size:13px;font-weight:600;margin-bottom:8px">{{ t('ut.hitTop15') }}</div>
@@ -431,7 +439,7 @@
           <el-table-column prop="customer_id" label="用户ID" width="100" />
           <el-table-column label="标签" min-width="300">
             <template #default="{row}">
-              <el-tag v-for="tag in row.active_tags" :key="tag" size="small" type="success" style="margin:2px">{{ tag }}</el-tag>
+              <el-tag v-for="tag in row.active_tags" :key="tag" size="small" type="success" style="margin:2px">{{ tagText(tag) }}</el-tag>
             </template>
           </el-table-column>
           <el-table-column prop="update_time" label="更新时间" width="160" />
@@ -566,8 +574,12 @@
           <el-table :data="etlOverview" border size="small" max-height="420">
             <el-table-column prop="tag_id" label="tag_id" width="75" />
             <el-table-column prop="tag_name" :label="t('ut.colTagName')" width="170" />
-            <el-table-column prop="label" :label="t('ut.tag')" width="110" />
-            <el-table-column prop="category" :label="t('ut.category')" width="80" />
+            <el-table-column :label="t('ut.tag')" width="110">
+              <template #default="{row}">{{ tagText(row.label) }}</template>
+            </el-table-column>
+            <el-table-column :label="t('ut.category')" width="80">
+              <template #default="{row}">{{ groupLabel(row.category) }}</template>
+            </el-table-column>
             <el-table-column prop="user_count" :label="t('ut.hitUsers')">
               <template #default="{row}">{{ (row.user_count || 0).toLocaleString() }}</template>
             </el-table-column>
@@ -752,7 +764,7 @@ const tgiOption = computed(() => {
     }},
     grid: { left: '28%', right: '10%', top: '4%', bottom: '4%' },
     xAxis: { type: 'value', axisLabel: { fontSize: 11 } },
-    yAxis: { type: 'category', data: rows.map(r => r.label), axisLabel: { fontSize: 11 } },
+    yAxis: { type: 'category', data: rows.map(r => tagText(r.label)), axisLabel: { fontSize: 11 } },
     series: [{
       type: 'bar',
       data: rows.map(r => ({
@@ -911,6 +923,7 @@ const distMax        = computed(() => Math.max(...distribution.value.map(d => d.
 const distPercent    = cnt => Math.round(cnt * 100 / distMax.value)
 
 async function queryWide(page = 1) {
+  if (typeof page !== 'number') page = 1
   wideLoading.value = true
   widePage.value = page
   try {
