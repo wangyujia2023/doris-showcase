@@ -9,6 +9,7 @@ This document is intended for handing the project over to another team for indep
 | Backend | `backend/` | FastAPI service |
 | Frontend | `frontend/` | Vue 3 + Vite frontend |
 | One-click script | `deploy.sh` | Install dependencies, build frontend, start backend and frontend |
+| Database script | `init_database.sh` | Run Doris schema creation and mock data import |
 | Config template | `.env.example` | Environment variable template |
 | SQL delivery directory | `sql/by_database/` | Database-oriented schema and mock SQL files |
 | Main DB schema | `sql/by_database/bank_cdp_schema.sql` | Schema for `bank_cdp` |
@@ -111,7 +112,25 @@ Without password:
 mysql -h <DORIS_FE_HOST> -P19030 -uroot
 ```
 
-### 5.1 Initialize Main Business Database `bank_cdp`
+### 5.1 Recommended: One-click Schema and Mock Data Import
+
+```bash
+chmod +x init_database.sh
+sh init_database.sh
+```
+
+Run a single database if needed:
+
+```bash
+sh init_database.sh core
+sh init_database.sh lineage
+sh init_database.sh regdb
+sh init_database.sh bjmetro
+```
+
+The script reads `DORIS_HOST`, `DORIS_PORT`, `DORIS_USER` and `DORIS_PASSWORD` from `.env`, then runs schema and mock SQL files under `sql/by_database/`. Mock data is written in English for reusable multilingual deployments.
+
+### 5.2 Manual: Initialize Main Business Database `bank_cdp`
 
 ```bash
 mysql -h <DORIS_FE_HOST> -P19030 -uroot -p < sql/by_database/bank_cdp_schema.sql
@@ -125,7 +144,7 @@ Description:
 | `sql/by_database/bank_cdp_schema.sql` | `CREATE DATABASE bank_cdp`, core tables, materialized views and dashboard tables |
 | `sql/by_database/bank_cdp_mock.sql` | Mock data for `user_wide`, `user_tag`, `user_behavior`, logs, tag dictionary and dashboard |
 
-### 5.2 Initialize Lineage Database `retail_lineage`
+### 5.3 Manual: Initialize Lineage Database `retail_lineage`
 
 ```bash
 mysql -h <DORIS_FE_HOST> -P19030 -uroot -p < sql/by_database/retail_lineage_schema.sql
@@ -139,14 +158,14 @@ Description:
 | `sql/by_database/retail_lineage_schema.sql` | Base lineage tables, sync log table, ETL task tables and retail physical tables |
 | `sql/by_database/retail_lineage_mock.sql` | Lineage assets, edges, ETL mappings, realistic insert-select jobs and complex ETL examples |
 
-### 5.3 Optional: Initialize Regulatory Database `regdb`
+### 5.4 Optional: Initialize Regulatory Database `regdb`
 
 ```bash
 mysql -h <DORIS_FE_HOST> -P19030 -uroot -p < sql/by_database/regdb_schema.sql
 mysql -h <DORIS_FE_HOST> -P19030 -uroot -p < sql/by_database/regdb_mock.sql
 ```
 
-### 5.4 Optional: Initialize Beijing Metro Database `bjmetro`
+### 5.5 Optional: Initialize Beijing Metro Database `bjmetro`
 
 ```bash
 mysql -h <DORIS_FE_HOST> -P19030 -uroot -p < sql/by_database/bjmetro_schema.sql

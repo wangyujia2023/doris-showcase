@@ -9,6 +9,7 @@
 | 后端 | `backend/` | FastAPI 服务 |
 | 前端 | `frontend/` | Vue 3 + Vite 前端 |
 | 一键脚本 | `deploy.sh` | 初始化依赖、构建前端、启动前后端 |
+| 数据脚本 | `init_database.sh` | 一键执行 Doris 建表和 mock 数据导入 |
 | 配置模板 | `.env.example` | 环境变量模板 |
 | SQL 交付目录 | `sql/by_database/` | 按数据库整理后的建表和 mock 数据 |
 | 主库建表 | `sql/by_database/bank_cdp_schema.sql` | `bank_cdp` 建表 |
@@ -111,7 +112,25 @@ mysql -h <DORIS_FE_HOST> -P19030 -uroot -p
 mysql -h <DORIS_FE_HOST> -P19030 -uroot
 ```
 
-### 5.1 初始化主业务库 `bank_cdp`
+### 5.1 推荐：一键建库并导入 mock 数据
+
+```bash
+chmod +x init_database.sh
+sh init_database.sh
+```
+
+可按库单独执行：
+
+```bash
+sh init_database.sh core
+sh init_database.sh lineage
+sh init_database.sh regdb
+sh init_database.sh bjmetro
+```
+
+脚本会读取 `.env` 中的 `DORIS_HOST`、`DORIS_PORT`、`DORIS_USER`、`DORIS_PASSWORD`，并按顺序执行 `sql/by_database/` 下的 schema 和 mock SQL。mock 数据均使用英文内容，方便多语言环境复用。
+
+### 5.2 手动初始化主业务库 `bank_cdp`
 
 ```bash
 mysql -h <DORIS_FE_HOST> -P19030 -uroot -p < sql/by_database/bank_cdp_schema.sql
@@ -125,7 +144,7 @@ mysql -h <DORIS_FE_HOST> -P19030 -uroot -p < sql/by_database/bank_cdp_mock.sql
 | `sql/by_database/bank_cdp_schema.sql` | `CREATE DATABASE bank_cdp`、核心表、物化视图、首页大盘表 |
 | `sql/by_database/bank_cdp_mock.sql` | `user_wide`、`user_tag`、`user_behavior`、日志、标签字典、首页大盘 mock 数据 |
 
-### 5.2 初始化血缘库 `retail_lineage`
+### 5.3 手动初始化血缘库 `retail_lineage`
 
 ```bash
 mysql -h <DORIS_FE_HOST> -P19030 -uroot -p < sql/by_database/retail_lineage_schema.sql
@@ -139,14 +158,14 @@ mysql -h <DORIS_FE_HOST> -P19030 -uroot -p < sql/by_database/retail_lineage_mock
 | `sql/by_database/retail_lineage_schema.sql` | 血缘基础表、同步日志表、ETL 任务表、服饰零售物理表 |
 | `sql/by_database/retail_lineage_mock.sql` | 血缘资产、血缘边、ETL 任务映射、真实风格 insert into select 示例、复杂 ETL 示例 |
 
-### 5.3 可选：初始化监管库 `regdb`
+### 5.4 可选：初始化监管库 `regdb`
 
 ```bash
 mysql -h <DORIS_FE_HOST> -P19030 -uroot -p < sql/by_database/regdb_schema.sql
 mysql -h <DORIS_FE_HOST> -P19030 -uroot -p < sql/by_database/regdb_mock.sql
 ```
 
-### 5.4 可选：初始化北京地铁库 `bjmetro`
+### 5.5 可选：初始化北京地铁库 `bjmetro`
 
 ```bash
 mysql -h <DORIS_FE_HOST> -P19030 -uroot -p < sql/by_database/bjmetro_schema.sql

@@ -9,7 +9,22 @@ This directory groups SQL files by database for handover deployment.
 | `regdb` | `regdb_schema.sql` | `regdb_mock.sql` |
 | `bjmetro` | `bjmetro_schema.sql` | `bjmetro_mock.sql` |
 
-Recommended execution order:
+Recommended one-click execution:
+
+```bash
+sh init_database.sh
+```
+
+Single database modes:
+
+```bash
+sh init_database.sh core
+sh init_database.sh lineage
+sh init_database.sh regdb
+sh init_database.sh bjmetro
+```
+
+Manual execution order:
 
 ```bash
 mysql -h <DORIS_FE_HOST> -P19030 -uroot -p < sql/by_database/bank_cdp_schema.sql

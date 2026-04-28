@@ -20,6 +20,32 @@ cp .env.example .env
 - `OPENMETADATA_BASE_URL`
 - `OPENMETADATA_JWT_TOKEN`
 
+## 数据库初始化
+
+建表和 mock 数据已经按数据库整理到 `sql/by_database/`，mock 数据使用英文内容。
+
+一键初始化全部数据库：
+
+```bash
+sh init_database.sh
+```
+
+按库初始化：
+
+```bash
+sh init_database.sh core
+sh init_database.sh lineage
+sh init_database.sh regdb
+sh init_database.sh bjmetro
+```
+
+包含数据库：
+
+- `bank_cdp`：主业务库
+- `retail_lineage`：零售血缘库
+- `regdb`：监管演示库
+- `bjmetro`：城市数据大盘库
+
 ## 统一配置文件
 
 根目录 `.env` 是唯一配置入口。
@@ -34,37 +60,26 @@ cp .env.example .env
 
 启动脚本读取：
 
-- `start_all.sh`
+- `deploy.sh`
+- `init_database.sh`
 
 ## 快速启动
 
-### 1. 安装依赖
-
-后端：
+### 1. 一键初始化数据库
 
 ```bash
-python3 -m venv .venv
-. .venv/bin/activate
-pip install -r requirements.txt
+sh init_database.sh
 ```
 
-前端：
+### 2. 一键安装依赖并启动
 
 ```bash
-cd frontend
-npm install
-cd ..
-```
-
-### 2. 一键启动
-
-```bash
-bash start_all.sh
+sh deploy.sh
 ```
 
 默认：
 
-- 后端：`http://127.0.0.1:8000`
+- 后端：`http://127.0.0.1:27713`
 - 前端：`http://127.0.0.1:5173`
 
 实际端口以 `.env` 为准。
@@ -75,7 +90,7 @@ bash start_all.sh
 
 ```bash
 . .venv/bin/activate
-uvicorn backend.app:app --host 0.0.0.0 --port 8000 --reload
+uvicorn backend.app:app --host 0.0.0.0 --port 27713 --reload
 ```
 
 前端：
@@ -93,7 +108,7 @@ npm run dev -- --host 0.0.0.0 --port 5173
 
 ```bash
 git pull
-bash start_all.sh
+sh deploy.sh
 ```
 
 如果只更新血缘功能，至少覆盖：
@@ -126,7 +141,7 @@ OPENMETADATA_JWT_TOKEN=...
 现在统一改 `.env`：
 
 ```env
-BACKEND_PORT=8000
+BACKEND_PORT=27713
 FRONTEND_PORT=5173
 BACKEND_PROXY_HOST=127.0.0.1
 ```

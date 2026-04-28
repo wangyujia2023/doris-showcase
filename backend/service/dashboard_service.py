@@ -62,7 +62,7 @@ class DashboardService:
             """
             SELECT 'stat' AS type,
                    COUNT(1) AS total_users,
-                   SUM(IF(active_level='高活', 1, 0)) AS active_users,
+                   SUM(IF(active_level IN ('高活', 'High Active'), 1, 0)) AS active_users,
                    SUM(IF(anomaly_flag=1, 1, 0)) AS anomaly_users,
                    ROUND(AVG(aum_total), 2) AS avg_aum,
                    SUM(aum_total) AS total_aum,
