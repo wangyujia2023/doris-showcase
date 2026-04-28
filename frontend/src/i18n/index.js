@@ -1,7 +1,7 @@
 import { computed, ref } from 'vue'
 import { messages } from './messages'
 
-const STORAGE_KEY = 'bank-cdp-locale'
+const STORAGE_KEY = 'doris-showcase-locale'
 const DEFAULT_LOCALE = 'zh'
 
 const LOCALE_ALIASES = {

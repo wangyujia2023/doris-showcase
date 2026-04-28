@@ -555,9 +555,9 @@
         <el-col :span="10">
           <div class="card-title">宽表 → 高表 ETL</div>
           <p style="font-size:13px;color:#606266;line-height:1.8">
-            将 <code>bank_cdp.user_tag_wide</code> 各 TINYINT 标签列<br/>
+            将 <code>doris_showcase.user_tag_wide</code> 各 TINYINT 标签列<br/>
             通过 <b>BITMAP_UNION(TO_BITMAP(customer_id))</b><br/>
-            写入 <code>bank_cdp.t_customer_tags</code>（高表）
+            写入 <code>doris_showcase.t_customer_tags</code>（高表）
           </p>
           <el-button type="primary" :loading="etlLoading" @click="runEtl" style="margin-top:8px">执行 ETL 同步</el-button>
           <div v-if="etlResult" style="margin-top:12px">

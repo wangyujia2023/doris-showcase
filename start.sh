@@ -6,7 +6,7 @@ ENV_FILE="$PROJECT_DIR/.env"
 
 cd "$PROJECT_DIR"
 
-echo "== Bank Demo start =="
+echo "== Doris Showcase start =="
 
 if [ ! -f "$ENV_FILE" ]; then
   echo "Missing .env. Run: sh deploy.sh"

@@ -45,11 +45,11 @@ mysql_exec() {
 mysql_exec_wide() {
   echo "Running wide-table schema and mock data"
   if [ -n "$DORIS_PASSWORD" ]; then
-    { printf 'CREATE DATABASE IF NOT EXISTS bank_cdp;\nUSE bank_cdp;\n'; sed -n '/^-- Table: user_wide$/,$p' "$PROJECT_DIR/sql/by_database/bank_cdp_schema.sql"; } | MYSQL_PWD="$DORIS_PASSWORD" mysql -h "$DORIS_HOST" -P "$DORIS_PORT" -u "$DORIS_USER"
-    { printf 'CREATE DATABASE IF NOT EXISTS bank_cdp;\nUSE bank_cdp;\n'; sed -n '/^-- Table: user_wide$/,$p' "$PROJECT_DIR/sql/by_database/bank_cdp_mock.sql"; } | MYSQL_PWD="$DORIS_PASSWORD" mysql -h "$DORIS_HOST" -P "$DORIS_PORT" -u "$DORIS_USER"
+    { printf 'CREATE DATABASE IF NOT EXISTS doris_showcase;\nUSE doris_showcase;\n'; sed -n '/^-- Table: user_wide$/,$p' "$PROJECT_DIR/sql/by_database/doris_showcase_schema.sql"; } | MYSQL_PWD="$DORIS_PASSWORD" mysql -h "$DORIS_HOST" -P "$DORIS_PORT" -u "$DORIS_USER"
+    { printf 'CREATE DATABASE IF NOT EXISTS doris_showcase;\nUSE doris_showcase;\n'; sed -n '/^-- Table: user_wide$/,$p' "$PROJECT_DIR/sql/by_database/doris_showcase_mock.sql"; } | MYSQL_PWD="$DORIS_PASSWORD" mysql -h "$DORIS_HOST" -P "$DORIS_PORT" -u "$DORIS_USER"
   else
-    { printf 'CREATE DATABASE IF NOT EXISTS bank_cdp;\nUSE bank_cdp;\n'; sed -n '/^-- Table: user_wide$/,$p' "$PROJECT_DIR/sql/by_database/bank_cdp_schema.sql"; } | mysql -h "$DORIS_HOST" -P "$DORIS_PORT" -u "$DORIS_USER"
-    { printf 'CREATE DATABASE IF NOT EXISTS bank_cdp;\nUSE bank_cdp;\n'; sed -n '/^-- Table: user_wide$/,$p' "$PROJECT_DIR/sql/by_database/bank_cdp_mock.sql"; } | mysql -h "$DORIS_HOST" -P "$DORIS_PORT" -u "$DORIS_USER"
+    { printf 'CREATE DATABASE IF NOT EXISTS doris_showcase;\nUSE doris_showcase;\n'; sed -n '/^-- Table: user_wide$/,$p' "$PROJECT_DIR/sql/by_database/doris_showcase_schema.sql"; } | mysql -h "$DORIS_HOST" -P "$DORIS_PORT" -u "$DORIS_USER"
+    { printf 'CREATE DATABASE IF NOT EXISTS doris_showcase;\nUSE doris_showcase;\n'; sed -n '/^-- Table: user_wide$/,$p' "$PROJECT_DIR/sql/by_database/doris_showcase_mock.sql"; } | mysql -h "$DORIS_HOST" -P "$DORIS_PORT" -u "$DORIS_USER"
   fi
 }
 
@@ -61,23 +61,23 @@ init_db() {
 
 need_cmd mysql
 
-echo "== Bank Demo Doris database initialization =="
+echo "== Doris Showcase Doris database initialization =="
 echo "Doris: $DORIS_USER@$DORIS_HOST:$DORIS_PORT"
 mkdir -p "$UPLOAD_DIR"
 echo "Upload dir: $UPLOAD_DIR"
 
 case "$MODE" in
   all)
-    init_db bank_cdp
-    init_db retail_lineage
+    init_db doris_showcase
+    init_db lineage_showcase
     init_db regdb
     init_db bjmetro
     ;;
-  core|bank_cdp)
-    init_db bank_cdp
+  core|doris_showcase)
+    init_db doris_showcase
     ;;
-  lineage|retail_lineage)
-    init_db retail_lineage
+  lineage|lineage_showcase)
+    init_db lineage_showcase
     ;;
   regdb)
     init_db regdb

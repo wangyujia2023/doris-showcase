@@ -1,12 +1,12 @@
 -- ================================================================
--- Database: bank_cdp
+-- Database: doris_showcase
 -- Type: English mock data
 -- Source: generated from current Doris table metadata.
 -- Execute after schema SQL.
 -- ================================================================
 
-CREATE DATABASE IF NOT EXISTS bank_cdp;
-USE bank_cdp;
+CREATE DATABASE IF NOT EXISTS doris_showcase;
+USE doris_showcase;
 
 -- Table: aum_metrics
 TRUNCATE TABLE `aum_metrics`;

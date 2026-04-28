@@ -1,4 +1,4 @@
-# Bank Demo Delivery Deployment Manual
+# Doris Showcase Delivery Deployment Manual
 
 This document is intended for handing the project over to another team for independent deployment. Sensitive values are represented as placeholders.
 
@@ -12,10 +12,10 @@ This document is intended for handing the project over to another team for indep
 | Database script | `init_database.sh` | Run Doris schema creation and mock data import |
 | Config template | `.env.example` | Environment variable template |
 | SQL delivery directory | `sql/by_database/` | Database-oriented schema and mock SQL files |
-| Main DB schema | `sql/by_database/bank_cdp_schema.sql` | Schema for `bank_cdp` |
-| Main DB data | `sql/by_database/bank_cdp_mock.sql` | Mock data for `bank_cdp` |
-| Lineage schema | `sql/by_database/retail_lineage_schema.sql` | Schema for `retail_lineage` |
-| Lineage data | `sql/by_database/retail_lineage_mock.sql` | Mock data and ETL examples for `retail_lineage` |
+| Main DB schema | `sql/by_database/doris_showcase_schema.sql` | Schema for `doris_showcase` |
+| Main DB data | `sql/by_database/doris_showcase_mock.sql` | Mock data for `doris_showcase` |
+| Lineage schema | `sql/by_database/lineage_showcase_schema.sql` | Schema for `lineage_showcase` |
+| Lineage data | `sql/by_database/lineage_showcase_mock.sql` | Mock data and ETL examples for `lineage_showcase` |
 | Regulatory DB | `sql/by_database/regdb_schema.sql` / `regdb_mock.sql` | Schema and placeholder mock for `regdb` |
 | Metro DB | `sql/by_database/bjmetro_schema.sql` / `bjmetro_mock.sql` | Schema and placeholder mock for `bjmetro` |
 
@@ -46,15 +46,15 @@ mysql --version
 Public repository:
 
 ```bash
-git clone https://github.com/wangyujia2023/bank-demo.git
-cd bank-demo
+git clone https://github.com/wangyujia2023/doris-showcase.git
+cd doris-showcase
 ```
 
 For a private repository, use a GitHub token:
 
 ```bash
-git clone https://<github_user>:<github_token>@github.com/wangyujia2023/bank-demo.git
-cd bank-demo
+git clone https://<github_user>:<github_token>@github.com/wangyujia2023/doris-showcase.git
+cd doris-showcase
 ```
 
 ## 4. Configure `.env`
@@ -75,12 +75,12 @@ DORIS_HOST=<DORIS_FE_HOST>
 DORIS_PORT=19030
 DORIS_USER=root
 DORIS_PASSWORD=
-DORIS_DATABASE=bank_cdp
+DORIS_DATABASE=doris_showcase
 
 DB_WARMUP_ON_START=false
 TELEMETRY_ENABLED=true
 BEHAVIOR_SCAN_DAYS=120
-RETAIL_LINEAGE_DB=retail_lineage
+LINEAGE_DATABASE=lineage_showcase
 
 OPENMETADATA_BASE_URL=http://<OPENMETADATA_HOST>:8585/api
 OPENMETADATA_JWT_TOKEN=<OPENMETADATA_BOT_TOKEN>
@@ -94,8 +94,8 @@ DORIS_HOST=<DORIS_FE_HOST>
 DORIS_PORT=19030
 DORIS_USER=root
 DORIS_PASSWORD=
-DORIS_DATABASE=bank_cdp
-RETAIL_LINEAGE_DB=retail_lineage
+DORIS_DATABASE=doris_showcase
+LINEAGE_DATABASE=lineage_showcase
 ```
 
 ## 5. Initialize Doris
@@ -130,33 +130,33 @@ sh init_database.sh bjmetro
 
 The script reads `DORIS_HOST`, `DORIS_PORT`, `DORIS_USER` and `DORIS_PASSWORD` from `.env`, then runs schema and mock SQL files under `sql/by_database/`. Mock data is written in English for reusable multilingual deployments.
 
-### 5.2 Manual: Initialize Main Business Database `bank_cdp`
+### 5.2 Manual: Initialize Main Business Database `doris_showcase`
 
 ```bash
-mysql -h <DORIS_FE_HOST> -P19030 -uroot -p < sql/by_database/bank_cdp_schema.sql
-mysql -h <DORIS_FE_HOST> -P19030 -uroot -p < sql/by_database/bank_cdp_mock.sql
+mysql -h <DORIS_FE_HOST> -P19030 -uroot -p < sql/by_database/doris_showcase_schema.sql
+mysql -h <DORIS_FE_HOST> -P19030 -uroot -p < sql/by_database/doris_showcase_mock.sql
 ```
 
 Description:
 
 | File | Content |
 | --- | --- |
-| `sql/by_database/bank_cdp_schema.sql` | `CREATE DATABASE bank_cdp`, core tables, materialized views and dashboard tables |
-| `sql/by_database/bank_cdp_mock.sql` | Mock data for `user_wide`, `user_tag`, `user_behavior`, logs, tag dictionary and dashboard |
+| `sql/by_database/doris_showcase_schema.sql` | `CREATE DATABASE doris_showcase`, core tables, materialized views and dashboard tables |
+| `sql/by_database/doris_showcase_mock.sql` | Mock data for `user_wide`, `user_tag`, `user_behavior`, logs, tag dictionary and dashboard |
 
-### 5.3 Manual: Initialize Lineage Database `retail_lineage`
+### 5.3 Manual: Initialize Lineage Database `lineage_showcase`
 
 ```bash
-mysql -h <DORIS_FE_HOST> -P19030 -uroot -p < sql/by_database/retail_lineage_schema.sql
-mysql -h <DORIS_FE_HOST> -P19030 -uroot -p < sql/by_database/retail_lineage_mock.sql
+mysql -h <DORIS_FE_HOST> -P19030 -uroot -p < sql/by_database/lineage_showcase_schema.sql
+mysql -h <DORIS_FE_HOST> -P19030 -uroot -p < sql/by_database/lineage_showcase_mock.sql
 ```
 
 Description:
 
 | File | Content |
 | --- | --- |
-| `sql/by_database/retail_lineage_schema.sql` | Base lineage tables, sync log table, ETL task tables and retail physical tables |
-| `sql/by_database/retail_lineage_mock.sql` | Lineage assets, edges, ETL mappings, realistic insert-select jobs and complex ETL examples |
+| `sql/by_database/lineage_showcase_schema.sql` | Base lineage tables, sync log table, ETL task tables and retail physical tables |
+| `sql/by_database/lineage_showcase_mock.sql` | Lineage assets, edges, ETL mappings, realistic insert-select jobs and complex ETL examples |
 
 ### 5.4 Optional: Initialize Regulatory Database `regdb`
 
@@ -235,7 +235,7 @@ tail -f frontend.log
 ## 8. Update Deployment
 
 ```bash
-cd bank-demo
+cd doris-showcase
 git pull origin main
 sh deploy.sh
 ```
@@ -247,7 +247,7 @@ sh deploy.sh
 The server does not have a GitHub SSH key. Use HTTPS:
 
 ```bash
-git clone https://github.com/wangyujia2023/bank-demo.git
+git clone https://github.com/wangyujia2023/doris-showcase.git
 ```
 
 ### 9.2 `.venv/bin/pip: bad interpreter`
@@ -316,9 +316,9 @@ AI_EXTRACT('qwen_llm', content, ARRAY(...))
 | --- | --- |
 | `git clone` succeeded |  |
 | `.env` configured for Doris |  |
-| `bank_cdp` DDL executed |  |
-| `bank_cdp` mock data inserted |  |
-| `retail_lineage` DDL executed |  |
+| `doris_showcase` DDL executed |  |
+| `doris_showcase` mock data inserted |  |
+| `lineage_showcase` DDL executed |  |
 | Lineage mock/ETL data inserted |  |
 | `sh deploy.sh` succeeded |  |
 | Backend port `27713` is listening |  |

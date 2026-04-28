@@ -1,4 +1,4 @@
-"""银行业CDP平台 - 全局配置"""
+"""Doris Showcase - 全局配置"""
 from __future__ import annotations
 
 import os
@@ -50,7 +50,7 @@ class Settings:
         self.DORIS_PORT: int = _env_int("DORIS_PORT", "19030")
         self.DORIS_USER: str = os.getenv("DORIS_USER", "root")
         self.DORIS_PASSWORD: str = os.getenv("DORIS_PASSWORD", "")
-        self.DORIS_DATABASE: str = os.getenv("DORIS_DATABASE", "bank_cdp")
+        self.DORIS_DATABASE: str = os.getenv("DORIS_DATABASE", "doris_showcase")
         self.DORIS_AI_RESOURCE: str = os.getenv("DORIS_AI_RESOURCE", "")
         self.DB_WARMUP_ON_START: bool = _env_bool("DB_WARMUP_ON_START", "false")
         self.BACKEND_HOST: str = os.getenv("BACKEND_HOST", "0.0.0.0")
@@ -75,7 +75,8 @@ class Settings:
         self.BEHAVIOR_SCAN_DAYS: int = _env_int("BEHAVIOR_SCAN_DAYS", "120")
         self.OPENMETADATA_BASE_URL: str = os.getenv("OPENMETADATA_BASE_URL", "http://10.26.20.3:8585/api")
         self.OPENMETADATA_JWT_TOKEN: str = os.getenv("OPENMETADATA_JWT_TOKEN", "")
-        self.RETAIL_LINEAGE_DB: str = os.getenv("RETAIL_LINEAGE_DB", "retail_lineage")
+        self.LINEAGE_DATABASE: str = os.getenv("LINEAGE_DATABASE", os.getenv("RETAIL_LINEAGE_DB", "lineage_showcase"))
+        self.RETAIL_LINEAGE_DB: str = self.LINEAGE_DATABASE  # Backward compatible alias
 
         # 数据安全（脱敏）
         self.MASK_ID_CARD: bool = True

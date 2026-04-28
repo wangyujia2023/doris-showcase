@@ -2,14 +2,14 @@
 -- 场景2: 客户画像 宽表 & 高表 DDL（Doris 4.0）
 -- ================================================================
 
-USE bank_cdp;
+USE doris_showcase;
 
 -- ================================================================
 -- 1. 客户标签高表 t_customer_tags
 --    (tag_id, tag_name) -> BITMAP
 --    AGGREGATE KEY: tag_bitmap 做 BITMAP_UNION 聚合
 -- ================================================================
-CREATE TABLE IF NOT EXISTS bank_cdp.t_customer_tags (
+CREATE TABLE IF NOT EXISTS doris_showcase.t_customer_tags (
   tag_id       BIGINT      NOT NULL  COMMENT '标签ID',
   tag_name     VARCHAR(32) NOT NULL  COMMENT '标签名称',
   tag_bitmap   BITMAP                COMMENT '用户ID Bitmap（BITMAP_UNION聚合）',
@@ -25,7 +25,7 @@ PROPERTIES (
 --    每用户一行，每个标签一列（TINYINT 0/1）
 --    DUPLICATE KEY 模型，高效写入
 -- ================================================================
-CREATE TABLE IF NOT EXISTS bank_cdp.user_tag_wide (
+CREATE TABLE IF NOT EXISTS doris_showcase.user_tag_wide (
     customer_id        BIGINT   COMMENT '用户ID',
     update_time        DATETIME COMMENT '更新时间',
 

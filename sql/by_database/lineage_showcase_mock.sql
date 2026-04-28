@@ -1,12 +1,12 @@
 -- ================================================================
--- Database: retail_lineage
+-- Database: lineage_showcase
 -- Type: English mock data
 -- Source: generated from current Doris table metadata.
 -- Execute after schema SQL.
 -- ================================================================
 
-CREATE DATABASE IF NOT EXISTS retail_lineage;
-USE retail_lineage;
+CREATE DATABASE IF NOT EXISTS lineage_showcase;
+USE lineage_showcase;
 
 -- Table: ads_product_rank
 TRUNCATE TABLE `ads_product_rank`;

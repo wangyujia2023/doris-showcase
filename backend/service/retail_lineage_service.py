@@ -15,7 +15,7 @@ from backend.settings import settings
 
 class RetailLineageService:
     def __init__(self) -> None:
-        self.db = settings.RETAIL_LINEAGE_DB
+        self.db = settings.LINEAGE_DATABASE
 
     def _t(self, name: str) -> str:
         return f"{self.db}.{name}"
@@ -324,7 +324,7 @@ class RetailLineageService:
         if raw:
             candidates.append(raw)
 
-        default_prefix = "Doris.default.retail_lineage"
+        default_prefix = "Doris.default.lineage_showcase"
         candidate = f"{default_prefix}.{raw}"
         if candidate not in candidates:
             candidates.append(candidate)

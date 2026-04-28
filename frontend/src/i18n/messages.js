@@ -2,7 +2,7 @@
 export const messages = {
   zh: {
     app: {
-      title: 'Doris 特性展示',
+      title: 'Doris Showcase',
    
       ai: 'AI Function 就绪',
       analyst: '数据分析师',

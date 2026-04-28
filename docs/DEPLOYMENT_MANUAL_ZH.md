@@ -1,4 +1,4 @@
-# Bank Demo 交付部署手册
+# Doris Showcase 交付部署手册
 
 本文档用于把项目交给其他人独立部署。所有敏感信息均使用占位符，请部署人按实际环境填写。
 
@@ -12,10 +12,10 @@
 | 数据脚本 | `init_database.sh` | 一键执行 Doris 建表和 mock 数据导入 |
 | 配置模板 | `.env.example` | 环境变量模板 |
 | SQL 交付目录 | `sql/by_database/` | 按数据库整理后的建表和 mock 数据 |
-| 主库建表 | `sql/by_database/bank_cdp_schema.sql` | `bank_cdp` 建表 |
-| 主库数据 | `sql/by_database/bank_cdp_mock.sql` | `bank_cdp` mock 数据 |
-| 血缘建表 | `sql/by_database/retail_lineage_schema.sql` | `retail_lineage` 建表 |
-| 血缘数据 | `sql/by_database/retail_lineage_mock.sql` | `retail_lineage` mock 数据和 ETL 示例 |
+| 主库建表 | `sql/by_database/doris_showcase_schema.sql` | `doris_showcase` 建表 |
+| 主库数据 | `sql/by_database/doris_showcase_mock.sql` | `doris_showcase` mock 数据 |
+| 血缘建表 | `sql/by_database/lineage_showcase_schema.sql` | `lineage_showcase` 建表 |
+| 血缘数据 | `sql/by_database/lineage_showcase_mock.sql` | `lineage_showcase` mock 数据和 ETL 示例 |
 | 监管库 | `sql/by_database/regdb_schema.sql` / `regdb_mock.sql` | `regdb` 建表和占位 mock |
 | 地铁库 | `sql/by_database/bjmetro_schema.sql` / `bjmetro_mock.sql` | `bjmetro` 建表和占位 mock |
 
@@ -46,15 +46,15 @@ mysql --version
 公开仓库：
 
 ```bash
-git clone https://github.com/wangyujia2023/bank-demo.git
-cd bank-demo
+git clone https://github.com/wangyujia2023/doris-showcase.git
+cd doris-showcase
 ```
 
 私有仓库请使用 GitHub Token：
 
 ```bash
-git clone https://<github_user>:<github_token>@github.com/wangyujia2023/bank-demo.git
-cd bank-demo
+git clone https://<github_user>:<github_token>@github.com/wangyujia2023/doris-showcase.git
+cd doris-showcase
 ```
 
 ## 4. 配置 `.env`
@@ -75,12 +75,12 @@ DORIS_HOST=<DORIS_FE_HOST>
 DORIS_PORT=19030
 DORIS_USER=root
 DORIS_PASSWORD=
-DORIS_DATABASE=bank_cdp
+DORIS_DATABASE=doris_showcase
 
 DB_WARMUP_ON_START=false
 TELEMETRY_ENABLED=true
 BEHAVIOR_SCAN_DAYS=120
-RETAIL_LINEAGE_DB=retail_lineage
+LINEAGE_DATABASE=lineage_showcase
 
 OPENMETADATA_BASE_URL=http://<OPENMETADATA_HOST>:8585/api
 OPENMETADATA_JWT_TOKEN=<OPENMETADATA_BOT_TOKEN>
@@ -94,8 +94,8 @@ DORIS_HOST=<DORIS_FE_HOST>
 DORIS_PORT=19030
 DORIS_USER=root
 DORIS_PASSWORD=
-DORIS_DATABASE=bank_cdp
-RETAIL_LINEAGE_DB=retail_lineage
+DORIS_DATABASE=doris_showcase
+LINEAGE_DATABASE=lineage_showcase
 ```
 
 ## 5. Doris 初始化
@@ -130,33 +130,33 @@ sh init_database.sh bjmetro
 
 脚本会读取 `.env` 中的 `DORIS_HOST`、`DORIS_PORT`、`DORIS_USER`、`DORIS_PASSWORD`，并按顺序执行 `sql/by_database/` 下的 schema 和 mock SQL。mock 数据均使用英文内容，方便多语言环境复用。
 
-### 5.2 手动初始化主业务库 `bank_cdp`
+### 5.2 手动初始化主业务库 `doris_showcase`
 
 ```bash
-mysql -h <DORIS_FE_HOST> -P19030 -uroot -p < sql/by_database/bank_cdp_schema.sql
-mysql -h <DORIS_FE_HOST> -P19030 -uroot -p < sql/by_database/bank_cdp_mock.sql
+mysql -h <DORIS_FE_HOST> -P19030 -uroot -p < sql/by_database/doris_showcase_schema.sql
+mysql -h <DORIS_FE_HOST> -P19030 -uroot -p < sql/by_database/doris_showcase_mock.sql
 ```
 
 说明：
 
 | 文件 | 内容 |
 | --- | --- |
-| `sql/by_database/bank_cdp_schema.sql` | `CREATE DATABASE bank_cdp`、核心表、物化视图、首页大盘表 |
-| `sql/by_database/bank_cdp_mock.sql` | `user_wide`、`user_tag`、`user_behavior`、日志、标签字典、首页大盘 mock 数据 |
+| `sql/by_database/doris_showcase_schema.sql` | `CREATE DATABASE doris_showcase`、核心表、物化视图、首页大盘表 |
+| `sql/by_database/doris_showcase_mock.sql` | `user_wide`、`user_tag`、`user_behavior`、日志、标签字典、首页大盘 mock 数据 |
 
-### 5.3 手动初始化血缘库 `retail_lineage`
+### 5.3 手动初始化血缘库 `lineage_showcase`
 
 ```bash
-mysql -h <DORIS_FE_HOST> -P19030 -uroot -p < sql/by_database/retail_lineage_schema.sql
-mysql -h <DORIS_FE_HOST> -P19030 -uroot -p < sql/by_database/retail_lineage_mock.sql
+mysql -h <DORIS_FE_HOST> -P19030 -uroot -p < sql/by_database/lineage_showcase_schema.sql
+mysql -h <DORIS_FE_HOST> -P19030 -uroot -p < sql/by_database/lineage_showcase_mock.sql
 ```
 
 说明：
 
 | 文件 | 内容 |
 | --- | --- |
-| `sql/by_database/retail_lineage_schema.sql` | 血缘基础表、同步日志表、ETL 任务表、服饰零售物理表 |
-| `sql/by_database/retail_lineage_mock.sql` | 血缘资产、血缘边、ETL 任务映射、真实风格 insert into select 示例、复杂 ETL 示例 |
+| `sql/by_database/lineage_showcase_schema.sql` | 血缘基础表、同步日志表、ETL 任务表、服饰零售物理表 |
+| `sql/by_database/lineage_showcase_mock.sql` | 血缘资产、血缘边、ETL 任务映射、真实风格 insert into select 示例、复杂 ETL 示例 |
 
 ### 5.4 可选：初始化监管库 `regdb`
 
@@ -235,7 +235,7 @@ tail -f frontend.log
 ## 8. 更新部署
 
 ```bash
-cd bank-demo
+cd doris-showcase
 git pull origin main
 sh deploy.sh
 ```
@@ -247,7 +247,7 @@ sh deploy.sh
 说明服务器没有配置 GitHub SSH Key。改用 HTTPS：
 
 ```bash
-git clone https://github.com/wangyujia2023/bank-demo.git
+git clone https://github.com/wangyujia2023/doris-showcase.git
 ```
 
 ### 9.2 `.venv/bin/pip: bad interpreter`
@@ -316,9 +316,9 @@ AI_EXTRACT('qwen_llm', content, ARRAY(...))
 | --- | --- |
 | `git clone` 成功 |  |
 | `.env` 已配置 Doris |  |
-| `bank_cdp` 建表完成 |  |
-| `bank_cdp` mock 数据导入完成 |  |
-| `retail_lineage` 建表完成 |  |
+| `doris_showcase` 建表完成 |  |
+| `doris_showcase` mock 数据导入完成 |  |
+| `lineage_showcase` 建表完成 |  |
 | 血缘 mock/ETL 数据导入完成 |  |
 | `sh deploy.sh` 成功 |  |
 | `27713` 后端端口监听 |  |

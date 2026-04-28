@@ -7,7 +7,7 @@ EXAMPLE_FILE="$PROJECT_DIR/.env.example"
 
 cd "$PROJECT_DIR"
 
-echo "== Bank Demo 一键初始化并启动 =="
+echo "== Doris Showcase 一键初始化并启动 =="
 
 need_cmd() {
   if ! command -v "$1" >/dev/null 2>&1; then
@@ -35,12 +35,12 @@ DORIS_HOST=10.26.20.3
 DORIS_PORT=19030
 DORIS_USER=root
 DORIS_PASSWORD=
-DORIS_DATABASE=bank_cdp
+DORIS_DATABASE=doris_showcase
 UPLOAD_DIR=./uploads
 DB_WARMUP_ON_START=false
 TELEMETRY_ENABLED=true
 BEHAVIOR_SCAN_DAYS=120
-RETAIL_LINEAGE_DB=retail_lineage
+LINEAGE_DATABASE=lineage_showcase
 OPENMETADATA_BASE_URL=http://10.26.20.3:8585/api
 OPENMETADATA_JWT_TOKEN=
 ENV

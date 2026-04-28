@@ -30,7 +30,7 @@ flowchart LR
 
 ## Doris Objects
 
-Database: `retail_lineage`
+Database: `lineage_showcase`
 
 Main tables:
 
@@ -92,8 +92,8 @@ The sync page shows audit-log SQL sync results:
 
 Database scripts are organized under `sql/by_database/`:
 
-- `retail_lineage_schema.sql`
-- `retail_lineage_mock.sql`
+- `lineage_showcase_schema.sql`
+- `lineage_showcase_mock.sql`
 
 Run:
 

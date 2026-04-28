@@ -4,8 +4,8 @@ This directory is the only SQL delivery entry. Schema files are rebuilt from the
 
 | Database | Tables | Schema SQL | Mock Data SQL |
 | --- | ---: | --- | --- |
-| `bank_cdp` | 52 | `bank_cdp_schema.sql` | `bank_cdp_mock.sql` |
-| `retail_lineage` | 14 | `retail_lineage_schema.sql` | `retail_lineage_mock.sql` |
+| `doris_showcase` | 52 | `doris_showcase_schema.sql` | `doris_showcase_mock.sql` |
+| `lineage_showcase` | 14 | `lineage_showcase_schema.sql` | `lineage_showcase_mock.sql` |
 | `regdb` | 8 | `regdb_schema.sql` | `regdb_mock.sql` |
 | `bjmetro` | 8 | `bjmetro_schema.sql` | `bjmetro_mock.sql` |
 
@@ -27,11 +27,11 @@ sh init_database.sh bjmetro
 Manual execution order:
 
 ```bash
-mysql -h <DORIS_FE_HOST> -P19030 -uroot -p < sql/by_database/bank_cdp_schema.sql
-mysql -h <DORIS_FE_HOST> -P19030 -uroot -p < sql/by_database/bank_cdp_mock.sql
+mysql -h <DORIS_FE_HOST> -P19030 -uroot -p < sql/by_database/doris_showcase_schema.sql
+mysql -h <DORIS_FE_HOST> -P19030 -uroot -p < sql/by_database/doris_showcase_mock.sql
 
-mysql -h <DORIS_FE_HOST> -P19030 -uroot -p < sql/by_database/retail_lineage_schema.sql
-mysql -h <DORIS_FE_HOST> -P19030 -uroot -p < sql/by_database/retail_lineage_mock.sql
+mysql -h <DORIS_FE_HOST> -P19030 -uroot -p < sql/by_database/lineage_showcase_schema.sql
+mysql -h <DORIS_FE_HOST> -P19030 -uroot -p < sql/by_database/lineage_showcase_mock.sql
 
 mysql -h <DORIS_FE_HOST> -P19030 -uroot -p < sql/by_database/regdb_schema.sql
 mysql -h <DORIS_FE_HOST> -P19030 -uroot -p < sql/by_database/regdb_mock.sql

@@ -1,11 +1,11 @@
 -- ================================================================
--- Database: bank_cdp
+-- Database: doris_showcase
 -- Type: schema
 -- Source: generated from current Doris SHOW CREATE TABLE output.
 -- ================================================================
 
-CREATE DATABASE IF NOT EXISTS bank_cdp;
-USE bank_cdp;
+CREATE DATABASE IF NOT EXISTS doris_showcase;
+USE doris_showcase;
 
 -- Table: aum_metrics
 CREATE TABLE IF NOT EXISTS `aum_metrics` (

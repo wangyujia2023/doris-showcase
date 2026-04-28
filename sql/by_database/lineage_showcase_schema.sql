@@ -1,11 +1,11 @@
 -- ================================================================
--- Database: retail_lineage
+-- Database: lineage_showcase
 -- Type: schema
 -- Source: generated from current Doris SHOW CREATE TABLE output.
 -- ================================================================
 
-CREATE DATABASE IF NOT EXISTS retail_lineage;
-USE retail_lineage;
+CREATE DATABASE IF NOT EXISTS lineage_showcase;
+USE lineage_showcase;
 
 -- Table: ads_product_rank
 CREATE TABLE IF NOT EXISTS `ads_product_rank` (

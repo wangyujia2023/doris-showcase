@@ -1,1 +1,1 @@
-# bank-cdp-doris4 backend package
+# doris-showcase backend package

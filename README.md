@@ -45,9 +45,9 @@ DORIS_HOST=10.26.20.3
 DORIS_PORT=19030
 DORIS_USER=root
 DORIS_PASSWORD=
-DORIS_DATABASE=bank_cdp
+DORIS_DATABASE=doris_showcase
 DORIS_AI_RESOURCE=gemini_llm
-RETAIL_LINEAGE_DB=retail_lineage
+LINEAGE_DATABASE=lineage_showcase
 
 UPLOAD_DIR=./uploads
 
@@ -71,8 +71,8 @@ SQL files are grouped by database under `sql/by_database/`.
 
 Databases:
 
-- `bank_cdp`: main business demo database
-- `retail_lineage`: retail lineage demo database
+- `doris_showcase`: main business demo database
+- `lineage_showcase`: retail lineage demo database
 - `regdb`: regulatory reporting demo database
 - `bjmetro`: metro operation demo database
 
@@ -189,7 +189,7 @@ npm run build
 Python syntax check example:
 
 ```bash
-PYTHONPYCACHEPREFIX=/tmp/bank-demo-pycache python3 -m py_compile backend/settings.py backend/app.py
+PYTHONPYCACHEPREFIX=/tmp/doris-showcase-pycache python3 -m py_compile backend/settings.py backend/app.py
 ```
 
 ## Production Update
@@ -218,7 +218,7 @@ Lineage features use two data sources:
 Required `.env` settings:
 
 ```env
-RETAIL_LINEAGE_DB=retail_lineage
+LINEAGE_DATABASE=lineage_showcase
 OPENMETADATA_BASE_URL=http://10.26.20.3:8585/api
 OPENMETADATA_JWT_TOKEN=YOUR_OPENMETADATA_BOT_TOKEN
 ```
@@ -311,10 +311,23 @@ If the frontend is blank or keeps loading:
 ## Minimal Server Setup Flow
 
 ```bash
-git clone https://github.com/wangyujia2023/bank-demo.git
-cd bank-demo
+git clone https://github.com/wangyujia2023/doris-showcase.git
+cd doris-showcase
 cp .env.example .env
 # edit .env if needed
 sh init_database.sh
 sh deploy.sh
+```
+
+
+## Operations
+
+```bash
+sh deploy.sh          # initialize runtime, install dependencies, build frontend, start services
+sh start.sh           # start existing runtime
+sh stop.sh            # stop backend and frontend ports
+sh restart.sh         # restart services
+sh logs.sh backend    # backend logs
+sh logs.sh frontend   # frontend logs
+sh healthcheck.sh     # verify backend, frontend proxy and dictionary API
 ```

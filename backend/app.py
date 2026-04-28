@@ -1,6 +1,6 @@
 """
-银行业 CDP 平台 - FastAPI 入口
-启动: uvicorn backend.app:app --host 0.0.0.0 --port 8000 --reload
+Doris Showcase - FastAPI entrypoint
+Start: uvicorn backend.app:app --host 0.0.0.0 --port 27713
 """
 import logging
 from contextlib import asynccontextmanager
@@ -51,8 +51,8 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="银行业CDP平台",
-    description="基于 SelectDB的银行客户数据平台（HASP + AI Function）",
+    title="Doris Showcase",
+    description="Scenario showcase platform for Apache Doris, SelectDB and VeloDB",
     version="2.0.0",
     lifespan=lifespan,
 )
@@ -73,4 +73,4 @@ app.include_router(router, prefix="/api")
 
 @app.get("/")
 async def root():
-    return {"message": "银行CDP平台 API 运行中", "docs": "/docs"}
+    return {"message": "Doris Showcase API is running", "docs": "/docs"}
