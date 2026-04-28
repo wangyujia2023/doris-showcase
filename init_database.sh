@@ -16,6 +16,7 @@ DORIS_HOST="${DORIS_HOST:-10.26.20.3}"
 DORIS_PORT="${DORIS_PORT:-19030}"
 DORIS_USER="${DORIS_USER:-root}"
 DORIS_PASSWORD="${DORIS_PASSWORD:-}"
+UPLOAD_DIR="${UPLOAD_DIR:-/mnt/disk13/wangyujia/data/bank-demo/uploads}"
 
 need_cmd() {
   if ! command -v "$1" >/dev/null 2>&1; then
@@ -62,6 +63,8 @@ need_cmd mysql
 
 echo "== Bank Demo Doris database initialization =="
 echo "Doris: $DORIS_USER@$DORIS_HOST:$DORIS_PORT"
+mkdir -p "$UPLOAD_DIR"
+echo "Upload dir: $UPLOAD_DIR"
 
 case "$MODE" in
   all)

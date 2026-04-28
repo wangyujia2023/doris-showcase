@@ -48,7 +48,7 @@ DORIS_PASSWORD=
 DORIS_DATABASE=bank_cdp
 RETAIL_LINEAGE_DB=retail_lineage
 
-UPLOAD_DIR=./uploads
+UPLOAD_DIR=/mnt/disk13/wangyujia/data/bank-demo/uploads
 
 OPENMETADATA_BASE_URL=http://10.26.20.3:8585/api
 OPENMETADATA_JWT_TOKEN=
@@ -60,7 +60,7 @@ Notes:
 - `BACKEND_PROXY_HOST` is the frontend proxy target host. Use `127.0.0.1`, not `0.0.0.0`.
 - `BACKEND_PORT` defaults to `27713`.
 - `FRONTEND_PORT` defaults to `5173`.
-- `UPLOAD_DIR` stores uploaded vector-search images. Use an absolute server path if you want to keep files outside the project directory.
+- `UPLOAD_DIR` stores uploaded vector-search images. `deploy.sh` and `init_database.sh` create this directory automatically.
 - OpenMetadata settings are required only for lineage synchronization to OpenMetadata.
 
 ## Database Initialization
