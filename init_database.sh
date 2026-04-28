@@ -16,7 +16,7 @@ DORIS_HOST="${DORIS_HOST:-10.26.20.3}"
 DORIS_PORT="${DORIS_PORT:-19030}"
 DORIS_USER="${DORIS_USER:-root}"
 DORIS_PASSWORD="${DORIS_PASSWORD:-}"
-UPLOAD_DIR="${UPLOAD_DIR:-/mnt/disk13/wangyujia/data/bank-demo/uploads}"
+UPLOAD_DIR="${UPLOAD_DIR:-./uploads}"
 
 need_cmd() {
   if ! command -v "$1" >/dev/null 2>&1; then

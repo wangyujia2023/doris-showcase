@@ -48,7 +48,7 @@ DORIS_PASSWORD=
 DORIS_DATABASE=bank_cdp
 RETAIL_LINEAGE_DB=retail_lineage
 
-UPLOAD_DIR=/mnt/disk13/wangyujia/data/bank-demo/uploads
+UPLOAD_DIR=./uploads
 
 OPENMETADATA_BASE_URL=http://10.26.20.3:8585/api
 OPENMETADATA_JWT_TOKEN=

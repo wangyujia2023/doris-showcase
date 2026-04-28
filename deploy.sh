@@ -36,7 +36,7 @@ DORIS_PORT=19030
 DORIS_USER=root
 DORIS_PASSWORD=
 DORIS_DATABASE=bank_cdp
-UPLOAD_DIR=/mnt/disk13/wangyujia/data/bank-demo/uploads
+UPLOAD_DIR=./uploads
 DB_WARMUP_ON_START=false
 TELEMETRY_ENABLED=true
 BEHAVIOR_SCAN_DAYS=120
@@ -61,7 +61,7 @@ BACKEND_LOG="${BACKEND_LOG:-$PROJECT_DIR/backend.log}"
 FRONTEND_LOG="${FRONTEND_LOG:-$PROJECT_DIR/frontend.log}"
 PYTHON_BIN="${PYTHON_BIN:-python3}"
 NPM_BIN="${NPM_BIN:-npm}"
-UPLOAD_DIR="${UPLOAD_DIR:-/mnt/disk13/wangyujia/data/bank-demo/uploads}"
+UPLOAD_DIR="${UPLOAD_DIR:-./uploads}"
 mkdir -p "$UPLOAD_DIR"
 echo "上传目录: $UPLOAD_DIR"
 
