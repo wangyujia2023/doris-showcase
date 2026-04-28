@@ -51,6 +51,7 @@ class Settings:
         self.DORIS_USER: str = os.getenv("DORIS_USER", "root")
         self.DORIS_PASSWORD: str = os.getenv("DORIS_PASSWORD", "")
         self.DORIS_DATABASE: str = os.getenv("DORIS_DATABASE", "bank_cdp")
+        self.DORIS_AI_RESOURCE: str = os.getenv("DORIS_AI_RESOURCE", "")
         self.DB_WARMUP_ON_START: bool = _env_bool("DB_WARMUP_ON_START", "false")
         self.BACKEND_HOST: str = os.getenv("BACKEND_HOST", "0.0.0.0")
         self.BACKEND_PORT: int = _env_int("BACKEND_PORT", "27713")

@@ -12,6 +12,7 @@ export const newsApi = {
   sentiment:   (ids)      => http.post('/news/sentiment',  { article_ids: ids || null }),
   extract:     (ids)      => http.post('/news/extract',    { article_ids: ids || null }),
   runAllAI:    ()         => http.post('/news/run-all-ai'),  // 3合1：同时执行 SUMMARIZE + SENTIMENT + EXTRACT
+  sentimentOverview: ()   => http.get('/news/sentiment-overview'),
   tagAnalysis:    ()      => http.get('/news/tag-analysis'),
   sectorMetrics:  ()      => http.get('/news/sector-metrics'),
   signals:        ()      => http.get('/news/signals'),

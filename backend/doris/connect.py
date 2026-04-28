@@ -38,6 +38,12 @@ async def close_pool():
 async def get_conn():
     pool = await get_pool()
     async with pool.acquire() as conn:
+        ai_resource = settings.DORIS_AI_RESOURCE.strip()
+        if ai_resource:
+            if not _re.fullmatch(r"[A-Za-z0-9_\\-]+", ai_resource):
+                raise ValueError("DORIS_AI_RESOURCE contains invalid characters")
+            async with conn.cursor() as cur:
+                await cur.execute(f"SET default_ai_resource = '{ai_resource}'")
         yield conn
 
 

@@ -77,6 +77,11 @@ async def news_tag_analysis():
     return await get_news_svc().get_tag_analysis()
 
 
+@router.get("/news/sentiment-overview")
+async def news_sentiment_overview():
+    return await get_news_svc().get_sentiment_overview()
+
+
 @router.get("/news/sector-metrics")
 async def news_sector_metrics():
     return await get_news_svc().get_sector_metrics()

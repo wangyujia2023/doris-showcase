@@ -46,6 +46,7 @@ DORIS_PORT=19030
 DORIS_USER=root
 DORIS_PASSWORD=
 DORIS_DATABASE=bank_cdp
+DORIS_AI_RESOURCE=gemini_llm
 RETAIL_LINEAGE_DB=retail_lineage
 
 UPLOAD_DIR=./uploads
@@ -61,6 +62,7 @@ Notes:
 - `BACKEND_PORT` defaults to `27713`.
 - `FRONTEND_PORT` defaults to `5173`.
 - `UPLOAD_DIR` stores uploaded vector-search images. `deploy.sh` and `init_database.sh` create this directory automatically.
+- `DORIS_AI_RESOURCE` sets `default_ai_resource` for every backend Doris session. It is required only for Doris AI Function pages.
 - OpenMetadata settings are required only for lineage synchronization to OpenMetadata.
 
 ## Database Initialization
@@ -112,7 +114,13 @@ PROPERTIES (
 SET default_ai_resource = 'gemini_llm';
 ```
 
-After `default_ai_resource` is set, Doris AI functions can be called without passing the resource name explicitly, for example:
+Set the same resource name in `.env`:
+
+```env
+DORIS_AI_RESOURCE=gemini_llm
+```
+
+The backend will run `SET default_ai_resource = 'gemini_llm'` for its Doris sessions. After that, Doris AI functions can be called without passing the resource name explicitly, for example:
 
 ```sql
 SELECT AI_SUMMARIZE(content) FROM news_article LIMIT 1;

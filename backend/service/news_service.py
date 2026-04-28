@@ -267,67 +267,50 @@ WHERE {where}"""
         """) or []
         return rows[0] if rows else {"total": 0, "summarized": 0, "sentiment_done": 0, "extracted": 0}
 
-    # ── 标签分析 ────────────────────────────────────────────
-    async def get_tag_analysis(self):
-        # 情感分布（SQL聚合，避免Python遍历）
-        stats = await execute_query("""
-            SELECT ai_sentiment, COUNT(*) AS cnt
-            FROM (
-                SELECT article_id, ai_sentiment
-                FROM news_article
-                WHERE extracted = 1
-                QUALIFY ROW_NUMBER() OVER (PARTITION BY article_id ORDER BY publish_ts DESC) = 1
-            ) t
-            GROUP BY ai_sentiment
+    # ── 情感全景：轻量接口，只查情感字段 ───────────────────────
+    async def get_sentiment_overview(self):
+        rows = await execute_query("""
+            SELECT article_id, sector_tag, ai_sentiment, sentiment_score
+            FROM news_article
+            WHERE sentiment_done = 1
+            QUALIFY ROW_NUMBER() OVER (PARTITION BY article_id ORDER BY publish_ts DESC) = 1
         """) or []
-        sentiment_dist = {(r.get("ai_sentiment") or "neutral"): r.get("cnt", 0) for r in stats}
 
-        # 板块×情感分布
-        sector_stats = await execute_query("""
-            SELECT sector_tag, ai_sentiment, COUNT(*) AS cnt
-            FROM (
-                SELECT article_id, sector_tag, ai_sentiment
-                FROM news_article
-                WHERE extracted = 1
-                QUALIFY ROW_NUMBER() OVER (PARTITION BY article_id ORDER BY publish_ts DESC) = 1
-            ) t
-            GROUP BY sector_tag, ai_sentiment
-        """) or []
+        sentiment_dist = {"positive": 0, "negative": 0, "neutral": 0, "mixed": 0}
         sector_sentiment = {}
-        for r in sector_stats:
-            sec = r.get("sector_tag") or "其他"
+        score_buckets = [0] * 10
+
+        for r in rows:
             sent = r.get("ai_sentiment") or "neutral"
+            sec = r.get("sector_tag") or "Other"
+            sentiment_dist[sent] = sentiment_dist.get(sent, 0) + 1
+
             if sec not in sector_sentiment:
                 sector_sentiment[sec] = {"positive": 0, "negative": 0, "neutral": 0, "mixed": 0, "total": 0}
-            sector_sentiment[sec][sent] = r.get("cnt", 0)
-            sector_sentiment[sec]["total"] += r.get("cnt", 0)
+            sector_sentiment[sec][sent] = sector_sentiment[sec].get(sent, 0) + 1
+            sector_sentiment[sec]["total"] += 1
 
-        # 分值分布：后端计算（避免前端遍历）
-        score_buckets = [0] * 10
-        score_rows = await execute_query("""
-            SELECT sentiment_score
-            FROM (
-                SELECT article_id, sentiment_score
-                FROM news_article
-                WHERE extracted = 1 AND sentiment_score IS NOT NULL
-                QUALIFY ROW_NUMBER() OVER (PARTITION BY article_id ORDER BY publish_ts DESC) = 1
-            ) t
-        """) or []
-        for r in score_rows:
-            score = r.get("sentiment_score") or 0
-            idx = min(int((score + 100) / 20), 9)
-            score_buckets[idx] += 1
+            score = r.get("sentiment_score")
+            if score is not None:
+                idx = max(0, min(int((int(score) + 100) / 20), 9))
+                score_buckets[idx] += 1
 
-        # 标签频率
+        return {
+            "sentiment_dist": {k: v for k, v in sentiment_dist.items() if v > 0},
+            "sector_sentiment": sector_sentiment,
+            "score_buckets": score_buckets,
+            "total": len(rows),
+        }
+
+    # ── 标签分析：只解析 AI_EXTRACT，避免拖慢情感全景 ────────────
+    async def get_tag_analysis(self):
         rows = await execute_query("""
-            SELECT ai_extract
-            FROM (
-                SELECT article_id, ai_extract
-                FROM news_article
-                WHERE extracted = 1
-                QUALIFY ROW_NUMBER() OVER (PARTITION BY article_id ORDER BY publish_ts DESC) = 1
-            ) t
+            SELECT article_id, ai_extract
+            FROM news_article
+            WHERE extracted = 1
+            QUALIFY ROW_NUMBER() OVER (PARTITION BY article_id ORDER BY publish_ts DESC) = 1
         """) or []
+
         tag_freq = {}
         for r in rows:
             ex = r.get("ai_extract")
@@ -343,10 +326,7 @@ WHERE {where}"""
 
         top_tags = sorted(tag_freq.items(), key=lambda x: -x[1])[:30]
         return {
-            "sentiment_dist": sentiment_dist,
-            "sector_sentiment": sector_sentiment,
             "top_tags": [{"tag": k, "freq": v} for k, v in top_tags],
-            "score_buckets": score_buckets,  # 后端返回，前端无需计算
             "total": len(rows),
         }
 

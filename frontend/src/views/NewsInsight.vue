@@ -264,10 +264,10 @@
               <div class="ct">{{ t('news.sentimentProgressTitle') }}</div>
               <div class="sent-table">
                 <div class="sent-row hd"><span>{{ t('news.sentimentTable.sentiment') }}</span><span>{{ t('news.sentimentTable.count') }}</span><span>{{ t('news.sentimentTable.ratio') }}</span></div>
-                <div class="sent-row" v-for="(cnt, s) in tagData?.sentiment_dist || {}" :key="s">
+                <div class="sent-row" v-for="(cnt, s) in sentimentData?.sentiment_dist || {}" :key="s">
                   <span><span :class="['sentiment-dot', s]"></span>{{ sentimentLabel(s) }}</span>
                   <span>{{ cnt }}</span>
-                  <span>{{ tagData?.total ? (cnt / tagData.total * 100).toFixed(1) : 0 }}%</span>
+                  <span>{{ sentimentData?.total ? (cnt / sentimentData.total * 100).toFixed(1) : 0 }}%</span>
                 </div>
               </div>
               <div class="ct" style="margin-top:14px">{{ t('news.sqlExplainTitle') }}</div>
@@ -280,7 +280,7 @@ GROUP BY ai_sentiment</pre>
               </div>
             </div>
           </div>
-          <div class="empty-tip" v-if="!tagData">{{ t('news.emptySentiment') }}</div>
+          <div class="empty-tip" v-if="!sentimentData">{{ t('news.emptySentiment') }}</div>
         </el-tab-pane>
 
         <!-- ── Tab3: 标签分析 ── -->
@@ -535,6 +535,7 @@ const articles   = ref([])
 const selId      = ref('')
 const selArticle = ref(null)
 const tagData    = ref(null)
+const sentimentData = ref(null)
 
 const keyword         = ref('')
 const filterSector    = ref('')
@@ -747,16 +748,22 @@ function filterByTag(t) {
 
 async function onTab() {
   const name = activeTab.value
-  if (name === 'sentiment' || name === 'tags') await loadTagData()
+  if (name === 'sentiment') await loadSentimentData()
+  if (name === 'tags') await loadTagData()
   if (name === 'metrics') await loadMetrics()
   if (name === 'signals') await loadSignals()
+}
+
+async function loadSentimentData() {
+  try { sentimentData.value = await newsApi.sentimentOverview() } catch { sentimentData.value = null }
+  await nextTick()
+  renderSentimentCharts()
 }
 
 async function loadTagData() {
   try { tagData.value = await newsApi.tagAnalysis() } catch { tagData.value = null }
   await nextTick()
-  if (activeTab.value === 'sentiment') renderSentimentCharts()
-  if (activeTab.value === 'tags') renderTagCharts()
+  renderTagCharts()
 }
 
 async function loadMetrics() {
@@ -780,8 +787,8 @@ const SENT_COLORS = { positive: '#f56c6c', negative: '#67c23a', neutral: '#90939
 const SENT_LABELS = { positive: t('news.sentimentPositive'), negative: t('news.sentimentNegative'), neutral: t('news.sentimentNeutral'), mixed: t('news.sentimentMixed') }
 
 function renderSentimentCharts() {
-  if (!tagData.value) return
-  const dist = tagData.value.sentiment_dist || {}
+  if (!sentimentData.value) return
+  const dist = sentimentData.value.sentiment_dist || {}
 
   // 第一个图表：立即渲染
   const c1 = initChart(sentPieChart, 'sentpie')
@@ -796,7 +803,7 @@ function renderSentimentCharts() {
 
   // 第二、三个图表：延迟渲染（避免UI阻塞）
   requestAnimationFrame(() => {
-    const secSent = tagData.value.sector_sentiment || {}
+    const secSent = sentimentData.value.sector_sentiment || {}
     const secs = Object.keys(secSent)
     const c2 = initChart(sentSecChart, 'sentsec')
     if (c2) c2.setOption({
@@ -813,7 +820,7 @@ function renderSentimentCharts() {
     })
 
     // 分值分布：直接用后端计算的 score_buckets（不再遍历）
-    const buckets = tagData.value.score_buckets || Array(10).fill(0)
+    const buckets = sentimentData.value.score_buckets || Array(10).fill(0)
     const c3 = initChart(scoreChart, 'score')
     if (c3) c3.setOption({
       tooltip: { trigger: 'axis' },
