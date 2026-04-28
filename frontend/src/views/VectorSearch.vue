@@ -12,9 +12,14 @@
           {{ t('vec.subtitle') }}
         </div>
       </div>
-      <el-button type="primary" :loading="initing" @click="initData" plain>
-        <el-icon><RefreshRight /></el-icon> {{ t('vec.initData') }}
-      </el-button>
+      <div style="display:flex;gap:8px">
+        <el-button type="danger" plain :loading="clearing" @click="clearData">
+          <el-icon><Delete /></el-icon> {{ t('vec.clearData') }}
+        </el-button>
+        <el-button type="primary" :loading="initing" @click="initData" plain>
+          <el-icon><RefreshRight /></el-icon> {{ t('vec.initData') }}
+        </el-button>
+      </div>
     </div>
 
     <div class="main-grid">
@@ -36,10 +41,10 @@
             :class="{ selected: queryPhoto.userId === u.user_id }"
             @click="useUserAsQuery(u)"
           >
-            <img :src="avatarUrl(u.avatar_style)" class="mini-avatar" />
+            <img :src="userAvatarSrc(u)" class="mini-avatar" />
             <div class="mini-name">{{ u.user_name }}</div>
             <div class="mini-labels">
-              <el-tag v-for="lb in u.labels" :key="lb" size="small" effect="plain" style="font-size:10px;margin:1px">{{ lb }}</el-tag>
+              <el-tag v-for="lb in u.labels" :key="lb" size="small" effect="plain" style="font-size:10px;margin:1px">{{ labelText(lb) }}</el-tag>
             </div>
           </div>
         </div>
@@ -52,7 +57,7 @@
             class="lchip"
             :style="{ borderColor: lb.color, color: lb.color }"
           >
-            <span class="lchip-name">{{ lb.label_name }}</span>
+            <span class="lchip-name">{{ labelText(lb.label_name) }}</span>
             <span class="lchip-cnt">{{ lb.user_count }}</span>
           </div>
         </div>
@@ -66,7 +71,7 @@
           <!-- 模式 Tab -->
           <div class="mode-tabs">
             <div
-              v-for="m in MODES" :key="m.key"
+              v-for="m in modes" :key="m.key"
               class="mode-tab"
               :class="{ active: searchMode === m.key }"
               @click="searchMode = m.key"
@@ -132,7 +137,7 @@
                   :class="{ selected: labelFilters.includes(lb.label_name) }"
                   :style="{ borderColor: labelFilters.includes(lb.label_name) ? lb.color : '#e4e7ed', color: labelFilters.includes(lb.label_name) ? lb.color : '#606266' }"
                   @click="toggleLabel(lb.label_name)"
-                >{{ lb.label_name }}</div>
+                >{{ labelText(lb.label_name) }}</div>
               </div>
             </div>
 
@@ -166,7 +171,7 @@
                 @click="doSearch"
               >
                 <el-icon><Search /></el-icon>
-                {{ MODE_BTN[searchMode] }}
+                {{ modeBtn[searchMode] }}
               </el-button>
               <el-button v-if="result" @click="clearResult">{{ t('common.clear') }}</el-button>
             </div>
@@ -177,7 +182,7 @@
         <div v-if="result" class="card sql-card">
           <div class="sql-header" @click="sqlOpen = !sqlOpen">
             <div style="display:flex;align-items:center;gap:8px">
-              <el-tag :type="MODE_COLOR[result.mode]" size="small" effect="dark">{{ MODE_LABEL[result.mode] }}</el-tag>
+              <el-tag :type="MODE_COLOR[result.mode]" size="small" effect="dark">{{ modeLabel[result.mode] }}</el-tag>
               <span style="font-size:13px;font-weight:600;color:#1a1a1a">{{ t('vec.sqlTitle') }}</span>
               <el-tag size="small" effect="plain" type="success">cosine_distance</el-tag>
               <el-tag v-if="result.label_filters.length" size="small" effect="plain" type="warning">{{ t('vec.scalarFilter') }}</el-tag>
@@ -200,7 +205,7 @@
           <div v-else class="result-list">
             <div v-for="(r, idx) in result.results" :key="r.user_id" class="result-item">
               <div class="rank-badge" :class="`rank-${idx+1}`">{{ idx + 1 }}</div>
-              <img :src="avatarUrl(r.avatar_style)" class="res-avatar" />
+              <img :src="userAvatarSrc(r)" class="res-avatar" />
               <div class="res-info">
                 <div class="res-name">{{ r.user_name }}</div>
                 <div class="res-desc">{{ r.description }}</div>
@@ -210,7 +215,7 @@
                     size="small" effect="plain" round
                     :type="labelFilters.includes(lb) ? 'warning' : ''"
                     style="margin:2px 2px 0 0;font-size:11px"
-                  >{{ lb }}</el-tag>
+                  >{{ labelText(lb) }}</el-tag>
                 </div>
               </div>
               <div v-if="result.mode !== 'scalar'" class="res-score">
@@ -257,8 +262,8 @@
             <el-form-item :label="t('vec.formDesc')"><el-input v-model="addForm.description" type="textarea" :rows="3" /></el-form-item>
             <el-form-item :label="t('vec.formTags')">
               <el-select v-model="addForm.labels" multiple style="width:100%">
-                <el-option v-for="lb in labels" :key="lb.label_name" :label="lb.label_name" :value="lb.label_name">
-                  <span :style="{color:lb.color}">● </span>{{ lb.label_name }}
+                <el-option v-for="lb in labels" :key="lb.label_name" :label="labelText(lb.label_name)" :value="lb.label_name">
+                  <span :style="{color:lb.color}">● </span>{{ labelText(lb.label_name) }}
                 </el-option>
               </el-select>
             </el-form-item>
@@ -278,7 +283,7 @@
 <script setup>
 import { ref, computed, onMounted, defineComponent, h, reactive } from 'vue'
 import { ElMessage } from 'element-plus'
-import { RefreshRight, Search, Plus, Upload, Picture, PriceTag, ChatLineRound, Refresh } from '@element-plus/icons-vue'
+import { RefreshRight, Search, Plus, Upload, Picture, PriceTag, ChatLineRound, Refresh, Delete } from '@element-plus/icons-vue'
 import { vectorApi } from '@/api'
 import { t, locale } from '@/i18n'
 
@@ -303,14 +308,14 @@ const VecBar = defineComponent({
 })
 
 // ── 常量 ────────────────────────────────────────────────────────
-const MODES = [
+const modes = computed(() => ([
   { key: 'vector', icon: '📷', title: t('vec.modeVectorTitle'), desc: t('vec.modeVectorDesc') },
   { key: 'scalar', icon: '🏷️', title: t('vec.modeScalarTitle'), desc: t('vec.modeScalarDesc') },
   { key: 'hybrid', icon: '🔀', title: t('vec.modeHybridTitle'), desc: t('vec.modeHybridDesc') },
-]
-const MODE_BTN   = { vector: t('vec.modeVectorBtn'), scalar: t('vec.modeScalarBtn'), hybrid: t('vec.modeHybridBtn') }
+]))
+const modeBtn = computed(() => ({ vector: t('vec.modeVectorBtn'), scalar: t('vec.modeScalarBtn'), hybrid: t('vec.modeHybridBtn') }))
 const MODE_COLOR = { vector: 'primary', scalar: 'success', hybrid: 'warning' }
-const MODE_LABEL = { vector: t('vec.modeVectorLabel'), scalar: t('vec.modeScalarLabel'), hybrid: t('vec.modeHybridLabel') }
+const modeLabel = computed(() => ({ vector: t('vec.modeVectorLabel'), scalar: t('vec.modeScalarLabel'), hybrid: t('vec.modeHybridLabel') }))
 
 const RANDOM_NAMES = ['Nova','Cloud','Ink','Star','Phoenix','Jade','Phantom','Storm','Moon','Dawn']
 const RANDOM_DESCS = ['Energetic and curious','Calm and analytical','Humorous and sociable','Adventurous and bold','Tech-savvy digital native']
@@ -321,6 +326,7 @@ const users     = ref([])
 const labels    = ref([])
 const dimLabels = ref([])
 const initing   = ref(false)
+const clearing  = ref(false)
 const searching = ref(false)
 const sqlOpen   = ref(true)
 
@@ -357,6 +363,50 @@ const matchedKeywords = computed(() => {
 function avatarUrl(style) {
   return `https://api.dicebear.com/7.x/bottts/svg?seed=${style}&backgroundColor=b6e3f4,ffd5dc,ffdfbf,c0aede,d1d4f9`
 }
+function userAvatarSrc(u) {
+  return u?.photo_url || avatarUrl(u?.avatar_style || u?.user_name || 'user')
+}
+function labelText(name) {
+  const map = {
+    zh: {
+      '活跃达人': '活跃达人',
+      '高价值客户': '高价值客户',
+      '年轻潮流': '年轻潮流',
+      '理财达人': '理财达人',
+      '科技爱好者': '科技爱好者',
+      '运动健康': '运动健康',
+      '娱乐消费': '娱乐消费',
+      '稳健保守': '稳健保守',
+      '冒险进取': '冒险进取',
+      '学生群体': '学生群体',
+      '行为特征': '行为特征',
+      '资产特征': '资产特征',
+      '人群特征': '人群特征',
+      '兴趣特征': '兴趣特征',
+      '消费特征': '消费特征',
+      '风险特征': '风险特征',
+    },
+    en: {
+      '活跃达人': 'Active Users',
+      '高价值客户': 'High Value',
+      '年轻潮流': 'Young Trend',
+      '理财达人': 'Wealth Planner',
+      '科技爱好者': 'Tech Enthusiast',
+      '运动健康': 'Fitness Lover',
+      '娱乐消费': 'Entertainment',
+      '稳健保守': 'Conservative',
+      '冒险进取': 'Risk Taker',
+      '学生群体': 'Students',
+      '行为特征': 'Behavior',
+      '资产特征': 'Assets',
+      '人群特征': 'Demographic',
+      '兴趣特征': 'Interest',
+      '消费特征': 'Consumption',
+      '风险特征': 'Risk',
+    },
+  }
+  return map[locale.value]?.[name] || name
+}
 function scoreColor(sim) {
   if (sim >= 0.9) return '#67c23a'
   if (sim >= 0.7) return '#409eff'
@@ -388,7 +438,7 @@ function handleQueryFile(file) {
 
 // 点击用户库直接用作查询
 function useUserAsQuery(u) {
-  queryPhoto.previewUrl = avatarUrl(u.avatar_style)
+  queryPhoto.previewUrl = userAvatarSrc(u)
   queryPhoto.embedding  = u.photo_embedding || []
   queryPhoto.userId     = u.user_id
   queryPhoto.photoFile  = null
@@ -433,9 +483,24 @@ async function initData() {
   initing.value = true
   try {
     const res = await vectorApi.init()
-    ElMessage.success(`初始化完成：${res.users} 用户、${res.labels} {{ t('vec.formTags') }}`)
+    ElMessage.success(t('vec.initDone', [res.users, res.labels]))
     await loadData()
   } finally { initing.value = false }
+}
+async function clearData() {
+  clearing.value = true
+  try {
+    await vectorApi.clear()
+    users.value = []
+    queryPhoto.previewUrl = ''
+    queryPhoto.embedding = []
+    queryPhoto.photoFile = null
+    queryPhoto.userId = null
+    result.value = null
+    ElMessage.success(t('vec.clearDone'))
+  } finally {
+    clearing.value = false
+  }
 }
 
 // ── 新增用户 ────────────────────────────────────────────────────
@@ -474,9 +539,18 @@ async function submitAdd() {
     fd.append('labels', JSON.stringify(addForm.labels))
     const res = await vectorApi.uploadUser(fd)
     addForm.embedding = res.embedding
+    const newUser = {
+      user_id: res.user_id,
+      user_name: res.user_name,
+      avatar_style: addForm.avatar_style || addForm.user_name,
+      photo_url: res.photo_url || addForm.previewUrl,
+      description: addForm.description,
+      labels: [...addForm.labels],
+      photo_embedding: res.embedding || [],
+    }
+    users.value = [newUser, ...users.value.filter(u => u.user_id !== res.user_id)]
     ElMessage.success(t('vec.userSaved', [res.user_name, res.user_id]))
     uploadDialog.value = false
-    await loadData()
   } finally { addLoading.value = false }
 }
 

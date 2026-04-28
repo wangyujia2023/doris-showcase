@@ -4,6 +4,7 @@ HASP 向量检索服务 - 用户图片识别标签场景
 向量维度: 8 （活跃度/智力/幽默/冒险/科技/运动/艺术/社交）
 """
 from backend.doris.connect import execute_query, execute_write, execute_one
+import base64
 import json
 import io
 import math
@@ -130,6 +131,52 @@ def _vec_str(vec: list) -> str:
 
 
 class VectorSearchService:
+    async def _seed_labels_if_empty(self) -> None:
+        try:
+            cnt = await execute_one("SELECT COUNT(*) AS cnt FROM avatar_label")
+            if cnt and int(cnt.get("cnt", 0)) > 0:
+                return
+        except Exception:
+            return
+        for lb in AVATAR_LABELS:
+            vec = _vec_str(lb["embedding"])
+            await execute_write(f"""
+                INSERT INTO avatar_label
+                  (label_id, label_name, category, color, label_desc, label_embedding, user_count, create_time)
+                VALUES
+                  ({lb['label_id']}, '{lb['label_name']}', '{lb['category']}',
+                   '{lb['color']}', '{lb['label_desc']}', '{vec}',
+                   0, NOW())
+            """)
+
+    async def _ensure_photo_table(self) -> None:
+        ddl_photo = """
+            CREATE TABLE IF NOT EXISTS user_avatar_photo (
+                user_id     BIGINT       NOT NULL COMMENT '用户ID',
+                photo_url   STRING                    COMMENT '头像图片dataURL',
+                create_time DATETIME                  COMMENT '创建时间'
+            ) ENGINE=OLAP
+            DUPLICATE KEY(user_id)
+            DISTRIBUTED BY HASH(user_id) BUCKETS 4
+            PROPERTIES ("replication_num"="1")
+        """
+        await execute_write(ddl_photo)
+
+    async def _has_photo_table(self) -> bool:
+        try:
+            rows = await execute_query("SHOW TABLES LIKE 'user_avatar_photo'")
+            return bool(rows)
+        except Exception:
+            return False
+
+    async def _photo_map(self) -> dict:
+        if not await self._has_photo_table():
+            return {}
+        try:
+            rows = await execute_query("SELECT user_id, photo_url FROM user_avatar_photo ORDER BY user_id")
+            return {r["user_id"]: r.get("photo_url") for r in rows}
+        except Exception:
+            return {}
 
     async def init_tables(self) -> dict:
         """建表 + 写入示例数据"""
@@ -138,6 +185,7 @@ class VectorSearchService:
                 user_id       BIGINT       NOT NULL COMMENT '用户ID',
                 user_name     VARCHAR(64)           COMMENT '用户名',
                 avatar_style  VARCHAR(32)           COMMENT '头像风格标识',
+                photo_url     STRING                COMMENT '头像图片dataURL',
                 description   VARCHAR(256)          COMMENT '角色描述',
                 photo_embedding ARRAY<FLOAT>        COMMENT '照片特征向量(8维)',
                 labels        VARCHAR(256)          COMMENT '标签JSON',
@@ -164,9 +212,11 @@ class VectorSearchService:
         """
         await execute_write(ddl_user)
         await execute_write(ddl_label)
+        await self._ensure_photo_table()
 
         # 清空旧数据
         await execute_write("TRUNCATE TABLE user_avatar")
+        await execute_write("TRUNCATE TABLE user_avatar_photo")
         await execute_write("TRUNCATE TABLE avatar_label")
 
         # 写入用户数据
@@ -196,22 +246,27 @@ class VectorSearchService:
             """
             await execute_write(sql)
 
-        # 更新标签 user_count
-        await execute_write("""
-            UPDATE avatar_label al
-            SET user_count = (
-                SELECT COUNT(*) FROM user_avatar ua
-                WHERE JSON_CONTAINS(ua.labels, CONCAT('"', al.label_name, '"'))
-            )
-        """)
-
         return {"status": "ok", "users": len(CARTOON_USERS), "labels": len(AVATAR_LABELS)}
 
+    async def clear_tables(self) -> dict:
+        """清空向量检索数据"""
+        await execute_write("TRUNCATE TABLE user_avatar")
+        await execute_write("TRUNCATE TABLE user_avatar_photo")
+        await self._seed_labels_if_empty()
+        return {"status": "ok", "users": 0, "labels": len(AVATAR_LABELS)}
+
     async def get_users(self) -> list:
-        rows = await execute_query(
-            "SELECT user_id, user_name, avatar_style, description, photo_embedding, labels "
-            "FROM user_avatar ORDER BY user_id"
-        )
+        try:
+            rows = await execute_query(
+                "SELECT user_id, user_name, avatar_style, description, photo_embedding, labels "
+                "FROM user_avatar ORDER BY user_id"
+            )
+        except Exception:
+            rows = await execute_query(
+                "SELECT user_id, user_name, avatar_style, description, photo_embedding, labels "
+                "FROM user_avatar ORDER BY user_id"
+            )
+        photo_map = await self._photo_map()
         for r in rows:
             try:
                 r["labels"] = json.loads(r["labels"]) if r["labels"] else []
@@ -227,9 +282,11 @@ class VectorSearchService:
                         r["photo_embedding"] = []
             except Exception:
                 r["photo_embedding"] = []
+            r["photo_url"] = photo_map.get(r["user_id"])
         return rows
 
     async def get_labels(self) -> list:
+        await self._seed_labels_if_empty()
         rows = await execute_query(
             "SELECT label_id, label_name, category, color, label_desc, label_embedding, user_count "
             "FROM avatar_label ORDER BY label_id"
@@ -250,7 +307,7 @@ class VectorSearchService:
     async def search_similar_users(self, query_vector: list, top_k: int = 5) -> list:
         """以向量检索最相似用户（cosine_distance，HASP 向量化加速）"""
         vec = _vec_str(query_vector)
-        sql = f"""
+        sql_without = f"""
             SELECT
                 user_id, user_name, avatar_style, description, labels,
                 ROUND(cosine_distance(photo_embedding, CAST('{vec}' AS ARRAY<FLOAT>)), 6) AS distance,
@@ -259,7 +316,8 @@ class VectorSearchService:
             ORDER BY distance ASC
             LIMIT {top_k}
         """
-        rows = await execute_query(sql)
+        rows = await execute_query(sql_without)
+        photo_map = await self._photo_map()
         for r in rows:
             try:
                 r["labels"] = json.loads(r["labels"]) if r["labels"] else []
@@ -267,6 +325,7 @@ class VectorSearchService:
                 r["labels"] = []
             r["distance"] = float(r.get("distance", 1))
             r["similarity"] = float(r.get("similarity", 0))
+            r["photo_url"] = photo_map.get(r["user_id"])
         return rows
 
     async def search_similar_labels(self, query_vector: list, top_k: int = 5) -> list:
@@ -360,6 +419,7 @@ class VectorSearchService:
 
         sql = self._build_sql(vec, label_filters, top_k)
         rows = await execute_query(sql)
+        photo_map = await self._photo_map()
 
         for r in rows:
             try:
@@ -368,6 +428,7 @@ class VectorSearchService:
                 r["labels"] = []
             r["distance"]   = float(r.get("distance", 1))
             r["similarity"] = float(r.get("similarity", 0))
+            r["photo_url"] = photo_map.get(r["user_id"])
 
         # 模式判断（用于前端展示）
         mode = "hybrid"
@@ -395,6 +456,7 @@ class VectorSearchService:
         embedding = self._extract_embedding(image_bytes)
         result = await self.hybrid_search(embedding, label_filters, description, top_k)
         result["photo_embedding"] = embedding
+        result["photo_url"] = "data:image/jpeg;base64," + base64.b64encode(image_bytes).decode("ascii")
         return result
 
     def _extract_embedding(self, image_bytes: bytes) -> list:
@@ -458,6 +520,9 @@ class VectorSearchService:
     ) -> dict:
         """上传照片 → 提取向量 → 写入 user_avatar"""
         embedding = self._extract_embedding(image_bytes)
+        photo_url = "data:image/jpeg;base64," + base64.b64encode(image_bytes).decode("ascii")
+        await self._ensure_photo_table()
+        has_photo_table = await self._has_photo_table()
 
         row = await execute_one(
             "SELECT IFNULL(MAX(user_id), 1000) + 1 AS next_id FROM user_avatar"
@@ -473,6 +538,11 @@ class VectorSearchService:
               ({user_id}, '{user_name}', '{avatar_style}',
                '{description}', '{vec}', '{labels_json}', NOW())
         """)
+        if has_photo_table:
+            await execute_write(f"""
+                INSERT INTO user_avatar_photo (user_id, photo_url, create_time)
+                VALUES ({user_id}, '{photo_url}', NOW())
+            """)
 
         # 更新关联标签的 user_count
         for lb in labels:
@@ -486,4 +556,5 @@ class VectorSearchService:
             "user_id": user_id,
             "user_name": user_name,
             "embedding": embedding,
+            "photo_url": photo_url,
         }

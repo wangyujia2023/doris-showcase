@@ -16,22 +16,13 @@
         <el-menu-item index="/dashboard">
           <el-icon><Odometer /></el-icon><span>{{ t('menu.dashboard') }}</span>
         </el-menu-item>
-        <el-menu-item index="/management">
-          <el-icon><DataAnalysis /></el-icon><span>{{ t('menu.management') }}</span>
-        </el-menu-item>
 
         <div class="menu-group-title">{{ t('group.userProfile') }}</div>
         <el-menu-item index="/user">
           <el-icon><User /></el-icon><span>{{ t('menu.userWide') }}</span>
         </el-menu-item>
-        <el-menu-item index="/segment">
-          <el-icon><Grid /></el-icon><span>{{ t('menu.segment') }}</span>
-        </el-menu-item>
-        <el-menu-item index="/behavior">
-          <el-icon><TrendCharts /></el-icon><span>{{ t('menu.behavior') }}</span>
-        </el-menu-item>
-        <el-menu-item index="/user-tag">
-          <el-icon><Files /></el-icon><span>{{ t('menu.userTag') }}</span>
+        <el-menu-item index="/user-analysis">
+          <el-icon><Grid /></el-icon><span>{{ t('menu.userAnalysis') }}</span>
         </el-menu-item>
         <el-menu-item index="/log-classify">
           <el-icon><Cpu /></el-icon><span>{{ t('menu.logClassify') }}</span>
@@ -168,15 +159,15 @@ body { font-family: -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
 .el-menu { border-right: none; flex: 1; overflow-y: auto; }
 /* 菜单项紧凑 */
 .el-menu .el-menu-item {
-  height: 36px !important;
-  line-height: 36px !important;
+  height: 32px !important;
+  line-height: 32px !important;
   font-size: 12px !important;
-  padding: 0 14px !important;
+  padding: 0 12px !important;
 }
-.el-menu .el-menu-item .el-icon { font-size: 14px !important; margin-right: 6px !important; }
+.el-menu .el-menu-item .el-icon { font-size: 13px !important; margin-right: 5px !important; }
 /* 自定义分组标题 */
 .menu-group-title {
-  padding: 10px 14px 3px;
+  padding: 7px 12px 2px;
   font-size: 10px;
   color: rgba(255,255,255,0.28);
   letter-spacing: .8px;

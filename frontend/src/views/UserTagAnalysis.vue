@@ -579,7 +579,8 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import { use } from 'echarts/core'
 import { FunnelChart, BarChart } from 'echarts/charts'
 import { GridComponent, TooltipComponent, LegendComponent } from 'echarts/components'
@@ -591,7 +592,8 @@ import { t, locale } from '@/i18n'
 use([FunnelChart, BarChart, GridComponent, TooltipComponent, LegendComponent, CanvasRenderer])
 
 const BASE = '/api'
-const activeTab = ref('crowd')
+const route = useRoute()
+const activeTab = ref(route.query.tab || route.meta?.defaultTab || 'crowd')
 
 // ── 标签元数据 ──
 const tagMeta = ref([])
@@ -1032,6 +1034,13 @@ onMounted(async () => {
   await loadEtlOverview()
   await loadCrowdList()
 })
+
+watch(
+  () => route.query.tab,
+  tab => {
+    if (tab) activeTab.value = String(tab)
+  }
+)
 </script>
 
 <style scoped>

@@ -53,7 +53,7 @@
         <el-empty v-if="!history.length" :description="t('noHistory')" :image-size="48" />
         <div v-for="(h, i) in history" :key="i" class="hist-item">
           <div class="hist-meta">
-            <el-tag size="small" type="success">{{ h.rows }}行</el-tag>
+            <el-tag size="small" type="success">{{ h.rows }} {{ t('rows') }}</el-tag>
             <el-tag size="small" type="info">{{ h.elapsed_ms }}ms</el-tag>
             <span class="hist-time">{{ h.time }}</span>
           </div>
@@ -109,12 +109,12 @@
           <div style="flex:1">
             <div v-for="(f, i) in filters" :key="i" class="filter-row">
               <el-select v-if="i>0" v-model="f.logic" size="small" style="width:54px">
-                <el-option value="AND" label="且" /><el-option value="OR" label="或" />
+                <el-option value="AND" :label="t('and')" /><el-option value="OR" :label="t('or')" />
               </el-select>
               <span v-else style="width:54px;font-size:12px;color:#909399">WHERE</span>
               <el-select v-model="f.field" size="small" :placeholder="t('field')" style="width:110px">
                 <el-option-group :label="t('dimensions')">
-                  <el-option v-for="d in defs.dimensions" :value="d.field" :label="d.label" />
+                  <el-option v-for="d in defs.dimensions" :key="d.field" :value="d.field" :label="dimLabel(d.field)" />
                 </el-option-group>
                 <el-option-group :label="t('numerics')">
                   <el-option value="aum_total"    :label="metricText('aum_total')" />
@@ -132,7 +132,7 @@
               <el-input v-model="f.value" size="small" :placeholder="t('value')" style="width:110px" />
               <el-button size="small" type="danger" text @click="filters.splice(i,1)">✕</el-button>
             </div>
-            <el-button size="small" type="primary" text @click="addFilter">+ 添加条件</el-button>
+            <el-button size="small" type="primary" text @click="addFilter">+ {{ t('addFilter') }}</el-button>
           </div>
         </div>
 
@@ -223,7 +223,7 @@
               <el-table :data="result.rows" border stripe size="small" max-height="360"
                 highlight-current-row @row-click="onRowClick">
                 <el-table-column v-for="col in result.columns" :key="col.field"
-                  :prop="col.field" :label="col.label" sortable
+                  :prop="col.field" :label="columnLabel(col)" sortable
                   :align="col.type==='measure'?'right':'left'" min-width="100">
                   <template #default="{row}">
                     <el-tag v-if="col.type==='dim'" size="small" effect="plain">{{ row[col.field] }}</el-tag>
@@ -285,7 +285,7 @@
               </div>
               <div class="compare-cards">
                 <div v-for="d in compareResult.diffs" :key="d.alias" class="cmp-card">
-                  <div class="cc-label">{{ d.label }}</div>
+                  <div class="cc-label">{{ measureLabel(d.alias) }}</div>
                   <div class="cc-cur">{{ fmtNum(d.current) }}</div>
                   <div :class="['cc-chg', d.up?'up':'down']">
                     {{ d.up ? '▲' : '▼' }} {{ Math.abs(d.change_pct) }}%
@@ -340,7 +340,7 @@
               <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
                 <span style="font-size:13px;color:#606266">{{ t('drillTo') }}</span>
                 <el-select v-model="drillChildDim" size="small" style="width:120px">
-                  <el-option v-for="d in drillableDims" :key="d.field" :value="d.field" :label="d.label" />
+                  <el-option v-for="d in drillableDims" :key="d.field" :value="d.field" :label="dimLabel(d.field)" />
                 </el-select>
                 <el-button size="small" type="primary" :loading="drilling" @click="executeDrill">{{ t('expand') }}</el-button>
                 <el-button size="small" @click="clearDrill">{{ t('reset') }}</el-button>
@@ -350,7 +350,7 @@
                 border stripe size="small" max-height="360"
                 @row-click="onDrillRowClick">
                 <el-table-column v-for="col in drillResult.columns" :key="col.field"
-                  :prop="col.field" :label="col.label" sortable
+                  :prop="col.field" :label="columnLabel(col)" sortable
                   :align="col.type==='measure'?'right':'left'">
                   <template #default="{row}">
                     <el-tag v-if="col.type==='dim'" size="small" effect="plain">{{ row[col.field] }}</el-tag>
@@ -378,7 +378,7 @@
   </div>
 
   <!-- 保存查询对话框 -->
-      <el-dialog v-model="saveVisible" title="保存查询配置" width="340px">
+      <el-dialog v-model="saveVisible" :title="t('saveDialogTitle')" width="340px">
     <el-input v-model="saveName" :placeholder="t('queryName')" maxlength="30" show-word-limit />
     <template #footer>
       <el-button @click="saveVisible=false">{{ t('cancel') }}</el-button>
@@ -400,7 +400,9 @@ import VChart from 'vue-echarts'
 import { Check, Search } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import { metricsApi } from '@/api'
-import { t, locale } from '@/i18n'
+import { t as i18nT, locale } from '@/i18n'
+
+const t = key => i18nT(`metrics.${key}`)
 
 const DIM_EN = {
   asset_level:'Asset Level', age_group:'Age Group', city:'City', lifecycle_stage:'Lifecycle Stage',
@@ -413,6 +415,10 @@ const MEASURE_EN = {
   avg_credit:'Avg Credit', loan_total:'Loan Total', fund_total:'Fund Total', deposit_sum:'Deposit Total',
   aum_total:'AUM', credit_score:'Credit Score', churn_prob:'Churn Probability', loan_amount:'Loan Amount',
   fund_amount:'Fund Amount', deposit_amount:'Deposit Amount', age:'Age',
+}
+const METRIC_ZH = {
+  aum_total:'AUM', credit_score:'信用分', churn_prob:'流失概率', loan_amount:'贷款金额',
+  fund_amount:'基金金额', deposit_amount:'存款金额', age:'年龄',
 }
 const TEMPLATE_EN = {
   t1: { name: 'Asset Level Distribution', desc: 'Count users and AUM by asset level' },
@@ -483,8 +489,14 @@ const canChart = computed(() =>
 
 const dimLabel     = f => (locale.value === 'en' ? DIM_EN[f] : defs.value.dimensions.find(d => d.field === f)?.label) || f
 const measureLabel = a => (locale.value === 'en' ? MEASURE_EN[a] : defs.value.measures.find(m => m.alias === a)?.label) || a
-const metricText = k => MEASURE_EN[k] || k
+const metricText = k => (locale.value === 'en' ? MEASURE_EN[k] : METRIC_ZH[k]) || k
 const templateText = (id, key, fallback) => (locale.value === 'en' ? TEMPLATE_EN[id]?.[key] : fallback) || fallback
+const columnLabel = col => {
+  if (!col) return ''
+  if (col.type === 'dim') return dimLabel(col.field)
+  const label = measureLabel(col.field)
+  return label === col.field ? (col.label || col.field) : label
+}
 
 const drillableDims = computed(() =>
   defs.value.dimensions.filter(d => d.field !== drillContext.value?.dim)
@@ -529,7 +541,7 @@ function applyTemplate(t) {
   sortDir.value = t.sort_dir || 'DESC'
   pageSize.value = t.limit  || 50
   lpTab.value = 'catalog'
-  ElMessage.success(`已应用模板「${t.name}」`)
+  ElMessage.success(i18nT('metrics.appliedTemplate', [templateText(t.id, 'name', t.name)]))
 }
 
 // ── 查询执行 ─────────────────────────────────────────────
@@ -633,7 +645,7 @@ async function doSave() {
     time_range: timeRange.value,
   }
   await metricsApi.saveQuery({ name: saveName.value.trim(), config })
-  ElMessage.success('查询已保存')
+  ElMessage.success(t('savedOk'))
   saveVisible.value = false
   loadSaved()
 }
@@ -648,7 +660,7 @@ function loadSavedConfig(s) {
   sortDir.value = c.sort_dir || 'DESC'
   pageSize.value = c.limit  || 50
   timeRange.value = c.time_range || ''
-  ElMessage.success(`已加载「${s.name}」`)
+  ElMessage.success(i18nT('metrics.loadedSaved', [s.name]))
   lpTab.value = 'catalog'
 }
 async function deleteSaved(id) {
@@ -673,7 +685,7 @@ function exportExcel() { doExport('excel') }
 function doExport(type) {
   const cols = result.value.columns
   const rows = result.value.rows
-  const header = cols.map(c => c.label).join(',')
+  const header = cols.map(c => columnLabel(c)).join(',')
   const lines  = rows.map(r => cols.map(c => `"${r[c.field] ?? ''}"`).join(','))
   const content = [header, ...lines].join('\n')
   const BOM = type === 'excel' ? '\uFEFF' : ''
@@ -713,10 +725,10 @@ const chartOpt = computed(() => {
   if (type === 'scatter') {
     if (mCols.length < 2) return {}
     return {
-      tooltip: { trigger: 'item', formatter: p => `${cats[p.dataIndex]}<br/>${mCols[0].label}: ${p.value[0]}<br/>${mCols[1].label}: ${p.value[1]}` },
+      tooltip: { trigger: 'item', formatter: p => `${cats[p.dataIndex]}<br/>${columnLabel(mCols[0])}: ${p.value[0]}<br/>${columnLabel(mCols[1])}: ${p.value[1]}` },
       grid: { left: 60, right: 20, top: 30, bottom: 40 },
-      xAxis: { type: 'value', name: mCols[0].label },
-      yAxis: { type: 'value', name: mCols[1].label },
+      xAxis: { type: 'value', name: columnLabel(mCols[0]) },
+      yAxis: { type: 'value', name: columnLabel(mCols[1]) },
       series: [{ type: 'scatter', data: result.value.rows.map(r => [r[mCols[0].field], r[mCols[1].field]]),
         symbolSize: 10, itemStyle: { color: '#409eff' },
         label: { show: true, formatter: p => cats[p.dataIndex], position: 'top', fontSize: 10 },
@@ -729,7 +741,7 @@ const chartOpt = computed(() => {
     return {
       tooltip: {},
       legend: { data: cats, bottom: 0 },
-      radar: { indicator: mCols.map((c, i) => ({ name: c.label, max: maxVals[i] })), radius: '65%' },
+      radar: { indicator: mCols.map((c, i) => ({ name: columnLabel(c), max: maxVals[i] })), radius: '65%' },
       series: [{
         type: 'radar',
         data: result.value.rows.slice(0, 6).map((r, ri) => ({
@@ -745,12 +757,12 @@ const chartOpt = computed(() => {
   // bar / line
   return {
     tooltip: { trigger: 'axis' },
-    legend: { top: 0, data: mCols.map(c => c.label) },
+    legend: { top: 0, data: mCols.map(c => columnLabel(c)) },
     grid: { left: 70, right: 20, top: 36, bottom: cats.length > 6 ? 60 : 30 },
     xAxis: { type: 'category', data: cats, axisLabel: { rotate: cats.length > 6 ? 30 : 0 } },
     yAxis: { type: 'value' },
     series: mCols.map((col, i) => ({
-      name: col.label, type,
+      name: columnLabel(col), type,
       data: result.value.rows.map(r => r[col.field]),
       itemStyle: { color: COLORS[i % COLORS.length] },
       label: { show: result.value.rows.length <= 12, position: 'top', fontSize: 10 },

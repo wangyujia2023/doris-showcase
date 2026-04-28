@@ -159,6 +159,7 @@ export const systemApi = {
 // ── HASP 向量检索 ────────────────────────────────────────────────
 export const vectorApi = {
   init: () => httpLong.post('/vector/init'),   // 20 分钟超时
+  clear: () => http.post('/vector/clear'),
   users: () => http.get('/vector/users'),
   labels: () => http.get('/vector/labels'),
   dimLabels: () => http.get('/vector/dim-labels'),

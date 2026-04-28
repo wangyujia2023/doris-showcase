@@ -30,6 +30,11 @@ async def vector_init():
     return await get_vec_svc().init_tables()
 
 
+@router.post("/vector/clear")
+async def vector_clear():
+    return await get_vec_svc().clear_tables()
+
+
 @router.get("/vector/users")
 async def vector_users():
     return await get_vec_svc().get_users()
