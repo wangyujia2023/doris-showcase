@@ -599,12 +599,28 @@ function sentimentEmoji(s) {
   return { positive: '📈', negative: '📉', neutral: '➖', mixed: '↕️' }[s] || ''
 }
 function sectorClass(s) {
-  const m = { '半导体': 'tag-blue', '新能源': 'tag-green', '消费': 'tag-orange', '医药': 'tag-purple', '金融': 'tag-red', '军工': 'tag-dark', '宏观': 'tag-grey', '化工': 'tag-cyan', '传媒': 'tag-pink' }
+  const m = {
+    '半导体': 'tag-blue', Semiconductors: 'tag-blue',
+    '新能源': 'tag-green', Renewables: 'tag-green',
+    '消费': 'tag-orange', Consumer: 'tag-orange',
+    '医药': 'tag-purple',
+    '金融': 'tag-red', Financials: 'tag-red',
+    '军工': 'tag-dark',
+    '宏观': 'tag-grey', Macro: 'tag-grey',
+    '化工': 'tag-cyan',
+    '传媒': 'tag-pink',
+  }
   return m[s] || 'tag-grey'
 }
 function tagColorClass(tag) {
   const t = tag.split(':')[0]
-  return { '事件类型': 'blue', '影响板块': 'green', '关键政策或技术': 'orange', '核心公司': 'purple', '市场影响方向': 'red' }[t] || ''
+  return {
+    '事件类型': 'blue', 'Event Type': 'blue',
+    '影响板块': 'green', 'Affected Sector': 'green',
+    '关键政策或技术': 'orange', 'Key Policy or Technology': 'orange',
+    '核心公司': 'purple', 'Core Companies': 'purple',
+    '市场影响方向': 'red', 'Market Impact Direction': 'red',
+  }[t] || ''
 }
 function tagFontSize(freq) { return Math.min(12 + freq * 2, 22) }
 function scoreStyle(score) {
@@ -829,7 +845,7 @@ function renderTagCharts() {
   // 第二个图表：延迟渲染
   requestAnimationFrame(() => {
     const impactMap = {}
-    topTags.filter(t => t.tag.startsWith('市场影响方向:')).forEach(t => {
+    topTags.filter(t => t.tag.startsWith('市场影响方向:') || t.tag.startsWith('Market Impact Direction:')).forEach(t => {
       const v = t.tag.split(':')[1]
       impactMap[v] = (impactMap[v] || 0) + t.freq
     })
