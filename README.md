@@ -1,6 +1,6 @@
 # Doris 4.0 Demo Platform
 
-A full-stack Doris 4.0 demo platform for banking CDP, metrics analysis, vector image search, data lineage, regulatory reporting, fund research, securities realtime warehouse, manufacturing, and metro operation scenarios.
+A full-stack Doris 4.0 demo platform for customer data, metrics analysis, vector image search, data lineage, regulatory reporting, fund research, securities realtime warehouse, manufacturing, and metro operation scenarios.
 
 ## Tech Stack
 
@@ -90,6 +90,37 @@ sh init_database.sh bjmetro
 ```
 
 The mock data files use English demo data where applicable.
+
+## Doris AI Function Resource
+
+This project does not create Doris AI resources automatically.
+
+Before using pages that call Doris AI functions, such as News AI Analysis, configure an AI resource in Doris once. After the resource is created, set it as the default resource for the Doris session or user.
+
+Example:
+
+```sql
+CREATE RESOURCE 'gemini_llm'
+PROPERTIES (
+    'type'             = 'ai',
+    'ai.provider_type' = 'gemini',
+    'ai.model_name'    = 'gemini-2.5-flash',
+    'ai.endpoint'      = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent',
+    'ai.api_key'       = '<YOUR_API_KEY>'
+);
+
+SET default_ai_resource = 'gemini_llm';
+```
+
+After `default_ai_resource` is set, Doris AI functions can be called without passing the resource name explicitly, for example:
+
+```sql
+SELECT AI_SUMMARIZE(content) FROM news_article LIMIT 1;
+SELECT AI_SENTIMENT(content) FROM news_article LIMIT 1;
+SELECT AI_EXTRACT(content, 'Event Type, Affected Sector') FROM news_article LIMIT 1;
+```
+
+Do not commit real API keys to this repository. Keep them only in Doris resource configuration or your own secure operations system.
 
 ## One-Click Deployment
 

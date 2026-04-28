@@ -12,9 +12,11 @@ from datetime import datetime
 from typing import Dict, List, Optional
 
 from backend.doris.connect import execute_query, execute_one
+from backend.settings import settings
 from backend.service.cdp_service import TAG_DEFS, _TAG_BY_ID, _TAG_BY_COL, _TAG_COLS
 
 logger = logging.getLogger(__name__)
+CDP_DB = settings.DORIS_DATABASE
 
 # ── 内存人群包存储 ─────────────────────────────────────────────
 _CROWD_STORE: Dict[str, Dict] = {}
@@ -33,7 +35,7 @@ class PortraitService:
         total_sql = f"""
             SELECT COUNT(*) AS total,
                    {', '.join(f'SUM({col}) AS {col}' for _, col, _, _ in TAG_DEFS)}
-            FROM bank.user_tag_wide
+            FROM {CDP_DB}.user_tag_wide
         """
         base_row = await execute_one(total_sql)
         base_total = int(base_row.get("total") or 0)
@@ -51,7 +53,7 @@ class PortraitService:
         seg_sql = f"""
             SELECT COUNT(*) AS total,
                    {', '.join(f'SUM({col}) AS {col}' for _, col, _, _ in TAG_DEFS)}
-            FROM bank.user_tag_wide
+            FROM {CDP_DB}.user_tag_wide
             WHERE {where}
         """
         seg_row = await execute_one(seg_sql)
@@ -101,7 +103,7 @@ class PortraitService:
                     f"SUM(IF({c1}=1 AND {c2}=1, 1, 0)) AS `{c1}_x_{c2}`"
                 )
 
-        sql = f"SELECT COUNT(*) AS total, {', '.join(select_parts)} FROM bank.user_tag_wide"
+        sql = f"SELECT COUNT(*) AS total, {', '.join(select_parts)} FROM {CDP_DB}.user_tag_wide"
         row = await execute_one(sql)
         total = int(row.get("total") or 0)
 
@@ -133,7 +135,7 @@ class PortraitService:
             tag_where = " AND ".join(conditions) if conditions else "1=1"
             sql = f"""
                 SELECT w.province, w.city, COUNT(*) AS cnt
-                FROM bank.user_tag_wide t
+                FROM {CDP_DB}.user_tag_wide t
                 JOIN user_wide w ON t.customer_id = w.user_id
                 WHERE {tag_where}
                 GROUP BY w.province, w.city
@@ -236,7 +238,7 @@ class CrowdPackageService:
             all_conds  = conditions + ex_conds
             where = " AND ".join(all_conds) if all_conds else "1=1"
             cols  = ", ".join(f"ROUND(AVG({col})*100, 1) AS {col}" for _, col, _, _ in TAG_DEFS)
-            sql   = f"SELECT COUNT(*) AS total, {cols} FROM bank.user_tag_wide WHERE {where}"
+            sql   = f"SELECT COUNT(*) AS total, {cols} FROM {CDP_DB}.user_tag_wide WHERE {where}"
             return await execute_one(sql)
 
         row_a = await _distribution(pkg_a["include_tag_ids"], pkg_a["exclude_tag_ids"])
@@ -308,7 +310,7 @@ class TagAnalysisService:
         total_sql = f"""
             SELECT COUNT(*) AS total,
                    {', '.join(f'SUM({col}) AS {col}' for _, col, _, _ in TAG_DEFS)}
-            FROM bank.user_tag_wide
+            FROM {CDP_DB}.user_tag_wide
         """
         base_row = await execute_one(total_sql)
         base_total = int(base_row.get("total") or 0)
@@ -320,7 +322,7 @@ class TagAnalysisService:
         anom_sql = f"""
             SELECT COUNT(*) AS total,
                    {', '.join(f'SUM({col}) AS {col}' for _, col, _, _ in TAG_DEFS)}
-            FROM bank.user_tag_wide
+            FROM {CDP_DB}.user_tag_wide
             WHERE customer_id IN ({ids_str})
         """
         anom_row = await execute_one(anom_sql)

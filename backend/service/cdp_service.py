@@ -1,8 +1,8 @@
 """
 用户标签分析服务（CDP）
 表结构：
-  - bank.user_tag_wide : 宽表，DUPLICATE KEY(customer_id)，每列为 TINYINT 0/1 标签
-  - bank.t_customer_tags: 高表，AGGREGATE KEY(tag_id, tag_name)，tag_bitmap BITMAP_UNION
+  - <DORIS_DATABASE>.user_tag_wide : 宽表，DUPLICATE KEY(customer_id)，每列为 TINYINT 0/1 标签
+  - <DORIS_DATABASE>.t_customer_tags: 高表，AGGREGATE KEY(tag_id, tag_name)，tag_bitmap BITMAP_UNION
 功能：
   1. 宽表自定义查询
   2. 宽表 -> 高表 ETL
@@ -12,8 +12,10 @@
 import logging
 from typing import Dict, List, Optional
 from backend.doris.connect import execute_query, execute_one, execute_write
+from backend.settings import settings
 
 logger = logging.getLogger(__name__)
+CDP_DB = settings.DORIS_DATABASE
 
 # ── 标签定义：(tag_id, col_name, label, category) ──────────────
 # tag_id 用于写高表，col_name 对应宽表列名
@@ -118,7 +120,7 @@ class WideQueryService:
                 conditions.append(f"{info[0]} = 1")
 
         where = " AND ".join(conditions)
-        count_sql = f"SELECT COUNT(1) AS total FROM bank.user_tag_wide WHERE {where}"
+        count_sql = f"SELECT COUNT(1) AS total FROM {CDP_DB}.user_tag_wide WHERE {where}"
         count_row = await execute_one(count_sql)
         total = int(count_row["total"]) if count_row else 0
 
@@ -126,7 +128,7 @@ class WideQueryService:
         data_sql = f"""
             SELECT customer_id, update_time,
                    {', '.join(_TAG_COLS)}
-            FROM bank.user_tag_wide
+            FROM {CDP_DB}.user_tag_wide
             WHERE {where}
             ORDER BY customer_id
             LIMIT {page_size} OFFSET {offset}
@@ -147,7 +149,7 @@ class WideQueryService:
     async def distribution(self) -> List[Dict]:
         """各标签命中用户数统计"""
         select_parts = [f"SUM({col}) AS {col}" for _, col, _, _ in TAG_DEFS]
-        sql = f"SELECT {', '.join(select_parts)} FROM bank.user_tag_wide"
+        sql = f"SELECT {', '.join(select_parts)} FROM {CDP_DB}.user_tag_wide"
         row = await execute_one(sql)
         result = []
         if row:
@@ -178,19 +180,19 @@ class EtlService:
                 SELECT {tid} AS tag_id, '{col}' AS tag_name,
                        BITMAP_UNION(TO_BITMAP(customer_id)) AS tag_bitmap,
                        NOW() AS update_time
-                FROM bank.user_tag_wide
+                FROM {CDP_DB}.user_tag_wide
                 WHERE {col} = 1
                 GROUP BY tag_id, tag_name
             """)
 
         union_sql = " UNION ALL ".join(union_parts)
         insert_sql = f"""
-            INSERT INTO bank.t_customer_tags (tag_id, tag_name, tag_bitmap, update_time)
+            INSERT INTO {CDP_DB}.t_customer_tags (tag_id, tag_name, tag_bitmap, update_time)
             {union_sql}
         """
         try:
             await execute_write(insert_sql)
-            count_row = await execute_one("SELECT COUNT(1) AS cnt FROM bank.t_customer_tags")
+            count_row = await execute_one(f"SELECT COUNT(1) AS cnt FROM {CDP_DB}.t_customer_tags")
             return {
                 "success": True,
                 "tag_rows": int(count_row["cnt"]) if count_row else 0,
@@ -201,9 +203,9 @@ class EtlService:
 
     async def get_tall_overview(self) -> List[Dict]:
         """高表各标签命中人数"""
-        sql = """
+        sql = f"""
             SELECT tag_id, tag_name, BITMAP_COUNT(tag_bitmap) AS user_count
-            FROM bank.t_customer_tags
+            FROM {CDP_DB}.t_customer_tags
             ORDER BY user_count DESC
         """
         rows = await execute_query(sql)
@@ -225,7 +227,7 @@ class BitmapOpsService:
     def _sub(tag_id: int) -> str:
         return (
             f"(SELECT IFNULL(tag_bitmap, BITMAP_EMPTY()) "
-            f"FROM bank.t_customer_tags WHERE tag_id = {tag_id} LIMIT 1)"
+            f"FROM {CDP_DB}.t_customer_tags WHERE tag_id = {tag_id} LIMIT 1)"
         )
 
     async def compute(

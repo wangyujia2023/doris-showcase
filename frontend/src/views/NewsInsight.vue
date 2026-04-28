@@ -185,7 +185,7 @@
                         <div class="ai-result-text">{{ selArticle.ai_summary }}</div>
                       </div>
                       <div class="ai-card-empty" v-else>{{ t('news.emptyAfterExecute') }}</div>
-                      <div class="ai-sql-snippet"><code>AI_SUMMARIZE('qwen_llm', content)</code></div>
+                      <div class="ai-sql-snippet"><code>AI_SUMMARIZE(content)</code></div>
                     </div>
                     <!-- AI_SENTIMENT -->
                     <div :class="['ai-card', selArticle.sentiment_done ? 'done' : 'empty']">
@@ -211,7 +211,7 @@
                         </div>
                       </div>
                       <div class="ai-card-empty" v-else>{{ t('news.returnFormat') }}</div>
-                      <div class="ai-sql-snippet"><code>AI_SENTIMENT('qwen_llm', content)</code></div>
+                      <div class="ai-sql-snippet"><code>AI_SENTIMENT(content)</code></div>
                     </div>
                     <!-- AI_EXTRACT -->
                     <div :class="['ai-card', selArticle.extracted ? 'done' : 'empty']">
@@ -233,7 +233,7 @@
                         </div>
                       </div>
                       <div class="ai-card-empty" v-else>{{ t('news.extractDesc') }}</div>
-                      <div class="ai-sql-snippet"><code>AI_EXTRACT('qwen_llm', content, ARRAY(...))</code></div>
+                      <div class="ai-sql-snippet"><code>AI_EXTRACT(content, ARRAY(...))</code></div>
                     </div>
                   </div>
                 </div>

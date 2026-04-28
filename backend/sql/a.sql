@@ -1,5 +1,5 @@
 -- 场景2: 客户画像 (Bitmap)
-CREATE TABLE IF NOT EXISTS bank.t_customer_tags (
+CREATE TABLE IF NOT EXISTS bank_cdp.t_customer_tags (
   tag_id  BIGINT,
   tag_name     VARCHAR(32),
   tag_bitmap   BITMAP BITMAP_UNION,
@@ -9,7 +9,7 @@ DISTRIBUTED BY HASH(tag_id) BUCKETS 16
 PROPERTIES (
   "replication_num" = "1"
 );
-CREATE TABLE IF NOT EXISTS bank.user_tag_wide (
+CREATE TABLE IF NOT EXISTS bank_cdp.user_tag_wide (
     customer_id        BIGINT COMMENT '用户ID',
     update_time        DATETIME COMMENT '更新时间',
 
