@@ -28,23 +28,23 @@
             style="text-align:center;padding:40px 0;color:#c0c4cc;font-size:13px">
             {{ t('trace.emptyList') }}
           </div>
-          <div v-for="t in traces" :key="t.trace_id"
+          <div v-for="trace in traces" :key="trace.trace_id"
             class="trace-row"
-            :class="{ selected: selected?.trace_id === t.trace_id, error: t.status === 'ERROR' }"
-            @click="selectTrace(t)">
+            :class="{ selected: selected?.trace_id === trace.trace_id, error: trace.status === 'ERROR' }"
+            @click="selectTrace(trace)">
             <div class="tr-hd">
-              <el-tag :type="t.status === 'ERROR' ? 'danger' : 'success'" size="small" effect="dark">
-                {{ t.status }}
+              <el-tag :type="trace.status === 'ERROR' ? 'danger' : 'success'" size="small" effect="dark">
+                {{ trace.status }}
               </el-tag>
-              <span class="tr-op">{{ t.operation }}</span>
-              <span class="tr-dur" :style="durStyle(t.duration_ms)">{{ fmtMs(t.duration_ms) }}</span>
+              <span class="tr-op">{{ trace.operation }}</span>
+              <span class="tr-dur" :style="durStyle(trace.duration_ms)">{{ fmtMs(trace.duration_ms) }}</span>
             </div>
             <div class="tr-meta">
-              <span class="mono">{{ t.trace_id?.slice(0, 16) }}…</span>
-              <span style="margin-left:auto">{{ t.span_count }} {{ t('trace.spans') }}</span>
+              <span class="mono">{{ trace.trace_id?.slice(0, 16) }}…</span>
+              <span style="margin-left:auto">{{ trace.span_count }} {{ t('trace.spans') }}</span>
             </div>
-            <div style="font-size:11px;color:#67c23a">{{ svcLabel(t.service) }}</div>
-            <div style="font-size:10px;color:#c0c4cc">{{ t.start_time?.toString().slice(0, 19) }}</div>
+            <div style="font-size:11px;color:#67c23a">{{ svcLabel(trace.service) }}</div>
+            <div style="font-size:10px;color:#c0c4cc">{{ trace.start_time?.toString().slice(0, 19) }}</div>
           </div>
         </div>
         <div style="padding:8px;text-align:center">

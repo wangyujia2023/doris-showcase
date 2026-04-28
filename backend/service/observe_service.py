@@ -107,7 +107,7 @@ class ObserveService:
                 "offset_ms,duration_ms,status,db_query "
                 "FROM sys_spans WHERE trace_id=%s ORDER BY offset_ms", (trace_id,)
             )
-            if spans is not None:
+            if spans:
                 total_ms = max((s.get("duration_ms",0)+s.get("offset_ms",0) for s in spans), default=0)
                 return {"trace_id": trace_id, "total_duration_ms": total_ms,
                         "services": list(dict.fromkeys(s["service"] for s in spans)),
@@ -120,6 +120,28 @@ class ObserveService:
                                    "status": s.get("status","OK"),
                                    "db": bool(s.get("db_query","")),
                                    "detail": s.get("db_query","")[:200]} for s in spans]}
+        except Exception:
+            pass
+        try:
+            row = await execute_one(
+                "SELECT trace_id,service,method,path,status_code,duration_ms,level "
+                "FROM sys_logs WHERE trace_id=%s ORDER BY log_time DESC LIMIT 1",
+                (trace_id,),
+            )
+            if row:
+                dur = row.get("duration_ms", 0) or 0
+                svc = row.get("service", "CDP后台")
+                return {"trace_id": trace_id, "total_duration_ms": dur,
+                        "services": [svc],
+                        "spans": [{"span_id": trace_id[:16],
+                                   "parent_span_id": "",
+                                   "service": svc,
+                                   "operation": f"{row.get('method','')} {row.get('path','')}",
+                                   "offset_ms": 0,
+                                   "duration_ms": dur,
+                                   "status": "ERROR" if row.get("level") == "ERROR" or row.get("status_code", 0) >= 500 else "OK",
+                                   "db": False,
+                                   "detail": ""}]}
         except Exception:
             pass
         svc_rows = log_store.get_by_trace(trace_id)
