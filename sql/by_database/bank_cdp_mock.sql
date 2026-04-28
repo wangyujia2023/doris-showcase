@@ -512,6 +512,401 @@ INSERT INTO `user_tag` (`tag_date`, `tag_category`, `tag_name`, `tag_value`, `us
   ('2025-04-04', 'Risk', 'Tag 4', 'user_tag_tag_value_4', bitmap_from_string('10004,10014'), 40, '2025-04-04 09:04:00'),
   ('2025-04-05', 'Operation', 'Tag 5', 'user_tag_tag_value_5', bitmap_from_string('10005,10015'), 50, '2025-04-05 09:05:00');
 
+
+-- Table: user_tag_wide
+TRUNCATE TABLE `user_tag_wide`;
+INSERT INTO `user_tag_wide` (`customer_id`, `update_time`, `male`, `female`, `age_under_20`, `age_20_25`, `age_26_30`, `age_31_35`, `age_36_40`, `age_41_45`, `age_46_50`, `age_51_55`, `age_56_60`, `age_over_60`, `married`, `unmarried`, `divorced`, `has_child`, `has_house`, `has_car`, `local_hukou`, `has_social_security`, `has_fund`, `education_bachelor`, `education_college`, `education_high`, `income_under_5k`, `income_5k_1w`, `income_1w_2w`, `income_2w_5w`, `income_over_5w`, `asset_under_10w`, `asset_100w_500w`, `asset_500w_1000w`, `asset_over_1000w`, `high_net_worth`, `ultra_high_net`, `potential_client`, `normal_client`, `has_financial`, `has_fund_product`, `has_stock`, `has_insurance`, `has_bonds`, `has_gold`, `has_loan`, `has_housing_loan`, `has_car_loan`, `has_consumer_loan`, `active_7d`, `active_30d`, `inactive_30d`, `trans_high_freq`, `big_transactor`, `mobile_user`, `web_user`, `high_response`, `low_response`, `marketing_sensitive`, `apply_loan`, `buy_financing`) VALUES
+(1001, '2026-04-28 06:00:00', 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1),
+(1002, '2026-04-28 06:00:00', 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0),
+(1003, '2026-04-28 06:00:00', 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 1, 0, 0, 0, 1, 1, 0),
+(1004, '2026-04-28 06:00:00', 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0),
+(1005, '2026-04-28 06:00:00', 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0),
+(1006, '2026-04-28 06:00:00', 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 0, 1, 1, 0, 1, 1, 1, 0, 1, 0, 1, 0, 1),
+(1007, '2026-04-28 06:00:00', 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1, 0, 1),
+(1008, '2026-04-28 06:00:00', 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 1, 1, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0, 1, 0, 1, 1, 1, 0, 0, 1, 1, 0, 1),
+(1009, '2026-04-28 06:00:00', 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0),
+(1010, '2026-04-28 06:00:00', 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 1, 0, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1),
+(1011, '2026-04-28 06:00:00', 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0),
+(1012, '2026-04-28 06:00:00', 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1, 0, 1),
+(1013, '2026-04-28 06:00:00', 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0),
+(1014, '2026-04-28 06:00:00', 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0),
+(1015, '2026-04-28 06:00:00', 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1),
+(1016, '2026-04-28 06:00:00', 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1),
+(1017, '2026-04-28 06:00:00', 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0, 1, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0),
+(1018, '2026-04-28 06:00:00', 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1),
+(1019, '2026-04-28 06:00:00', 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0),
+(1020, '2026-04-28 06:00:00', 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1, 0, 1);
+
+-- Table: t_customer_tags
+TRUNCATE TABLE `t_customer_tags`;
+INSERT INTO `t_customer_tags` (`tag_id`, `tag_name`, `tag_bitmap`, `update_time`)
+SELECT 1 AS tag_id, 'male' AS tag_name,
+       BITMAP_UNION(TO_BITMAP(customer_id)) AS tag_bitmap,
+       NOW() AS update_time
+FROM `user_tag_wide`
+WHERE `male` = 1
+GROUP BY tag_id, tag_name UNION ALL
+SELECT 2 AS tag_id, 'female' AS tag_name,
+       BITMAP_UNION(TO_BITMAP(customer_id)) AS tag_bitmap,
+       NOW() AS update_time
+FROM `user_tag_wide`
+WHERE `female` = 1
+GROUP BY tag_id, tag_name UNION ALL
+SELECT 3 AS tag_id, 'age_under_20' AS tag_name,
+       BITMAP_UNION(TO_BITMAP(customer_id)) AS tag_bitmap,
+       NOW() AS update_time
+FROM `user_tag_wide`
+WHERE `age_under_20` = 1
+GROUP BY tag_id, tag_name UNION ALL
+SELECT 4 AS tag_id, 'age_20_25' AS tag_name,
+       BITMAP_UNION(TO_BITMAP(customer_id)) AS tag_bitmap,
+       NOW() AS update_time
+FROM `user_tag_wide`
+WHERE `age_20_25` = 1
+GROUP BY tag_id, tag_name UNION ALL
+SELECT 5 AS tag_id, 'age_26_30' AS tag_name,
+       BITMAP_UNION(TO_BITMAP(customer_id)) AS tag_bitmap,
+       NOW() AS update_time
+FROM `user_tag_wide`
+WHERE `age_26_30` = 1
+GROUP BY tag_id, tag_name UNION ALL
+SELECT 6 AS tag_id, 'age_31_35' AS tag_name,
+       BITMAP_UNION(TO_BITMAP(customer_id)) AS tag_bitmap,
+       NOW() AS update_time
+FROM `user_tag_wide`
+WHERE `age_31_35` = 1
+GROUP BY tag_id, tag_name UNION ALL
+SELECT 7 AS tag_id, 'age_36_40' AS tag_name,
+       BITMAP_UNION(TO_BITMAP(customer_id)) AS tag_bitmap,
+       NOW() AS update_time
+FROM `user_tag_wide`
+WHERE `age_36_40` = 1
+GROUP BY tag_id, tag_name UNION ALL
+SELECT 8 AS tag_id, 'age_41_45' AS tag_name,
+       BITMAP_UNION(TO_BITMAP(customer_id)) AS tag_bitmap,
+       NOW() AS update_time
+FROM `user_tag_wide`
+WHERE `age_41_45` = 1
+GROUP BY tag_id, tag_name UNION ALL
+SELECT 9 AS tag_id, 'age_46_50' AS tag_name,
+       BITMAP_UNION(TO_BITMAP(customer_id)) AS tag_bitmap,
+       NOW() AS update_time
+FROM `user_tag_wide`
+WHERE `age_46_50` = 1
+GROUP BY tag_id, tag_name UNION ALL
+SELECT 10 AS tag_id, 'age_51_55' AS tag_name,
+       BITMAP_UNION(TO_BITMAP(customer_id)) AS tag_bitmap,
+       NOW() AS update_time
+FROM `user_tag_wide`
+WHERE `age_51_55` = 1
+GROUP BY tag_id, tag_name UNION ALL
+SELECT 11 AS tag_id, 'age_56_60' AS tag_name,
+       BITMAP_UNION(TO_BITMAP(customer_id)) AS tag_bitmap,
+       NOW() AS update_time
+FROM `user_tag_wide`
+WHERE `age_56_60` = 1
+GROUP BY tag_id, tag_name UNION ALL
+SELECT 12 AS tag_id, 'age_over_60' AS tag_name,
+       BITMAP_UNION(TO_BITMAP(customer_id)) AS tag_bitmap,
+       NOW() AS update_time
+FROM `user_tag_wide`
+WHERE `age_over_60` = 1
+GROUP BY tag_id, tag_name UNION ALL
+SELECT 13 AS tag_id, 'married' AS tag_name,
+       BITMAP_UNION(TO_BITMAP(customer_id)) AS tag_bitmap,
+       NOW() AS update_time
+FROM `user_tag_wide`
+WHERE `married` = 1
+GROUP BY tag_id, tag_name UNION ALL
+SELECT 14 AS tag_id, 'unmarried' AS tag_name,
+       BITMAP_UNION(TO_BITMAP(customer_id)) AS tag_bitmap,
+       NOW() AS update_time
+FROM `user_tag_wide`
+WHERE `unmarried` = 1
+GROUP BY tag_id, tag_name UNION ALL
+SELECT 15 AS tag_id, 'divorced' AS tag_name,
+       BITMAP_UNION(TO_BITMAP(customer_id)) AS tag_bitmap,
+       NOW() AS update_time
+FROM `user_tag_wide`
+WHERE `divorced` = 1
+GROUP BY tag_id, tag_name UNION ALL
+SELECT 16 AS tag_id, 'has_child' AS tag_name,
+       BITMAP_UNION(TO_BITMAP(customer_id)) AS tag_bitmap,
+       NOW() AS update_time
+FROM `user_tag_wide`
+WHERE `has_child` = 1
+GROUP BY tag_id, tag_name UNION ALL
+SELECT 17 AS tag_id, 'has_house' AS tag_name,
+       BITMAP_UNION(TO_BITMAP(customer_id)) AS tag_bitmap,
+       NOW() AS update_time
+FROM `user_tag_wide`
+WHERE `has_house` = 1
+GROUP BY tag_id, tag_name UNION ALL
+SELECT 18 AS tag_id, 'has_car' AS tag_name,
+       BITMAP_UNION(TO_BITMAP(customer_id)) AS tag_bitmap,
+       NOW() AS update_time
+FROM `user_tag_wide`
+WHERE `has_car` = 1
+GROUP BY tag_id, tag_name UNION ALL
+SELECT 19 AS tag_id, 'local_hukou' AS tag_name,
+       BITMAP_UNION(TO_BITMAP(customer_id)) AS tag_bitmap,
+       NOW() AS update_time
+FROM `user_tag_wide`
+WHERE `local_hukou` = 1
+GROUP BY tag_id, tag_name UNION ALL
+SELECT 20 AS tag_id, 'has_social_security' AS tag_name,
+       BITMAP_UNION(TO_BITMAP(customer_id)) AS tag_bitmap,
+       NOW() AS update_time
+FROM `user_tag_wide`
+WHERE `has_social_security` = 1
+GROUP BY tag_id, tag_name UNION ALL
+SELECT 21 AS tag_id, 'has_fund' AS tag_name,
+       BITMAP_UNION(TO_BITMAP(customer_id)) AS tag_bitmap,
+       NOW() AS update_time
+FROM `user_tag_wide`
+WHERE `has_fund` = 1
+GROUP BY tag_id, tag_name UNION ALL
+SELECT 22 AS tag_id, 'education_bachelor' AS tag_name,
+       BITMAP_UNION(TO_BITMAP(customer_id)) AS tag_bitmap,
+       NOW() AS update_time
+FROM `user_tag_wide`
+WHERE `education_bachelor` = 1
+GROUP BY tag_id, tag_name UNION ALL
+SELECT 23 AS tag_id, 'education_college' AS tag_name,
+       BITMAP_UNION(TO_BITMAP(customer_id)) AS tag_bitmap,
+       NOW() AS update_time
+FROM `user_tag_wide`
+WHERE `education_college` = 1
+GROUP BY tag_id, tag_name UNION ALL
+SELECT 24 AS tag_id, 'education_high' AS tag_name,
+       BITMAP_UNION(TO_BITMAP(customer_id)) AS tag_bitmap,
+       NOW() AS update_time
+FROM `user_tag_wide`
+WHERE `education_high` = 1
+GROUP BY tag_id, tag_name UNION ALL
+SELECT 30 AS tag_id, 'income_under_5k' AS tag_name,
+       BITMAP_UNION(TO_BITMAP(customer_id)) AS tag_bitmap,
+       NOW() AS update_time
+FROM `user_tag_wide`
+WHERE `income_under_5k` = 1
+GROUP BY tag_id, tag_name UNION ALL
+SELECT 31 AS tag_id, 'income_5k_1w' AS tag_name,
+       BITMAP_UNION(TO_BITMAP(customer_id)) AS tag_bitmap,
+       NOW() AS update_time
+FROM `user_tag_wide`
+WHERE `income_5k_1w` = 1
+GROUP BY tag_id, tag_name UNION ALL
+SELECT 32 AS tag_id, 'income_1w_2w' AS tag_name,
+       BITMAP_UNION(TO_BITMAP(customer_id)) AS tag_bitmap,
+       NOW() AS update_time
+FROM `user_tag_wide`
+WHERE `income_1w_2w` = 1
+GROUP BY tag_id, tag_name UNION ALL
+SELECT 33 AS tag_id, 'income_2w_5w' AS tag_name,
+       BITMAP_UNION(TO_BITMAP(customer_id)) AS tag_bitmap,
+       NOW() AS update_time
+FROM `user_tag_wide`
+WHERE `income_2w_5w` = 1
+GROUP BY tag_id, tag_name UNION ALL
+SELECT 34 AS tag_id, 'income_over_5w' AS tag_name,
+       BITMAP_UNION(TO_BITMAP(customer_id)) AS tag_bitmap,
+       NOW() AS update_time
+FROM `user_tag_wide`
+WHERE `income_over_5w` = 1
+GROUP BY tag_id, tag_name UNION ALL
+SELECT 35 AS tag_id, 'asset_under_10w' AS tag_name,
+       BITMAP_UNION(TO_BITMAP(customer_id)) AS tag_bitmap,
+       NOW() AS update_time
+FROM `user_tag_wide`
+WHERE `asset_under_10w` = 1
+GROUP BY tag_id, tag_name UNION ALL
+SELECT 36 AS tag_id, 'asset_10w_50w' AS tag_name,
+       BITMAP_UNION(TO_BITMAP(customer_id)) AS tag_bitmap,
+       NOW() AS update_time
+FROM `user_tag_wide`
+WHERE `asset_10w_50w` = 1
+GROUP BY tag_id, tag_name UNION ALL
+SELECT 37 AS tag_id, 'asset_50w_100w' AS tag_name,
+       BITMAP_UNION(TO_BITMAP(customer_id)) AS tag_bitmap,
+       NOW() AS update_time
+FROM `user_tag_wide`
+WHERE `asset_50w_100w` = 1
+GROUP BY tag_id, tag_name UNION ALL
+SELECT 38 AS tag_id, 'asset_100w_500w' AS tag_name,
+       BITMAP_UNION(TO_BITMAP(customer_id)) AS tag_bitmap,
+       NOW() AS update_time
+FROM `user_tag_wide`
+WHERE `asset_100w_500w` = 1
+GROUP BY tag_id, tag_name UNION ALL
+SELECT 39 AS tag_id, 'asset_500w_1000w' AS tag_name,
+       BITMAP_UNION(TO_BITMAP(customer_id)) AS tag_bitmap,
+       NOW() AS update_time
+FROM `user_tag_wide`
+WHERE `asset_500w_1000w` = 1
+GROUP BY tag_id, tag_name UNION ALL
+SELECT 40 AS tag_id, 'asset_over_1000w' AS tag_name,
+       BITMAP_UNION(TO_BITMAP(customer_id)) AS tag_bitmap,
+       NOW() AS update_time
+FROM `user_tag_wide`
+WHERE `asset_over_1000w` = 1
+GROUP BY tag_id, tag_name UNION ALL
+SELECT 41 AS tag_id, 'high_net_worth' AS tag_name,
+       BITMAP_UNION(TO_BITMAP(customer_id)) AS tag_bitmap,
+       NOW() AS update_time
+FROM `user_tag_wide`
+WHERE `high_net_worth` = 1
+GROUP BY tag_id, tag_name UNION ALL
+SELECT 42 AS tag_id, 'ultra_high_net' AS tag_name,
+       BITMAP_UNION(TO_BITMAP(customer_id)) AS tag_bitmap,
+       NOW() AS update_time
+FROM `user_tag_wide`
+WHERE `ultra_high_net` = 1
+GROUP BY tag_id, tag_name UNION ALL
+SELECT 43 AS tag_id, 'potential_client' AS tag_name,
+       BITMAP_UNION(TO_BITMAP(customer_id)) AS tag_bitmap,
+       NOW() AS update_time
+FROM `user_tag_wide`
+WHERE `potential_client` = 1
+GROUP BY tag_id, tag_name UNION ALL
+SELECT 44 AS tag_id, 'normal_client' AS tag_name,
+       BITMAP_UNION(TO_BITMAP(customer_id)) AS tag_bitmap,
+       NOW() AS update_time
+FROM `user_tag_wide`
+WHERE `normal_client` = 1
+GROUP BY tag_id, tag_name UNION ALL
+SELECT 50 AS tag_id, 'has_financial' AS tag_name,
+       BITMAP_UNION(TO_BITMAP(customer_id)) AS tag_bitmap,
+       NOW() AS update_time
+FROM `user_tag_wide`
+WHERE `has_financial` = 1
+GROUP BY tag_id, tag_name UNION ALL
+SELECT 51 AS tag_id, 'has_fund_product' AS tag_name,
+       BITMAP_UNION(TO_BITMAP(customer_id)) AS tag_bitmap,
+       NOW() AS update_time
+FROM `user_tag_wide`
+WHERE `has_fund_product` = 1
+GROUP BY tag_id, tag_name UNION ALL
+SELECT 52 AS tag_id, 'has_stock' AS tag_name,
+       BITMAP_UNION(TO_BITMAP(customer_id)) AS tag_bitmap,
+       NOW() AS update_time
+FROM `user_tag_wide`
+WHERE `has_stock` = 1
+GROUP BY tag_id, tag_name UNION ALL
+SELECT 53 AS tag_id, 'has_insurance' AS tag_name,
+       BITMAP_UNION(TO_BITMAP(customer_id)) AS tag_bitmap,
+       NOW() AS update_time
+FROM `user_tag_wide`
+WHERE `has_insurance` = 1
+GROUP BY tag_id, tag_name UNION ALL
+SELECT 54 AS tag_id, 'has_bonds' AS tag_name,
+       BITMAP_UNION(TO_BITMAP(customer_id)) AS tag_bitmap,
+       NOW() AS update_time
+FROM `user_tag_wide`
+WHERE `has_bonds` = 1
+GROUP BY tag_id, tag_name UNION ALL
+SELECT 55 AS tag_id, 'has_gold' AS tag_name,
+       BITMAP_UNION(TO_BITMAP(customer_id)) AS tag_bitmap,
+       NOW() AS update_time
+FROM `user_tag_wide`
+WHERE `has_gold` = 1
+GROUP BY tag_id, tag_name UNION ALL
+SELECT 56 AS tag_id, 'has_loan' AS tag_name,
+       BITMAP_UNION(TO_BITMAP(customer_id)) AS tag_bitmap,
+       NOW() AS update_time
+FROM `user_tag_wide`
+WHERE `has_loan` = 1
+GROUP BY tag_id, tag_name UNION ALL
+SELECT 57 AS tag_id, 'has_housing_loan' AS tag_name,
+       BITMAP_UNION(TO_BITMAP(customer_id)) AS tag_bitmap,
+       NOW() AS update_time
+FROM `user_tag_wide`
+WHERE `has_housing_loan` = 1
+GROUP BY tag_id, tag_name UNION ALL
+SELECT 58 AS tag_id, 'has_car_loan' AS tag_name,
+       BITMAP_UNION(TO_BITMAP(customer_id)) AS tag_bitmap,
+       NOW() AS update_time
+FROM `user_tag_wide`
+WHERE `has_car_loan` = 1
+GROUP BY tag_id, tag_name UNION ALL
+SELECT 59 AS tag_id, 'has_consumer_loan' AS tag_name,
+       BITMAP_UNION(TO_BITMAP(customer_id)) AS tag_bitmap,
+       NOW() AS update_time
+FROM `user_tag_wide`
+WHERE `has_consumer_loan` = 1
+GROUP BY tag_id, tag_name UNION ALL
+SELECT 60 AS tag_id, 'active_7d' AS tag_name,
+       BITMAP_UNION(TO_BITMAP(customer_id)) AS tag_bitmap,
+       NOW() AS update_time
+FROM `user_tag_wide`
+WHERE `active_7d` = 1
+GROUP BY tag_id, tag_name UNION ALL
+SELECT 61 AS tag_id, 'active_30d' AS tag_name,
+       BITMAP_UNION(TO_BITMAP(customer_id)) AS tag_bitmap,
+       NOW() AS update_time
+FROM `user_tag_wide`
+WHERE `active_30d` = 1
+GROUP BY tag_id, tag_name UNION ALL
+SELECT 62 AS tag_id, 'inactive_30d' AS tag_name,
+       BITMAP_UNION(TO_BITMAP(customer_id)) AS tag_bitmap,
+       NOW() AS update_time
+FROM `user_tag_wide`
+WHERE `inactive_30d` = 1
+GROUP BY tag_id, tag_name UNION ALL
+SELECT 63 AS tag_id, 'trans_high_freq' AS tag_name,
+       BITMAP_UNION(TO_BITMAP(customer_id)) AS tag_bitmap,
+       NOW() AS update_time
+FROM `user_tag_wide`
+WHERE `trans_high_freq` = 1
+GROUP BY tag_id, tag_name UNION ALL
+SELECT 64 AS tag_id, 'big_transactor' AS tag_name,
+       BITMAP_UNION(TO_BITMAP(customer_id)) AS tag_bitmap,
+       NOW() AS update_time
+FROM `user_tag_wide`
+WHERE `big_transactor` = 1
+GROUP BY tag_id, tag_name UNION ALL
+SELECT 65 AS tag_id, 'mobile_user' AS tag_name,
+       BITMAP_UNION(TO_BITMAP(customer_id)) AS tag_bitmap,
+       NOW() AS update_time
+FROM `user_tag_wide`
+WHERE `mobile_user` = 1
+GROUP BY tag_id, tag_name UNION ALL
+SELECT 66 AS tag_id, 'web_user' AS tag_name,
+       BITMAP_UNION(TO_BITMAP(customer_id)) AS tag_bitmap,
+       NOW() AS update_time
+FROM `user_tag_wide`
+WHERE `web_user` = 1
+GROUP BY tag_id, tag_name UNION ALL
+SELECT 70 AS tag_id, 'high_response' AS tag_name,
+       BITMAP_UNION(TO_BITMAP(customer_id)) AS tag_bitmap,
+       NOW() AS update_time
+FROM `user_tag_wide`
+WHERE `high_response` = 1
+GROUP BY tag_id, tag_name UNION ALL
+SELECT 71 AS tag_id, 'low_response' AS tag_name,
+       BITMAP_UNION(TO_BITMAP(customer_id)) AS tag_bitmap,
+       NOW() AS update_time
+FROM `user_tag_wide`
+WHERE `low_response` = 1
+GROUP BY tag_id, tag_name UNION ALL
+SELECT 72 AS tag_id, 'marketing_sensitive' AS tag_name,
+       BITMAP_UNION(TO_BITMAP(customer_id)) AS tag_bitmap,
+       NOW() AS update_time
+FROM `user_tag_wide`
+WHERE `marketing_sensitive` = 1
+GROUP BY tag_id, tag_name UNION ALL
+SELECT 73 AS tag_id, 'apply_loan' AS tag_name,
+       BITMAP_UNION(TO_BITMAP(customer_id)) AS tag_bitmap,
+       NOW() AS update_time
+FROM `user_tag_wide`
+WHERE `apply_loan` = 1
+GROUP BY tag_id, tag_name UNION ALL
+SELECT 74 AS tag_id, 'buy_financing' AS tag_name,
+       BITMAP_UNION(TO_BITMAP(customer_id)) AS tag_bitmap,
+       NOW() AS update_time
+FROM `user_tag_wide`
+WHERE `buy_financing` = 1
+GROUP BY tag_id, tag_name;
+
 -- Table: user_wide
 TRUNCATE TABLE user_wide;
 INSERT INTO user_wide (`user_id`, `update_date`, `user_name`, `id_card`, `phone`, `gender`, `age`, `age_group`, `city`, `province`, `education`, `occupation`, `register_date`, `asset_level`, `aum_total`, `deposit_amount`, `fund_amount`, `loan_amount`, `wm_amount`, `insurance_amount`, `has_credit_card`, `has_debit_card`, `has_mortgage`, `product_count`, `credit_score`, `credit_grade`, `risk_level`, `preferred_channel`, `app_login_30d`, `app_last_login`, `active_level`, `lifecycle_stage`, `churn_prob`, `clv_score`, `log_tags`, `anomaly_flag`, `created_at`, `updated_at`, `profile_attr_001`, `profile_attr_002`, `profile_attr_003`, `profile_attr_004`, `profile_attr_005`, `profile_attr_006`, `profile_attr_007`, `profile_attr_008`, `profile_attr_009`, `profile_attr_010`, `profile_attr_011`, `profile_attr_012`, `profile_attr_013`, `profile_attr_014`, `profile_attr_015`, `profile_attr_016`, `profile_attr_017`, `profile_attr_018`, `profile_attr_019`, `profile_attr_020`, `profile_attr_021`, `profile_attr_022`, `profile_attr_023`, `profile_attr_024`, `profile_attr_025`, `profile_attr_026`, `profile_attr_027`, `profile_attr_028`, `profile_attr_029`, `profile_attr_030`, `profile_attr_031`, `profile_attr_032`, `profile_attr_033`, `profile_attr_034`, `profile_attr_035`, `profile_attr_036`, `profile_attr_037`, `profile_attr_038`, `profile_attr_039`, `profile_attr_040`, `profile_attr_041`, `profile_attr_042`, `profile_attr_043`, `profile_attr_044`, `profile_attr_045`, `profile_attr_046`, `profile_attr_047`, `profile_attr_048`, `profile_attr_049`, `profile_attr_050`, `profile_attr_051`, `profile_attr_052`, `profile_attr_053`, `profile_attr_054`, `profile_attr_055`, `profile_attr_056`, `profile_attr_057`, `profile_attr_058`, `profile_attr_059`, `profile_attr_060`, `profile_attr_061`, `profile_attr_062`, `profile_attr_063`, `profile_attr_064`, `profile_attr_065`, `profile_attr_066`, `profile_attr_067`, `profile_attr_068`, `profile_attr_069`, `profile_attr_070`, `profile_attr_071`, `profile_attr_072`, `profile_attr_073`, `profile_attr_074`, `profile_attr_075`, `profile_attr_076`, `profile_attr_077`, `profile_attr_078`, `profile_attr_079`, `profile_attr_080`, `profile_attr_081`, `profile_attr_082`, `profile_attr_083`, `profile_attr_084`, `profile_attr_085`, `profile_attr_086`, `profile_attr_087`, `profile_attr_088`, `profile_attr_089`, `profile_attr_090`, `profile_attr_091`, `profile_attr_092`, `profile_attr_093`, `profile_attr_094`, `profile_attr_095`, `profile_attr_096`, `profile_attr_097`, `profile_attr_098`, `profile_attr_099`, `profile_attr_100`, `profile_attr_101`, `profile_attr_102`, `profile_attr_103`, `profile_attr_104`, `profile_attr_105`, `profile_attr_106`, `profile_attr_107`, `profile_attr_108`, `profile_attr_109`, `profile_attr_110`, `profile_attr_111`, `profile_attr_112`, `profile_attr_113`, `profile_attr_114`, `profile_attr_115`, `profile_attr_116`, `profile_attr_117`, `profile_attr_118`, `profile_attr_119`, `profile_attr_120`, `profile_attr_121`, `profile_attr_122`, `profile_attr_123`, `profile_attr_124`, `profile_attr_125`, `profile_attr_126`, `profile_attr_127`, `profile_attr_128`, `profile_attr_129`, `profile_attr_130`, `profile_attr_131`, `profile_attr_132`, `profile_attr_133`, `profile_attr_134`, `profile_attr_135`, `profile_attr_136`, `profile_attr_137`, `profile_attr_138`, `profile_attr_139`, `profile_attr_140`, `profile_attr_141`, `profile_attr_142`, `profile_attr_143`, `profile_attr_144`, `profile_attr_145`, `profile_attr_146`, `profile_attr_147`, `profile_attr_148`, `profile_attr_149`, `profile_attr_150`, `profile_attr_151`, `profile_attr_152`, `profile_attr_153`, `profile_attr_154`, `profile_attr_155`, `profile_attr_156`, `profile_attr_157`, `profile_attr_158`, `profile_attr_159`, `profile_attr_160`, `profile_attr_161`, `profile_attr_162`, `profile_attr_163`, `profile_attr_164`, `profile_attr_165`, `profile_attr_166`, `profile_attr_167`, `profile_attr_168`, `profile_attr_169`, `profile_attr_170`, `profile_attr_171`, `profile_attr_172`, `profile_attr_173`, `profile_attr_174`, `profile_attr_175`, `profile_attr_176`, `profile_attr_177`, `profile_attr_178`, `profile_attr_179`, `profile_attr_180`, `profile_attr_181`, `profile_attr_182`, `profile_attr_183`, `profile_attr_184`, `profile_attr_185`, `profile_attr_186`, `profile_attr_187`, `profile_attr_188`, `profile_attr_189`, `profile_attr_190`, `profile_attr_191`, `profile_attr_192`, `profile_attr_193`, `profile_attr_194`, `profile_attr_195`, `profile_attr_196`, `profile_attr_197`, `profile_attr_198`, `profile_attr_199`, `profile_attr_200`, `profile_attr_201`, `profile_attr_202`, `profile_attr_203`, `profile_attr_204`, `profile_attr_205`, `profile_attr_206`, `profile_attr_207`, `profile_attr_208`, `profile_attr_209`, `profile_attr_210`, `profile_attr_211`, `profile_attr_212`, `profile_attr_213`, `profile_attr_214`, `profile_attr_215`, `profile_attr_216`, `profile_attr_217`, `profile_attr_218`, `profile_attr_219`, `profile_attr_220`, `profile_attr_221`, `profile_attr_222`, `profile_attr_223`, `profile_attr_224`, `profile_attr_225`, `profile_attr_226`, `profile_attr_227`, `profile_attr_228`, `profile_attr_229`, `profile_attr_230`, `profile_attr_231`, `profile_attr_232`, `profile_attr_233`, `profile_attr_234`, `profile_attr_235`, `profile_attr_236`, `profile_attr_237`, `profile_attr_238`, `profile_attr_239`, `profile_attr_240`, `profile_attr_241`, `profile_attr_242`, `profile_attr_243`, `profile_attr_244`, `profile_attr_245`, `profile_attr_246`, `profile_attr_247`, `profile_attr_248`, `profile_attr_249`, `profile_attr_250`, `profile_attr_251`, `profile_attr_252`, `profile_attr_253`, `profile_attr_254`, `profile_attr_255`, `profile_attr_256`, `profile_attr_257`, `profile_attr_258`, `profile_attr_259`, `profile_attr_260`, `profile_attr_261`, `profile_attr_262`, `profile_attr_263`, `profile_attr_264`, `profile_attr_265`, `profile_attr_266`, `profile_attr_267`, `profile_attr_268`, `profile_attr_269`, `profile_attr_270`, `profile_attr_271`, `profile_attr_272`, `profile_attr_273`, `profile_attr_274`, `profile_attr_275`, `profile_attr_276`, `profile_attr_277`, `profile_attr_278`, `profile_attr_279`, `profile_attr_280`, `profile_attr_281`, `profile_attr_282`, `profile_attr_283`, `profile_attr_284`, `profile_attr_285`, `profile_attr_286`, `profile_attr_287`, `profile_attr_288`, `profile_attr_289`, `profile_attr_290`, `profile_attr_291`, `profile_attr_292`, `profile_attr_293`, `profile_attr_294`, `profile_attr_295`, `profile_attr_296`, `profile_attr_297`, `profile_attr_298`, `profile_attr_299`, `profile_attr_300`, `profile_attr_301`, `profile_attr_302`, `profile_attr_303`, `profile_attr_304`, `profile_attr_305`, `profile_attr_306`, `profile_attr_307`, `profile_attr_308`, `profile_attr_309`, `profile_attr_310`, `profile_attr_311`, `profile_attr_312`, `profile_attr_313`, `profile_attr_314`, `profile_attr_315`, `profile_attr_316`, `profile_attr_317`, `profile_attr_318`, `profile_attr_319`, `profile_attr_320`, `profile_attr_321`, `profile_attr_322`, `profile_attr_323`, `profile_attr_324`, `profile_attr_325`, `profile_attr_326`, `profile_attr_327`, `profile_attr_328`, `profile_attr_329`, `profile_attr_330`, `profile_attr_331`, `profile_attr_332`, `profile_attr_333`, `profile_attr_334`, `profile_attr_335`, `profile_attr_336`, `profile_attr_337`, `profile_attr_338`, `profile_attr_339`, `profile_attr_340`, `profile_attr_341`, `profile_attr_342`, `profile_attr_343`, `profile_attr_344`, `profile_attr_345`, `profile_attr_346`, `profile_attr_347`, `profile_attr_348`, `profile_attr_349`, `profile_attr_350`, `profile_attr_351`, `profile_attr_352`, `profile_attr_353`, `profile_attr_354`, `profile_attr_355`, `profile_attr_356`, `profile_attr_357`, `profile_attr_358`, `profile_attr_359`, `profile_attr_360`, `profile_attr_361`, `profile_attr_362`, `profile_attr_363`, `profile_attr_364`, `profile_attr_365`, `profile_attr_366`, `profile_attr_367`, `profile_attr_368`, `profile_attr_369`, `profile_attr_370`, `profile_attr_371`, `profile_attr_372`, `profile_attr_373`, `profile_attr_374`, `profile_attr_375`, `profile_attr_376`, `profile_attr_377`, `profile_attr_378`, `profile_attr_379`, `profile_attr_380`, `profile_attr_381`, `profile_attr_382`, `profile_attr_383`, `profile_attr_384`, `profile_attr_385`, `profile_attr_386`, `profile_attr_387`, `profile_attr_388`, `profile_attr_389`, `profile_attr_390`, `profile_attr_391`, `profile_attr_392`, `profile_attr_393`, `profile_attr_394`, `profile_attr_395`, `profile_attr_396`, `profile_attr_397`, `profile_attr_398`, `profile_attr_399`, `profile_attr_400`, `profile_attr_401`, `profile_attr_402`, `profile_attr_403`, `profile_attr_404`, `profile_attr_405`, `profile_attr_406`, `profile_attr_407`, `profile_attr_408`, `profile_attr_409`, `profile_attr_410`, `profile_attr_411`, `profile_attr_412`, `profile_attr_413`, `profile_attr_414`, `profile_attr_415`, `profile_attr_416`, `profile_attr_417`, `profile_attr_418`, `profile_attr_419`, `profile_attr_420`, `profile_attr_421`, `profile_attr_422`, `profile_attr_423`, `profile_attr_424`, `profile_attr_425`, `profile_attr_426`, `profile_attr_427`, `profile_attr_428`, `profile_attr_429`, `profile_attr_430`, `profile_attr_431`, `profile_attr_432`, `profile_attr_433`, `profile_attr_434`, `profile_attr_435`, `profile_attr_436`, `profile_attr_437`, `profile_attr_438`, `profile_attr_439`, `profile_attr_440`, `profile_attr_441`, `profile_attr_442`, `profile_attr_443`, `profile_attr_444`, `profile_attr_445`, `profile_attr_446`, `profile_attr_447`, `profile_attr_448`, `profile_attr_449`, `profile_attr_450`, `profile_attr_451`, `profile_attr_452`, `profile_attr_453`, `profile_attr_454`, `profile_attr_455`, `profile_attr_456`, `profile_attr_457`, `profile_attr_458`, `profile_attr_459`, `profile_attr_460`, `profile_attr_461`, `profile_attr_462`) VALUES

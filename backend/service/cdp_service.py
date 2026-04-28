@@ -168,6 +168,131 @@ class WideQueryService:
 # 2. 宽表 -> 高表 ETL
 # ══════════════════════════════════════════════════════
 class EtlService:
+    async def ensure_tall_ready(self) -> Dict:
+        """Ensure bitmap wide/tall tables exist and have data for old deployments."""
+        await execute_write(f"""
+            CREATE TABLE IF NOT EXISTS {CDP_DB}.user_tag_wide (
+              customer_id BIGINT NOT NULL COMMENT 'Customer ID',
+              update_time DATETIME COMMENT 'Update time',
+              male TINYINT DEFAULT '0' COMMENT '男性',
+              female TINYINT DEFAULT '0' COMMENT '女性',
+              age_under_20 TINYINT DEFAULT '0' COMMENT '年龄<20',
+              age_20_25 TINYINT DEFAULT '0' COMMENT '年龄20-25',
+              age_26_30 TINYINT DEFAULT '0' COMMENT '年龄26-30',
+              age_31_35 TINYINT DEFAULT '0' COMMENT '年龄31-35',
+              age_36_40 TINYINT DEFAULT '0' COMMENT '年龄36-40',
+              age_41_45 TINYINT DEFAULT '0' COMMENT '年龄41-45',
+              age_46_50 TINYINT DEFAULT '0' COMMENT '年龄46-50',
+              age_51_55 TINYINT DEFAULT '0' COMMENT '年龄51-55',
+              age_56_60 TINYINT DEFAULT '0' COMMENT '年龄56-60',
+              age_over_60 TINYINT DEFAULT '0' COMMENT '年龄>60',
+              married TINYINT DEFAULT '0' COMMENT '已婚',
+              unmarried TINYINT DEFAULT '0' COMMENT '未婚',
+              divorced TINYINT DEFAULT '0' COMMENT '离异',
+              has_child TINYINT DEFAULT '0' COMMENT '有子女',
+              has_house TINYINT DEFAULT '0' COMMENT '有房',
+              has_car TINYINT DEFAULT '0' COMMENT '有车',
+              local_hukou TINYINT DEFAULT '0' COMMENT '本地户籍',
+              has_social_security TINYINT DEFAULT '0' COMMENT '缴纳社保',
+              has_fund TINYINT DEFAULT '0' COMMENT '缴纳公积金',
+              education_bachelor TINYINT DEFAULT '0' COMMENT '本科及以上',
+              education_college TINYINT DEFAULT '0' COMMENT '大专',
+              education_high TINYINT DEFAULT '0' COMMENT '高中及以下',
+              income_under_5k TINYINT DEFAULT '0' COMMENT '月收入<5k',
+              income_5k_1w TINYINT DEFAULT '0' COMMENT '月收入5k-1w',
+              income_1w_2w TINYINT DEFAULT '0' COMMENT '月收入1w-2w',
+              income_2w_5w TINYINT DEFAULT '0' COMMENT '月收入2w-5w',
+              income_over_5w TINYINT DEFAULT '0' COMMENT '月收入>5w',
+              asset_under_10w TINYINT DEFAULT '0' COMMENT '资产<10w',
+              asset_10w_50w TINYINT DEFAULT '0' COMMENT '资产10w-50w',
+              asset_50w_100w TINYINT DEFAULT '0' COMMENT '资产50w-100w',
+              asset_100w_500w TINYINT DEFAULT '0' COMMENT '资产100w-500w',
+              asset_500w_1000w TINYINT DEFAULT '0' COMMENT '资产500w-1000w',
+              asset_over_1000w TINYINT DEFAULT '0' COMMENT '资产>1000w',
+              high_net_worth TINYINT DEFAULT '0' COMMENT '高净值',
+              ultra_high_net TINYINT DEFAULT '0' COMMENT '超高净值',
+              potential_client TINYINT DEFAULT '0' COMMENT '潜力客户',
+              normal_client TINYINT DEFAULT '0' COMMENT '普通客户',
+              has_financial TINYINT DEFAULT '0' COMMENT '持有理财',
+              has_fund_product TINYINT DEFAULT '0' COMMENT '持有基金',
+              has_stock TINYINT DEFAULT '0' COMMENT '持有股票',
+              has_insurance TINYINT DEFAULT '0' COMMENT '持有保险',
+              has_bonds TINYINT DEFAULT '0' COMMENT '持有国债',
+              has_gold TINYINT DEFAULT '0' COMMENT '持有贵金属',
+              has_loan TINYINT DEFAULT '0' COMMENT '有贷款',
+              has_housing_loan TINYINT DEFAULT '0' COMMENT '有房贷',
+              has_car_loan TINYINT DEFAULT '0' COMMENT '有车贷',
+              has_consumer_loan TINYINT DEFAULT '0' COMMENT '有消费贷',
+              active_7d TINYINT DEFAULT '0' COMMENT '7日活跃',
+              active_30d TINYINT DEFAULT '0' COMMENT '30日活跃',
+              inactive_30d TINYINT DEFAULT '0' COMMENT '30日不活跃',
+              trans_high_freq TINYINT DEFAULT '0' COMMENT '高交易频率',
+              big_transactor TINYINT DEFAULT '0' COMMENT '大额交易',
+              mobile_user TINYINT DEFAULT '0' COMMENT '手机银行用户',
+              web_user TINYINT DEFAULT '0' COMMENT '网银用户',
+              high_response TINYINT DEFAULT '0' COMMENT '高响应率',
+              low_response TINYINT DEFAULT '0' COMMENT '低响应率',
+              marketing_sensitive TINYINT DEFAULT '0' COMMENT '营销敏感',
+              apply_loan TINYINT DEFAULT '0' COMMENT '申请贷款',
+              buy_financing TINYINT DEFAULT '0' COMMENT '购买理财',
+              _reserved TINYINT DEFAULT '0' COMMENT 'Reserved flag'
+            ) ENGINE=OLAP
+            DUPLICATE KEY(customer_id)
+            DISTRIBUTED BY HASH(customer_id) BUCKETS 8
+            PROPERTIES ("replication_num" = "1")
+        """)
+        await execute_write(f"""
+            CREATE TABLE IF NOT EXISTS {CDP_DB}.t_customer_tags (
+              tag_id       BIGINT      NOT NULL COMMENT 'Tag ID',
+              tag_name     VARCHAR(64) NOT NULL COMMENT 'Tag column name',
+              tag_bitmap   BITMAP BITMAP_UNION COMMENT 'Customer bitmap',
+              update_time  DATETIME REPLACE COMMENT 'Last update time'
+            ) ENGINE=OLAP
+            AGGREGATE KEY(tag_id, tag_name)
+            DISTRIBUTED BY HASH(tag_id) BUCKETS 8
+            PROPERTIES ("replication_num" = "1")
+        """)
+
+        wide_row = await execute_one(f"SELECT COUNT(1) AS cnt FROM {CDP_DB}.user_tag_wide")
+        if int((wide_row or {}).get("cnt") or 0) == 0:
+            await execute_write(f"""
+                INSERT INTO {CDP_DB}.user_tag_wide (customer_id, update_time, male, female, age_under_20, age_20_25, age_26_30, age_31_35, age_36_40, age_41_45, age_46_50, age_51_55, age_56_60, age_over_60, married, unmarried, divorced, has_child, has_house, has_car, local_hukou, has_social_security, has_fund, education_bachelor, education_college, education_high, income_under_5k, income_5k_1w, income_1w_2w, income_2w_5w, income_over_5w, asset_under_10w, asset_10w_50w, asset_50w_100w, asset_100w_500w, asset_500w_1000w, asset_over_1000w, high_net_worth, ultra_high_net, potential_client, normal_client, has_financial, has_fund_product, has_stock, has_insurance, has_bonds, has_gold, has_loan, has_housing_loan, has_car_loan, has_consumer_loan, active_7d, active_30d, inactive_30d, trans_high_freq, big_transactor, mobile_user, web_user, high_response, low_response, marketing_sensitive, apply_loan, buy_financing) VALUES
+                (1001, '2026-04-02 09:01:00', 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0),
+                (1002, '2026-04-03 09:02:00', 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0),
+                (1003, '2026-04-04 09:03:00', 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0),
+                (1004, '2026-04-05 09:04:00', 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1),
+                (1005, '2026-04-06 09:05:00', 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0),
+                (1006, '2026-04-07 09:06:00', 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0),
+                (1007, '2026-04-08 09:07:00', 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0),
+                (1008, '2026-04-09 09:08:00', 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0),
+                (1009, '2026-04-10 09:09:00', 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1),
+                (1010, '2026-04-11 09:10:00', 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0),
+                (1011, '2026-04-12 09:11:00', 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0),
+                (1012, '2026-04-13 09:12:00', 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0),
+                (1013, '2026-04-14 09:13:00', 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0),
+                (1014, '2026-04-15 09:14:00', 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1),
+                (1015, '2026-04-16 09:15:00', 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0),
+                (1016, '2026-04-17 09:16:00', 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0),
+                (1017, '2026-04-18 09:17:00', 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
+                (1018, '2026-04-19 09:18:00', 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0),
+                (1019, '2026-04-20 09:19:00', 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1),
+                (1020, '2026-04-21 09:20:00', 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0),
+                (1021, '2026-04-22 09:21:00', 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0),
+                (1022, '2026-04-23 09:22:00', 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0),
+                (1023, '2026-04-24 09:23:00', 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0),
+                (1024, '2026-04-25 09:24:00', 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1),
+                (1025, '2026-04-26 09:25:00', 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0),
+                (1026, '2026-04-27 09:26:00', 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0),
+                (1027, '2026-04-28 09:27:00', 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0),
+                (1028, '2026-04-01 09:28:00', 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0),
+                (1029, '2026-04-02 09:29:00', 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1),
+                (1030, '2026-04-03 09:30:00', 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0)
+            """)
+
+        row = await execute_one(f"SELECT COUNT(1) AS cnt FROM {CDP_DB}.t_customer_tags")
+        if int((row or {}).get("cnt") or 0) == 0:
+            return await self.sync_wide_to_tall()
+        return {"success": True, "tag_rows": int(row.get("cnt") or 0)}
 
     async def sync_wide_to_tall(self) -> Dict:
         """
@@ -243,6 +368,10 @@ class BitmapOpsService:
         if not include_tag_ids:
             return {"crowd_size": 0}
 
+        ready = await EtlService().ensure_tall_ready()
+        if not ready.get("success"):
+            return {"crowd_size": 0, "message": ready.get("message") or "t_customer_tags is not ready"}
+
         inc_subs = [self._sub(tid) for tid in include_tag_ids]
         result_expr = (
             f"BITMAP_AND({', '.join(inc_subs)})"
@@ -292,6 +421,10 @@ class BitmapOpsService:
         tag_ids_b: List[int],
         operation: str = "AND",   # AND=交集 OR=并集 NOT=A差B
     ) -> Dict:
+        ready = await EtlService().ensure_tall_ready()
+        if not ready.get("success"):
+            return {"operation": operation, "size_a": 0, "size_b": 0, "size_result": 0, "message": ready.get("message")}
+
         def build_expr(ids):
             subs = [self._sub(tid) for tid in ids if tid]
             if not subs:
@@ -337,6 +470,7 @@ class BehaviorAnalysisService:
         """window_funnel() 漏斗分析，支持按高表标签过滤人群"""
         user_filter = ""
         if filter_tag_ids:
+            await EtlService().ensure_tall_ready()
             subs = [BitmapOpsService._sub(tid) for tid in filter_tag_ids]
             bmp_expr = f"BITMAP_AND({', '.join(subs)})" if len(subs) > 1 else subs[0]
             user_filter = f"AND user_id IN (SELECT t FROM (SELECT {bmp_expr} AS bm) tmp LATERAL VIEW EXPLODE_BITMAP(bm) tv AS t)"

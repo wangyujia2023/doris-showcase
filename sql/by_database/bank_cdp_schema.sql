@@ -1648,6 +1648,97 @@ PROPERTIES (
 "group_commit_data_bytes" = "134217728"
 );
 
+
+-- Table: t_customer_tags
+CREATE TABLE IF NOT EXISTS `t_customer_tags` (
+  `tag_id` bigint NOT NULL COMMENT "Tag ID",
+  `tag_name` varchar(64) NOT NULL COMMENT "Tag column name",
+  `tag_bitmap` bitmap BITMAP_UNION COMMENT "Customer bitmap",
+  `update_time` datetime REPLACE COMMENT "Last update time"
+) ENGINE=OLAP
+AGGREGATE KEY(`tag_id`, `tag_name`)
+COMMENT 'Customer tag tall table for bitmap operations'
+DISTRIBUTED BY HASH(`tag_id`) BUCKETS 8
+PROPERTIES (
+"replication_allocation" = "tag.location.default: 1"
+);
+
+-- Table: user_tag_wide
+CREATE TABLE IF NOT EXISTS `user_tag_wide` (
+  `customer_id` bigint NOT NULL COMMENT "Customer ID",
+  `update_time` datetime NULL COMMENT "Update time",
+  `male` tinyint NULL DEFAULT '0' COMMENT "男性",
+  `female` tinyint NULL DEFAULT '0' COMMENT "女性",
+  `age_under_20` tinyint NULL DEFAULT '0' COMMENT "年龄<20",
+  `age_20_25` tinyint NULL DEFAULT '0' COMMENT "年龄20-25",
+  `age_26_30` tinyint NULL DEFAULT '0' COMMENT "年龄26-30",
+  `age_31_35` tinyint NULL DEFAULT '0' COMMENT "年龄31-35",
+  `age_36_40` tinyint NULL DEFAULT '0' COMMENT "年龄36-40",
+  `age_41_45` tinyint NULL DEFAULT '0' COMMENT "年龄41-45",
+  `age_46_50` tinyint NULL DEFAULT '0' COMMENT "年龄46-50",
+  `age_51_55` tinyint NULL DEFAULT '0' COMMENT "年龄51-55",
+  `age_56_60` tinyint NULL DEFAULT '0' COMMENT "年龄56-60",
+  `age_over_60` tinyint NULL DEFAULT '0' COMMENT "年龄>60",
+  `married` tinyint NULL DEFAULT '0' COMMENT "已婚",
+  `unmarried` tinyint NULL DEFAULT '0' COMMENT "未婚",
+  `divorced` tinyint NULL DEFAULT '0' COMMENT "离异",
+  `has_child` tinyint NULL DEFAULT '0' COMMENT "有子女",
+  `has_house` tinyint NULL DEFAULT '0' COMMENT "有房",
+  `has_car` tinyint NULL DEFAULT '0' COMMENT "有车",
+  `local_hukou` tinyint NULL DEFAULT '0' COMMENT "本地户籍",
+  `has_social_security` tinyint NULL DEFAULT '0' COMMENT "缴纳社保",
+  `has_fund` tinyint NULL DEFAULT '0' COMMENT "缴纳公积金",
+  `education_bachelor` tinyint NULL DEFAULT '0' COMMENT "本科及以上",
+  `education_college` tinyint NULL DEFAULT '0' COMMENT "大专",
+  `education_high` tinyint NULL DEFAULT '0' COMMENT "高中及以下",
+  `income_under_5k` tinyint NULL DEFAULT '0' COMMENT "月收入<5k",
+  `income_5k_1w` tinyint NULL DEFAULT '0' COMMENT "月收入5k-1w",
+  `income_1w_2w` tinyint NULL DEFAULT '0' COMMENT "月收入1w-2w",
+  `income_2w_5w` tinyint NULL DEFAULT '0' COMMENT "月收入2w-5w",
+  `income_over_5w` tinyint NULL DEFAULT '0' COMMENT "月收入>5w",
+  `asset_under_10w` tinyint NULL DEFAULT '0' COMMENT "资产<10w",
+  `asset_10w_50w` tinyint NULL DEFAULT '0' COMMENT "资产10w-50w",
+  `asset_50w_100w` tinyint NULL DEFAULT '0' COMMENT "资产50w-100w",
+  `asset_100w_500w` tinyint NULL DEFAULT '0' COMMENT "资产100w-500w",
+  `asset_500w_1000w` tinyint NULL DEFAULT '0' COMMENT "资产500w-1000w",
+  `asset_over_1000w` tinyint NULL DEFAULT '0' COMMENT "资产>1000w",
+  `high_net_worth` tinyint NULL DEFAULT '0' COMMENT "高净值",
+  `ultra_high_net` tinyint NULL DEFAULT '0' COMMENT "超高净值",
+  `potential_client` tinyint NULL DEFAULT '0' COMMENT "潜力客户",
+  `normal_client` tinyint NULL DEFAULT '0' COMMENT "普通客户",
+  `has_financial` tinyint NULL DEFAULT '0' COMMENT "持有理财",
+  `has_fund_product` tinyint NULL DEFAULT '0' COMMENT "持有基金",
+  `has_stock` tinyint NULL DEFAULT '0' COMMENT "持有股票",
+  `has_insurance` tinyint NULL DEFAULT '0' COMMENT "持有保险",
+  `has_bonds` tinyint NULL DEFAULT '0' COMMENT "持有国债",
+  `has_gold` tinyint NULL DEFAULT '0' COMMENT "持有贵金属",
+  `has_loan` tinyint NULL DEFAULT '0' COMMENT "有贷款",
+  `has_housing_loan` tinyint NULL DEFAULT '0' COMMENT "有房贷",
+  `has_car_loan` tinyint NULL DEFAULT '0' COMMENT "有车贷",
+  `has_consumer_loan` tinyint NULL DEFAULT '0' COMMENT "有消费贷",
+  `active_7d` tinyint NULL DEFAULT '0' COMMENT "7日活跃",
+  `active_30d` tinyint NULL DEFAULT '0' COMMENT "30日活跃",
+  `inactive_30d` tinyint NULL DEFAULT '0' COMMENT "30日不活跃",
+  `trans_high_freq` tinyint NULL DEFAULT '0' COMMENT "高交易频率",
+  `big_transactor` tinyint NULL DEFAULT '0' COMMENT "大额交易",
+  `mobile_user` tinyint NULL DEFAULT '0' COMMENT "手机银行用户",
+  `web_user` tinyint NULL DEFAULT '0' COMMENT "网银用户",
+  `high_response` tinyint NULL DEFAULT '0' COMMENT "高响应率",
+  `low_response` tinyint NULL DEFAULT '0' COMMENT "低响应率",
+  `marketing_sensitive` tinyint NULL DEFAULT '0' COMMENT "营销敏感",
+  `apply_loan` tinyint NULL DEFAULT '0' COMMENT "申请贷款",
+  `buy_financing` tinyint NULL DEFAULT '0' COMMENT "购买理财",
+  `_reserved` tinyint NULL DEFAULT '0' COMMENT "Reserved flag"
+) ENGINE=OLAP
+DUPLICATE KEY(`customer_id`)
+COMMENT 'Customer tag wide table for CDP analysis'
+DISTRIBUTED BY HASH(`customer_id`) BUCKETS 8
+PROPERTIES (
+"replication_allocation" = "tag.location.default: 1",
+"storage_format" = "V2",
+"light_schema_change" = "true"
+);
+
 -- Table: user_wide
 DROP TABLE IF EXISTS `user_wide`;
 CREATE TABLE IF NOT EXISTS `user_wide` (

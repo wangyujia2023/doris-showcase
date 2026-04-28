@@ -82,7 +82,7 @@
         </el-form-item>
         <el-form-item :label="t('news.formLabelSector')" required>
           <el-select v-model="addForm.sector" :placeholder="t('news.formPhSector')">
-            <el-option v-for="s in sectors" :key="s" :label="s" :value="s" />
+            <el-option v-for="s in sectors" :key="s" :label="sectorLabel(s)" :value="s" />
           </el-select>
         </el-form-item>
       </el-form>
@@ -124,7 +124,7 @@
               <div class="list-hd">
                 <el-input v-model="keyword" :placeholder="t('news.searchPhrase')" size="small" clearable style="flex:1" @change="loadList" />
                 <el-select v-model="filterSector" size="small" :placeholder="t('news.filterSector')" clearable style="width:82px" @change="loadList">
-                  <el-option v-for="s in sectors" :key="s" :label="s" :value="s" />
+                  <el-option v-for="s in sectors" :key="s" :label="sectorLabel(s)" :value="s" />
                 </el-select>
                 <el-select v-model="filterSentiment" size="small" :placeholder="t('news.filterSentiment')" clearable style="width:80px" @change="loadList">
                   <el-option :label="t('news.sentimentPositive')" value="positive" />
@@ -528,7 +528,7 @@ const sqlVisible  = ref(false)
 const lastSql     = ref('')
 const activeTab   = ref('articles')
 const addDialogVisible = ref(false)
-const addForm     = ref({ title: '', content: '', source: '财联社', sector: '半导体' })
+const addForm     = ref({ title: '', content: '', source: 'Global Asset Review', sector: 'Macro' })
 
 const stats      = ref({ total: 0, summarized: 0, sentiment_done: 0, extracted: 0 })
 const articles   = ref([])
@@ -541,7 +541,7 @@ const keyword         = ref('')
 const filterSector    = ref('')
 const filterSentiment = ref('')
 
-const sectors = ['半导体', '新能源', '消费', '医药', '金融', '军工', '宏观', '化工', '传媒']
+const sectors = ['Macro', 'Financials', 'Semiconductors', 'Renewables', 'Consumer']
 
 const sectorMetrics = ref([])
 const signalData    = ref([])
@@ -598,6 +598,10 @@ function sentimentLabel(s) {
 }
 function sentimentEmoji(s) {
   return { positive: '📈', negative: '📉', neutral: '➖', mixed: '↕️' }[s] || ''
+}
+function sectorLabel(s) {
+  if (locale.value === 'en') return s
+  return { Macro: '宏观', Financials: '金融', Semiconductors: '半导体', Renewables: '新能源', Consumer: '消费' }[s] || s
 }
 function sectorClass(s) {
   const m = {
@@ -685,7 +689,7 @@ function showAddDialog() {
 }
 
 function resetAddForm() {
-  addForm.value = { title: '', content: '', source: '财联社', sector: '半导体' }
+  addForm.value = { title: '', content: '', source: 'Global Asset Review', sector: 'Macro' }
 }
 
 async function doAddManual() {
