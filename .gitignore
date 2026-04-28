@@ -1,20 +1,30 @@
 # Python
 venv/
+.venv/
 __pycache__/
 *.pyc
 *.pyo
 *.env
 .env
+*.log
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
 
 # Node / Vue
 node_modules/
 dist/
 .vuepress/dist
+frontend/node_modules/
+frontend/dist/
 
 # IDE
 .vscode/
 .idea/
 .DS_Store
 
-# Claude
+# Local agent/editor state
 .claude/
+.codex/
+.cursor/
+.windsurf/
