@@ -587,11 +587,20 @@ import { GridComponent, TooltipComponent, LegendComponent } from 'echarts/compon
 import { CanvasRenderer } from 'echarts/renderers'
 import VChart from 'vue-echarts'
 import axios from 'axios'
+import { ElMessage } from 'element-plus'
 import { t, locale } from '@/i18n'
 
 use([FunnelChart, BarChart, GridComponent, TooltipComponent, LegendComponent, CanvasRenderer])
 
 const BASE = '/api'
+const apiClient = axios.create({ baseURL: BASE, timeout: 30000 })
+apiClient.interceptors.response.use(
+  res => res,
+  err => {
+    ElMessage.error(err.response?.data?.detail || err.message || '请求超时或服务异常')
+    return Promise.reject(err)
+  }
+)
 const route = useRoute()
 const activeTab = ref(route.query.tab || route.meta?.defaultTab || 'crowd')
 
@@ -600,7 +609,7 @@ const tagMeta = ref([])
 const allCats = computed(() => tagMeta.value.map(g => g.category))
 
 async function loadTagMeta() {
-  const { data } = await axios.get(`${BASE}/cdp/wide/tag-meta`)
+  const { data } = await apiClient.get('/cdp/wide/tag-meta')
   tagMeta.value = data
 }
 function groupLabel(cat) {
@@ -662,7 +671,7 @@ function toggleExclude(tid) {
 async function computeBitmapCrowd() {
   bitmapLoading.value = true
   try {
-    const { data } = await axios.post(`${BASE}/cdp/bitmap/compute`, {
+    const { data } = await apiClient.post('/cdp/bitmap/compute', {
       include_tag_ids: includeTagIds.value,
       exclude_tag_ids: excludeTagIds.value,
     })
@@ -673,7 +682,7 @@ async function computeBitmapCrowd() {
 }
 
 async function saveCrowd() {
-  const { data } = await axios.post(`${BASE}/cdp/crowd/save`, {
+  const { data } = await apiClient.post('/cdp/crowd/save', {
     name: crowdName.value,
     desc: crowdDesc.value,
     include_tag_ids: includeTagIds.value,
@@ -686,13 +695,13 @@ async function saveCrowd() {
 }
 
 async function deleteCrowd(id) {
-  await axios.delete(`${BASE}/cdp/crowd/${id}`)
+  await apiClient.delete(`/cdp/crowd/${id}`)
   crowdList.value = crowdList.value.filter(p => p.crowd_id !== id)
   compareIds.value = compareIds.value.filter(x => x !== id)
 }
 
 async function loadCrowdList() {
-  const { data } = await axios.get(`${BASE}/cdp/crowd/list`)
+  const { data } = await apiClient.get('/cdp/crowd/list')
   crowdList.value = data
 }
 
@@ -700,7 +709,7 @@ async function runCompare() {
   if (compareIds.value.length !== 2) return
   compareLoading.value = true
   try {
-    const { data } = await axios.post(`${BASE}/cdp/crowd/compare`, {
+    const { data } = await apiClient.post('/cdp/crowd/compare', {
       id_a: compareIds.value[0],
       id_b: compareIds.value[1],
     })
@@ -725,7 +734,7 @@ const tgiCats    = computed(() => [...new Set(tgiData.value.map(x => x.category)
 async function runTgi() {
   tgiLoading.value = true
   try {
-    const { data } = await axios.post(`${BASE}/cdp/portrait/tgi`, { include_tag_ids: tgiTagIds.value })
+    const { data } = await apiClient.post('/cdp/portrait/tgi', { include_tag_ids: tgiTagIds.value })
     tgiData.value = data
   } finally {
     tgiLoading.value = false
@@ -773,7 +782,7 @@ function crossColor(pct, max) {
 async function runCross() {
   crossLoading.value = true
   try {
-    const { data } = await axios.post(`${BASE}/cdp/portrait/cross`, { cat1: crossCat1.value, cat2: crossCat2.value })
+    const { data } = await apiClient.post('/cdp/portrait/cross', { cat1: crossCat1.value, cat2: crossCat2.value })
     crossData.value = data
   } finally {
     crossLoading.value = false
@@ -788,7 +797,7 @@ const geoData    = ref(null)
 async function runGeo() {
   geoLoading.value = true
   try {
-    const { data } = await axios.post(`${BASE}/cdp/portrait/geo`, { include_tag_ids: geoTagIds.value })
+    const { data } = await apiClient.post('/cdp/portrait/geo', { include_tag_ids: geoTagIds.value })
     geoData.value = data
   } finally {
     geoLoading.value = false
@@ -835,7 +844,7 @@ function toggleProvince(p) {
 async function runTargeting() {
   mapLoading.value = true
   try {
-    const { data } = await axios.post(`${BASE}/cdp/portrait/targeting`, { provinces: selectedProvinces.value })
+    const { data } = await apiClient.post('/cdp/portrait/targeting', { provinces: selectedProvinces.value })
     targetingData.value = data
   } finally {
     mapLoading.value = false
@@ -873,7 +882,7 @@ const anomalyData  = ref(null)
 async function runWeight() {
   weightLoading.value = true
   try {
-    const { data } = await axios.post(`${BASE}/cdp/tag/weight`, { include_tag_ids: weightTagIds.value })
+    const { data } = await apiClient.post('/cdp/tag/weight', { include_tag_ids: weightTagIds.value })
     weightData.value = data
   } finally {
     weightLoading.value = false
@@ -883,7 +892,7 @@ async function runWeight() {
 async function runAnomaly() {
   anomalyLoading.value = true
   try {
-    const { data } = await axios.get(`${BASE}/cdp/tag/anomaly`)
+    const { data } = await apiClient.get('/cdp/tag/anomaly')
     anomalyData.value = data
   } finally {
     anomalyLoading.value = false
@@ -905,14 +914,14 @@ async function queryWide(page = 1) {
   wideLoading.value = true
   widePage.value = page
   try {
-    const { data } = await axios.post(`${BASE}/cdp/wide/query`, { tag_ids: selectedTagIds.value, page, page_size: 20 })
+    const { data } = await apiClient.post('/cdp/wide/query', { tag_ids: selectedTagIds.value, page, page_size: 20 })
     wideResult.value = data
   } finally {
     wideLoading.value = false
   }
 }
 async function loadDistribution() {
-  const { data } = await axios.get(`${BASE}/cdp/wide/distribution`)
+  const { data } = await apiClient.get('/cdp/wide/distribution')
   distribution.value = data
 }
 function onWidePage(p) { queryWide(p) }
@@ -927,7 +936,7 @@ const etlOverview = ref([])
 async function runEtl() {
   etlLoading.value = true
   try {
-    const { data } = await axios.post(`${BASE}/cdp/etl/sync`)
+    const { data } = await apiClient.post('/cdp/etl/sync')
     etlResult.value = data
     await loadEtlOverview()
   } finally {
@@ -935,7 +944,7 @@ async function runEtl() {
   }
 }
 async function loadEtlOverview() {
-  const { data } = await axios.get(`${BASE}/cdp/etl/overview`)
+  const { data } = await apiClient.get('/cdp/etl/overview')
   etlOverview.value = data
 }
 
@@ -958,7 +967,7 @@ function addStep(v) {
 async function runFunnel() {
   funnelLoading.value = true
   try {
-    const { data } = await axios.post(`${BASE}/cdp/behavior/funnel`, {
+    const { data } = await apiClient.post('/cdp/behavior/funnel', {
       steps: funnelSteps.value,
       window_seconds: funnelWindow.value,
       filter_tag_ids: funnelFilterTags.value.length ? funnelFilterTags.value : null,
@@ -988,7 +997,7 @@ const retentionData = ref(null)
 async function runRetention() {
   retLoading.value = true
   try {
-    const { data } = await axios.post(`${BASE}/cdp/behavior/retention`, {
+    const { data } = await apiClient.post('/cdp/behavior/retention', {
       cohort_event: retCohort.value, return_event: retReturn.value,
     })
     retentionData.value = data
@@ -1010,7 +1019,7 @@ const pathData    = ref(null)
 async function runPath() {
   pathLoading.value = true
   try {
-    const { data } = await axios.get(`${BASE}/cdp/behavior/path?top_n=10`)
+    const { data } = await apiClient.get('/cdp/behavior/path?top_n=10')
     pathData.value = data
   } finally {
     pathLoading.value = false
@@ -1029,10 +1038,12 @@ const pathOption = computed(() => {
 })
 
 onMounted(async () => {
-  await loadTagMeta()
-  await loadDistribution()
-  await loadEtlOverview()
-  await loadCrowdList()
+  await Promise.allSettled([
+    loadTagMeta(),
+    loadDistribution(),
+    loadEtlOverview(),
+    loadCrowdList(),
+  ])
 })
 
 watch(
