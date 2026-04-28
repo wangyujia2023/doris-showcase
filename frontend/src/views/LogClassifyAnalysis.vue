@@ -49,7 +49,7 @@
                 v-for="s in classifyResult.samples" :key="s.user_id"
                 style="margin:2px 4px"
                 effect="plain"
-              >{{ t('userTag', [s.user_id, s.tags.join('、')]) }}</el-tag>
+              >{{ t('userTag', [s.user_id, joinTags(s.tags)]) }}</el-tag>
             </div>
           </template>
         </el-alert>
@@ -154,8 +154,8 @@
             >
               <div class="tag-dot" :style="{ background: tag.color }"></div>
               <div class="tag-info">
-                <span class="tag-name">{{ tag.tag_name }}</span>
-                <span class="tag-cat">{{ tag.category }}</span>
+                <span class="tag-name">{{ tagText(tag.tag_name) }}</span>
+                <span class="tag-cat">{{ categoryText(tag.category) }}</span>
               </div>
               <div class="tag-count">{{ tag.user_count }}<small>{{ t('logClassify.unitPerson') }}</small></div>
               <el-tag v-if="tag.is_risk" type="danger" size="small" effect="plain" style="margin-left:4px">{{ t('logClassify.risk') }}</el-tag>
@@ -173,7 +173,7 @@
           <el-table :data="riskData" border stripe size="small">
             <el-table-column prop="tag_name" :label="t('logClassify.riskTag')" width="100">
               <template #default="{row}">
-                <el-tag type="danger" size="small" effect="dark">{{ row.tag_name }}</el-tag>
+                <el-tag type="danger" size="small" effect="dark">{{ tagText(row.tag_name) }}</el-tag>
               </template>
             </el-table-column>
             <el-table-column prop="total_users" :label="t('logClassify.users')" width="80" align="center" />
@@ -215,13 +215,13 @@
       <div class="cross-grid">
         <div v-for="tag in crossData" :key="tag.tag_name" class="cross-item">
           <div class="cross-tag" :style="{ borderColor: tag.color, color: tag.color }">
-            {{ tag.tag_name }}
-            <small>{{ tag.category }}</small>
+            {{ tagText(tag.tag_name) }}
+            <small>{{ categoryText(tag.category) }}</small>
           </div>
           <div class="cross-bars">
             <div v-for="d in tag.asset_dist" :key="d.level" class="cross-bar-row">
               <span class="cross-label">
-                <el-tag :type="assetTagType(d.level)" size="small" style="font-size:10px">{{ d.level }}</el-tag>
+                <el-tag :type="assetTagType(d.level)" size="small" style="font-size:10px">{{ assetText(d.level) }}</el-tag>
               </span>
               <el-progress
                 :percentage="Math.min(d.cnt * 100, 100)"
@@ -247,7 +247,7 @@
             <el-table-column prop="tag_a" :label="t('logClassify.tagA')" width="110">
               <template #default="{row}">
                 <el-tag size="small" effect="plain" :style="{borderColor: tagColor(row.tag_a), color: tagColor(row.tag_a)}">
-                  {{ row.tag_a }}
+                  {{ tagText(row.tag_a) }}
                 </el-tag>
               </template>
             </el-table-column>
@@ -257,7 +257,7 @@
             <el-table-column prop="tag_b" :label="t('logClassify.tagB')" width="110">
               <template #default="{row}">
                 <el-tag size="small" effect="plain" :style="{borderColor: tagColor(row.tag_b), color: tagColor(row.tag_b)}">
-                  {{ row.tag_b }}
+                  {{ tagText(row.tag_b) }}
                 </el-tag>
               </template>
             </el-table-column>
@@ -279,8 +279,8 @@
       <el-form inline style="margin-bottom:12px">
         <el-form-item :label="t('logClassify.filterTag')">
           <el-select v-model="userFilter.tag_name" clearable :placeholder="t('logClassify.allTags')" style="width:130px" @change="loadUsers">
-            <el-option v-for="tag in tagDist" :key="tag.tag_name" :label="tag.tag_name" :value="tag.tag_name">
-              <span :style="{color: tag.color}">● </span>{{ tag.tag_name }}
+            <el-option v-for="tag in tagDist" :key="tag.tag_name" :label="tagText(tag.tag_name)" :value="tag.tag_name">
+              <span :style="{color: tag.color}">● </span>{{ tagText(tag.tag_name) }}
               <span style="color:#c0c4cc;margin-left:4px">({{ tag.user_count }}{{ t('logClassify.unitPerson') }})</span>
             </el-option>
           </el-select>
@@ -300,14 +300,18 @@
         <el-table-column prop="city"           :label="t('logClassify.city')"    width="65" />
         <el-table-column prop="asset_level"    :label="t('logClassify.assetLevel')" width="90">
           <template #default="{row}">
-            <el-tag :type="assetTagType(row.asset_level)" size="small">{{ row.asset_level }}</el-tag>
+            <el-tag :type="assetTagType(row.asset_level)" size="small">{{ assetText(row.asset_level) }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column prop="aum_total"      :label="t('logClassify.aum')" width="85" align="right">
           <template #default="{row}">{{ row.aum_total.toFixed(1) }}</template>
         </el-table-column>
-        <el-table-column prop="active_level"   :label="t('logClassify.active')"   width="65" />
-        <el-table-column prop="lifecycle_stage" :label="t('logClassify.lifecycle')"  width="80" />
+        <el-table-column prop="active_level"   :label="t('logClassify.active')"   width="85">
+          <template #default="{row}">{{ activeText(row.active_level) }}</template>
+        </el-table-column>
+        <el-table-column prop="lifecycle_stage" :label="t('logClassify.lifecycle')"  width="95">
+          <template #default="{row}">{{ lifecycleText(row.lifecycle_stage) }}</template>
+        </el-table-column>
         <el-table-column prop="log_tags"       :label="t('logClassify.aiTags')" min-width="180">
           <template #default="{row}">
             <template v-if="parseTags(row.log_tags).length">
@@ -315,7 +319,7 @@
                 v-for="tag in parseTags(row.log_tags)" :key="tag"
                 size="small" effect="plain" round
                 :style="{ marginRight:'3px', borderColor: tagColor(tag), color: tagColor(tag) }"
-              >{{ tag }}</el-tag>
+              >{{ tagText(tag) }}</el-tag>
             </template>
             <span v-else style="color:#c0c4cc;font-size:12px">— {{ t('logClassify.noTag') }}</span>
           </template>
@@ -384,6 +388,21 @@ const fmt = v => v == null ? '-' : Number(v).toLocaleString()
 const assetTagType = l => ({ 'VIP私行': 'danger', 'VIP钻石': 'warning', 'VIP铂金': '', 'VIP黄金': 'success' }[l] || 'info')
 const tagColorMap = computed(() => Object.fromEntries(tagDist.value.map(t => [t.tag_name, t.color])))
 function tagColor(name) { return tagColorMap.value[name] || '#909399' }
+function translateDict(group, name) {
+  const key = String(name || '').trim()
+  if (!key) return ''
+  const path = `logClassify.${group}.${key}`
+  const value = t(path)
+  return value === path ? key : value
+}
+function tagText(name) { return translateDict('tagLabels', name) }
+function categoryText(name) { return translateDict('tagCategories', name) }
+function assetText(name) { return translateDict('assetLabels', name) }
+function activeText(name) { return translateDict('activeLabels', name) }
+function lifecycleText(name) { return translateDict('lifecycleLabels', name) }
+function joinTags(tags = []) {
+  return tags.map(tagText).join(locale.value === 'zh' ? '、' : ', ')
+}
 function parseTags(raw) {
   if (!raw || raw === '[]') return []
   try { return JSON.parse(raw) } catch { return [] }
@@ -435,7 +454,7 @@ const distBarOption = computed(() => ({
   tooltip: { trigger: 'axis' },
   grid: { left: 70, right: 20, top: 10, bottom: 10 },
   xAxis: { type: 'value' },
-  yAxis: { type: 'category', data: tagDist.value.map(t => t.tag_name) },
+  yAxis: { type: 'category', data: tagDist.value.map(t => tagText(t.tag_name)) },
   series: [{
     type: 'bar',
     data: tagDist.value.map(t => ({ value: t.user_count, itemStyle: { color: t.color } })),
@@ -451,7 +470,7 @@ const catPieOption = computed(() => {
     legend: { bottom: 0, textStyle: { fontSize: 11 } },
     series: [{
       type: 'pie', radius: ['35%', '60%'],
-      data: Object.entries(catMap).map(([name, value]) => ({ name, value })),
+      data: Object.entries(catMap).map(([name, value]) => ({ name: categoryText(name), value })),
       label: { formatter: '{b}\n{d}%', fontSize: 11 }
     }]
   }
@@ -462,7 +481,7 @@ const riskBarOption = computed(() => ({
   legend: { data: ['Total Users', 'Anomaly Users'], top: 0 },
   grid: { left: 70, right: 20, top: 36, bottom: 10 },
   xAxis: { type: 'value' },
-  yAxis: { type: 'category', data: riskData.value.map(r => r.tag_name) },
+  yAxis: { type: 'category', data: riskData.value.map(r => tagText(r.tag_name)) },
   series: [
     { name: 'Total Users',  type: 'bar', data: riskData.value.map(r => r.total_users),  itemStyle: { color: '#c0d9f0' } },
     { name: 'Anomaly Users', type: 'bar', data: riskData.value.map(r => r.anomaly_users), itemStyle: { color: '#f56c6c' } },
@@ -472,11 +491,12 @@ const riskBarOption = computed(() => ({
 const coocChordOption = computed(() => {
   if (!coocData.value.length) return {}
   const allTags = [...new Set(coocData.value.flatMap(r => [r.tag_a, r.tag_b]))]
+  const displayTags = allTags.map(tagText)
   return {
     tooltip: {},
     grid: { left: 20, right: 20, top: 20, bottom: 20 },
-    xAxis: { type: 'category', data: allTags, axisLabel: { fontSize: 10, rotate: 30 } },
-    yAxis: { type: 'category', data: allTags, axisLabel: { fontSize: 10 } },
+    xAxis: { type: 'category', data: displayTags, axisLabel: { fontSize: 10, rotate: 30 } },
+    yAxis: { type: 'category', data: displayTags, axisLabel: { fontSize: 10 } },
     series: [{
       type: 'scatter',
       data: coocData.value.flatMap(r => [
@@ -488,7 +508,7 @@ const coocChordOption = computed(() => {
       tooltip: {
         formatter: p => {
           const [xi, yi, cnt] = p.value
-          return `${allTags[xi]} + ${allTags[yi]}<br/>共现 <b>${cnt}</b> users`
+          return `${displayTags[xi]} + ${displayTags[yi]}<br/>${t('logClassify.coocTooltip', [cnt])}`
         }
       }
     }]
