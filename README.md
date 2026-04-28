@@ -84,6 +84,14 @@ sh deploy.sh
 
 实际端口以 `.env` 为准。
 
+## 根目录保留文件
+
+- `README.md`：唯一入口说明。
+- `deploy.sh`：一键安装依赖、构建前端、启动前后端。
+- `init_database.sh`：一键建库和导入 mock 数据。
+- `.env.example`：配置模板。
+- `requirements.txt`：后端依赖。
+
 ## 单独启动
 
 后端：
@@ -165,8 +173,3 @@ cd frontend && npm run build
 ```bash
 python3 -m py_compile backend/settings.py backend/app.py backend/api/lineage_routes.py backend/service/retail_lineage_service.py
 ```
-
-## 开发规范
-
-- 规范文档：`DEVELOPMENT_SPEC.md`
-- 模板文档：`DEVELOPMENT_SPEC_TEMPLATE.md`
