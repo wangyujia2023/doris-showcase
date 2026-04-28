@@ -58,6 +58,8 @@ class Settings:
         self.FRONTEND_PORT: int = _env_int("FRONTEND_PORT", "5173")
         self.APP_ENV: str = os.getenv("APP_ENV", "dev")
         self.PROJECT_ROOT: str = os.getenv("PROJECT_ROOT", str(Path(__file__).resolve().parents[1]))
+        upload_dir = Path(os.getenv("UPLOAD_DIR", str(Path(self.PROJECT_ROOT) / "uploads")))
+        self.UPLOAD_DIR: str = str(upload_dir if upload_dir.is_absolute() else Path(self.PROJECT_ROOT) / upload_dir)
 
         # Doris 4.0 HASP 配置
         self.DORIS_HASP_ENABLED: bool = True

@@ -74,9 +74,11 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import * as echarts from 'echarts'
 import { bjMetroApi } from '@/api'
 import { t } from '@/i18n'
+import { useDomChart } from '@/composables/useChart'
+
+const { renderChart } = useDomChart()
 
 const kpi           = ref(null)
 const revTrend      = ref([])
@@ -102,8 +104,7 @@ onMounted(async () => {
 })
 
 const renderRevTrend = () => {
-  const c = echarts.init(document.getElementById('bj-rev-trend'))
-  c.setOption({
+  renderChart('bj-rev-trend', {
     tooltip: { trigger: 'axis' },
     legend: { bottom: 0, textStyle: { fontSize: 11 } },
     grid: { left: 55, right: 20, top: 20, bottom: 40 },
@@ -115,13 +116,11 @@ const renderRevTrend = () => {
       { name: t('bjm.commRevShort'), type: 'bar', stack: 'r', data: revTrend.value.map(d => d.comm_w),   itemStyle: { color: '#e6a23c' } },
     ]
   })
-  window.addEventListener('resize', () => c.resize())
 }
 
 const renderTicketType = () => {
-  const c = echarts.init(document.getElementById('bj-ticket-type'))
   const colors = ['#409eff','#67c23a','#e6a23c','#9c6cd4']
-  c.setOption({
+  renderChart('bj-ticket-type', {
     tooltip: { trigger: 'item' },
     legend: { bottom: 0, textStyle: { fontSize: 11 } },
     series: [{
@@ -133,7 +132,6 @@ const renderTicketType = () => {
       label: { formatter: '{b}\n{d}%', fontSize: 11 }
     }]
   })
-  window.addEventListener('resize', () => c.resize())
 }
 </script>
 

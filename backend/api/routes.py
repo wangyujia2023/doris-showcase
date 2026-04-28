@@ -3,6 +3,7 @@ from fastapi import APIRouter
 
 from backend.api.benchmark_routes import router as benchmark_router
 from backend.api.cdp_routes import router as cdp_router
+from backend.api.dictionary_routes import router as dictionary_router
 from backend.api.core_routes import router as core_router
 from backend.api.fund_routes import router as fund_router
 from backend.api.manufacturing_routes import router as manufacturing_router
@@ -17,6 +18,7 @@ from backend.api.vector_routes import router as vector_router
 router = APIRouter()
 router.include_router(core_router)
 router.include_router(cdp_router)
+router.include_router(dictionary_router)
 router.include_router(vector_router)
 router.include_router(benchmark_router)
 router.include_router(satellite_router)

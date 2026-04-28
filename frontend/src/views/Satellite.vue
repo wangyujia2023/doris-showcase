@@ -3,11 +3,11 @@
     <!-- 顶部横幅 -->
     <div class="sat-banner">
       <el-icon size="20" color="#00d4ff"><Aim /></el-icon>
-      <span class="banner-title">军用卫星采集数据分析系统</span>
-      <el-tag type="danger" size="small" effect="dark">机密</el-tag>
-      <el-tag size="small" effect="dark" style="background:#0a2a4a;border-color:#00d4ff;color:#00d4ff">BIGINT 时间戳</el-tag>
+      <span class="banner-title">{{ t('satellite.title') }}</span>
+      <el-tag type="danger" size="small" effect="dark">{{ t('satellite.secret') }}</el-tag>
+      <el-tag size="small" effect="dark" style="background:#0a2a4a;border-color:#00d4ff;color:#00d4ff">{{ t('satellite.bigintTs') }}</el-tag>
       <el-button size="small" type="primary" :loading="initing" @click="initData" style="margin-left:auto">
-        初始化演示数据
+        {{ t('satellite.initBtn') }}
       </el-button>
     </div>
 
@@ -22,54 +22,54 @@
     <!-- 2. 查询面板 -->
     <div class="card query-panel">
       <div class="qp-grid">
-        <el-input v-model="f.satellite_name" placeholder="卫星名称" clearable size="small" />
-        <el-select v-model="f.satellite_type" placeholder="卫星类型" clearable size="small">
-          <el-option v-for="v in ['光学','雷达','电子侦察']" :key="v" :value="v" :label="v" />
+        <el-input v-model="f.satellite_name" :placeholder="t('satellite.phName')" clearable size="small" />
+        <el-select v-model="f.satellite_type" :placeholder="t('satellite.phType')" clearable size="small">
+          <el-option v-for="v in satelliteTypes" :key="v.value" :value="v.value" :label="v.label" />
         </el-select>
-        <el-select v-model="f.data_type" placeholder="数据类型" clearable size="small">
-          <el-option v-for="v in ['成像','信号','轨道','预警']" :key="v" :value="v" :label="v" />
+        <el-select v-model="f.data_type" :placeholder="t('satellite.phDataType')" clearable size="small">
+          <el-option v-for="v in dataTypes" :key="v.value" :value="v.value" :label="v.label" />
         </el-select>
-        <el-select v-model="f.target_type" placeholder="目标类型" clearable size="small">
-          <el-option v-for="v in ['舰船','车辆','机场','雷达站']" :key="v" :value="v" :label="v" />
+        <el-select v-model="f.target_type" :placeholder="t('satellite.phTargetType')" clearable size="small">
+          <el-option v-for="v in targetTypes" :key="v.value" :value="v.value" :label="v.label" />
         </el-select>
-        <el-select v-model="f.quality_min" placeholder="数据质量" clearable size="small">
+        <el-select v-model="f.quality_min" :placeholder="t('satellite.phQuality')" clearable size="small">
           <el-option :value="90" label="≥ 90" /><el-option :value="80" label="≥ 80" />
         </el-select>
-        <el-select v-model="f.status" placeholder="状态" clearable size="small">
-          <el-option value="normal" label="正常" /><el-option value="warning" label="预警" /><el-option value="abnormal" label="异常" />
+        <el-select v-model="f.status" :placeholder="t('satellite.phStatus')" clearable size="small">
+          <el-option value="normal" :label="t('satellite.statusNormal')" /><el-option value="warning" :label="t('satellite.statusWarning')" /><el-option value="abnormal" :label="t('satellite.statusAbnormal')" />
         </el-select>
       </div>
       <!-- 时间仅展示 -->
       <div class="time-display">
         <el-icon><Clock /></el-icon>
-        <span style="color:#909399;font-size:12px">时间范围（展示用）：</span>
+        <span style="color:#909399;font-size:12px">{{ t('satellite.timeRange') }}</span>
         <el-date-picker v-model="timeRange" type="daterange" size="small" style="width:280px"
-          range-separator="—" start-placeholder="开始时间" end-placeholder="结束时间" disabled />
-        <span style="font-size:11px;color:#c0c4cc">（不参与 SQL 查询，方便演示）</span>
+          range-separator="—" :start-placeholder="t('satellite.startTime')" :end-placeholder="t('satellite.endTime')" disabled />
+        <span style="font-size:11px;color:#c0c4cc">{{ t('satellite.displayOnly') }}</span>
       </div>
       <div style="margin-top:10px;display:flex;gap:8px">
-        <el-button type="primary" size="small" @click="search"><el-icon><Search /></el-icon> 查询</el-button>
-        <el-button size="small" @click="reset">重置</el-button>
-        <span style="margin-left:auto;font-size:12px;color:#909399">共 {{ total }} 条记录</span>
+        <el-button type="primary" size="small" @click="search"><el-icon><Search /></el-icon> {{ t('satellite.search') }}</el-button>
+        <el-button size="small" @click="reset">{{ t('satellite.reset') }}</el-button>
+        <span style="margin-left:auto;font-size:12px;color:#909399">{{ t('satellite.totalRecords', [total]) }}</span>
       </div>
     </div>
 
     <!-- 3. 图表区 -->
     <div class="chart-row">
       <div class="card chart-card">
-        <div class="ct">各卫星采集量</div>
+        <div class="ct">{{ t('satellite.chartSatellite') }}</div>
         <v-chart :option="pieOpt" style="height:220px" autoresize />
       </div>
       <div class="card chart-card">
-        <div class="ct">数据类型统计</div>
+        <div class="ct">{{ t('satellite.chartDataType') }}</div>
         <v-chart :option="typeBarOpt" style="height:220px" autoresize />
       </div>
       <div class="card chart-card">
-        <div class="ct">目标类型分布</div>
+        <div class="ct">{{ t('satellite.chartTarget') }}</div>
         <v-chart :option="targetBarOpt" style="height:220px" autoresize />
       </div>
       <div class="card chart-card">
-        <div class="ct">数据质量排行</div>
+        <div class="ct">{{ t('satellite.chartQuality') }}</div>
         <v-chart :option="qualityOpt" style="height:220px" autoresize />
       </div>
     </div>
@@ -78,39 +78,39 @@
     <div class="card">
       <el-table :data="rows" v-loading="loading" size="small" stripe>
         <el-table-column prop="id" label="ID" width="60" />
-        <el-table-column prop="satellite_name" label="卫星名称" width="100" />
-        <el-table-column prop="satellite_type" label="卫星类型" width="100">
+        <el-table-column prop="satellite_name" :label="t('satellite.colName')" width="100" />
+        <el-table-column prop="satellite_type" :label="t('satellite.colType')" width="100">
           <template #default="{row}">
             <el-tag :type="typeColor(row.satellite_type)" size="small">{{row.satellite_type}}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="采集时间（BIGINT→格式化）" width="200">
+        <el-table-column :label="t('satellite.colCollectTime')" width="200">
           <template #default="{row}">
             <span class="mono" style="font-size:11px;color:#409eff">{{ fmtTs(row.collect_time) }}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="data_type" label="数据类型" width="80" />
-        <el-table-column prop="target_type" label="目标类型" width="90" />
-        <el-table-column label="经纬度" width="160">
+        <el-table-column prop="data_type" :label="t('satellite.colDataType')" width="80" />
+        <el-table-column prop="target_type" :label="t('satellite.colTargetType')" width="90" />
+        <el-table-column :label="t('satellite.colLngLat')" width="160">
           <template #default="{row}">
             <span class="mono" style="font-size:11px">{{ row.longitude }}, {{ row.latitude }}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="data_quality" label="数据质量" width="90" sortable>
+        <el-table-column prop="data_quality" :label="t('satellite.colQuality')" width="90" sortable>
           <template #default="{row}">
             <span :style="{color: row.data_quality>=95?'#67c23a':row.data_quality>=85?'#e6a23c':'#f56c6c',fontWeight:'700'}">
               {{ row.data_quality }}
             </span>
           </template>
         </el-table-column>
-        <el-table-column prop="status" label="状态" width="80">
+        <el-table-column prop="status" :label="t('satellite.colStatus')" width="80">
           <template #default="{row}">
             <el-tag :type="statusType(row.status)" size="small" effect="dark">
-              {{ {normal:'正常',warning:'预警',abnormal:'异常'}[row.status] || row.status }}
+              {{ statusLabel(row.status) }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="task_id" label="任务ID" />
+        <el-table-column prop="task_id" :label="t('satellite.colTask')" />
       </el-table>
       <div style="text-align:center;padding:12px 0">
         <el-pagination v-model:current-page="page" :page-size="20"
@@ -130,7 +130,7 @@ import { PieChart, BarChart } from 'echarts/charts'
 import { GridComponent, TooltipComponent, LegendComponent } from 'echarts/components'
 import VChart from 'vue-echarts'
 import { satelliteApi } from '@/api'
-import { t, locale } from '@/i18n'
+import { t } from '@/i18n'
 
 use([CanvasRenderer, PieChart, BarChart, GridComponent, TooltipComponent, LegendComponent])
 
@@ -147,11 +147,29 @@ const timeRange = ref(null)
 const f = reactive({ satellite_name:'', satellite_type:'', data_type:'', target_type:'', quality_min:null, status:'' })
 
 const ovCards = computed(() => [
-  { label:'总采集数据量', value: (overview.value.total||0).toLocaleString(), color:'#00d4ff' },
-  { label:'卫星在线数',   value: overview.value.satellites||0, color:'#409eff' },
-  { label:'今日采集量',   value: (overview.value.total||0).toLocaleString(), color:'#67c23a' },
-  { label:'预警数量',     value: overview.value.warnings||0, color:'#f56c6c' },
-  { label:'异常数量',     value: overview.value.abnormals||0, color:'#e6a23c' },
+  { label:t('satellite.overviewTotal'), value: (overview.value.total||0).toLocaleString(), color:'#00d4ff' },
+  { label:t('satellite.overviewOnline'), value: overview.value.satellites||0, color:'#409eff' },
+  { label:t('satellite.overviewToday'), value: (overview.value.total||0).toLocaleString(), color:'#67c23a' },
+  { label:t('satellite.overviewWarnings'), value: overview.value.warnings||0, color:'#f56c6c' },
+  { label:t('satellite.overviewAbnormal'), value: overview.value.abnormals||0, color:'#e6a23c' },
+])
+
+const satelliteTypes = computed(() => [
+  { value:'光学', label:t('satellite.typeOptical') },
+  { value:'雷达', label:t('satellite.typeRadar') },
+  { value:'电子侦察', label:t('satellite.typeRecon') },
+])
+const dataTypes = computed(() => [
+  { value:'成像', label:t('satellite.dataImaging') },
+  { value:'信号', label:t('satellite.dataSignal') },
+  { value:'轨道', label:t('satellite.dataOrbit') },
+  { value:'预警', label:t('satellite.dataWarning') },
+])
+const targetTypes = computed(() => [
+  { value:'舰船', label:t('satellite.targetShip') },
+  { value:'车辆', label:t('satellite.targetVehicle') },
+  { value:'机场', label:t('satellite.targetAirport') },
+  { value:'雷达站', label:t('satellite.targetRadar') },
 ])
 
 const fmtTs = ts => {
@@ -161,6 +179,7 @@ const fmtTs = ts => {
 }
 const typeColor  = t => ({ '光学':'','雷达':'warning','电子侦察':'danger' })[t] || ''
 const statusType = s => ({ normal:'success', warning:'warning', abnormal:'danger' })[s] || ''
+const statusLabel = s => ({ normal:t('satellite.statusNormal'), warning:t('satellite.statusWarning'), abnormal:t('satellite.statusAbnormal') })[s] || s
 
 const pieOpt = computed(() => {
   const d = charts.value.by_satellite || []
@@ -209,7 +228,7 @@ const qualityOpt = computed(() => {
     yAxis:{type:'value',min:70,max:100,axisLabel:{fontSize:10}},
     series:[{type:'bar',barMaxWidth:36,
       data:d.map((r,i)=>({value:r.avg_q,itemStyle:{color:r.avg_q>=95?'#67c23a':r.avg_q>=85?'#e6a23c':'#f56c6c'}})),
-      label:{show:true,position:'top',fontSize:10,formatter:'{c}分'}}]
+      label:{show:true,position:'top',fontSize:10,formatter:`{c}${t('satellite.scoreUnit')}`}}]
   }
 })
 
@@ -239,7 +258,7 @@ async function initData() {
   initing.value = true
   try {
     await satelliteApi.init()
-    ElMessage.success('演示数据初始化成功')
+    ElMessage.success(t('satellite.initDone'))
     await Promise.all([loadOverview(), loadCharts(), loadList()])
   } finally { initing.value = false }
 }

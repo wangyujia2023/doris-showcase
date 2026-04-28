@@ -41,6 +41,17 @@ mysql_exec() {
   fi
 }
 
+mysql_exec_wide() {
+  echo "Running wide-table schema and mock data"
+  if [ -n "$DORIS_PASSWORD" ]; then
+    { printf 'CREATE DATABASE IF NOT EXISTS bank_cdp;\nUSE bank_cdp;\n'; sed -n '/^-- Table: user_wide$/,$p' "$PROJECT_DIR/sql/by_database/bank_cdp_schema.sql"; } | MYSQL_PWD="$DORIS_PASSWORD" mysql -h "$DORIS_HOST" -P "$DORIS_PORT" -u "$DORIS_USER"
+    { printf 'CREATE DATABASE IF NOT EXISTS bank_cdp;\nUSE bank_cdp;\n'; sed -n '/^-- Table: user_wide$/,$p' "$PROJECT_DIR/sql/by_database/bank_cdp_mock.sql"; } | MYSQL_PWD="$DORIS_PASSWORD" mysql -h "$DORIS_HOST" -P "$DORIS_PORT" -u "$DORIS_USER"
+  else
+    { printf 'CREATE DATABASE IF NOT EXISTS bank_cdp;\nUSE bank_cdp;\n'; sed -n '/^-- Table: user_wide$/,$p' "$PROJECT_DIR/sql/by_database/bank_cdp_schema.sql"; } | mysql -h "$DORIS_HOST" -P "$DORIS_PORT" -u "$DORIS_USER"
+    { printf 'CREATE DATABASE IF NOT EXISTS bank_cdp;\nUSE bank_cdp;\n'; sed -n '/^-- Table: user_wide$/,$p' "$PROJECT_DIR/sql/by_database/bank_cdp_mock.sql"; } | mysql -h "$DORIS_HOST" -P "$DORIS_PORT" -u "$DORIS_USER"
+  fi
+}
+
 init_db() {
   db_name="$1"
   mysql_exec "sql/by_database/${db_name}_schema.sql"
@@ -71,8 +82,11 @@ case "$MODE" in
   bjmetro)
     init_db bjmetro
     ;;
+  wide)
+    mysql_exec_wide
+    ;;
   *)
-    echo "Usage: sh init_database.sh [all|core|lineage|regdb|bjmetro]"
+    echo "Usage: sh init_database.sh [all|core|lineage|regdb|bjmetro|wide]"
     exit 1
     ;;
 esac

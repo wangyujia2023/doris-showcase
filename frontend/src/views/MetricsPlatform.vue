@@ -401,33 +401,20 @@ import { Check, Search } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import { metricsApi } from '@/api'
 import { t as i18nT, locale } from '@/i18n'
+import { useDictionaryStore } from '@/store/dictionary'
 
 const t = key => i18nT(`metrics.${key}`)
 
-const DIM_EN = {
-  asset_level:'Asset Level', age_group:'Age Group', city:'City', lifecycle_stage:'Lifecycle Stage',
-  active_level:'Activity Level', preferred_channel:'Preferred Channel', gender:'Gender',
-  credit_grade:'Credit Grade', risk_level:'Risk Level', province:'Province',
-}
-const MEASURE_EN = {
-  user_cnt:'Users', total_aum:'Total AUM', avg_aum:'Avg AUM', max_aum:'Max AUM',
-  anomaly_cnt:'Anomaly Users', anomaly_rate:'Anomaly Rate', avg_churn:'Avg Churn',
-  avg_credit:'Avg Credit', loan_total:'Loan Total', fund_total:'Fund Total', deposit_sum:'Deposit Total',
-  aum_total:'AUM', credit_score:'Credit Score', churn_prob:'Churn Probability', loan_amount:'Loan Amount',
-  fund_amount:'Fund Amount', deposit_amount:'Deposit Amount', age:'Age',
-}
-const METRIC_ZH = {
-  aum_total:'AUM', credit_score:'信用分', churn_prob:'流失概率', loan_amount:'贷款金额',
-  fund_amount:'基金金额', deposit_amount:'存款金额', age:'年龄',
-}
+const dict = useDictionaryStore()
 const TEMPLATE_EN = {
   t1: { name: 'Asset Level Distribution', desc: 'Count users and AUM by asset level' },
   t2: { name: 'Province Churn Analysis', desc: 'Compare average churn rate by province' },
   t3: { name: 'Channel Activity Analysis', desc: 'Credit score and AUM by preferred channel' },
   t4: { name: 'Lifecycle x Asset Cross', desc: 'Cross analysis of lifecycle stage and asset level' },
-  t5: { name: 'High-Value Profile', desc: 'Client structure with AUM > 50万' },
+  t5: { name: 'High-Value Profile', desc: 'Client structure with AUM > 500K' },
   t6: { name: 'Credit Risk by Region', desc: 'Loan scale and anomaly rate by city' },
 }
+
 
 use([CanvasRenderer, BarChart, LineChart, PieChart, ScatterChart, RadarChart,
      GridComponent, TooltipComponent, LegendComponent, MarkLineComponent, RadarComponent])
@@ -487,9 +474,9 @@ const canChart = computed(() =>
   selectedDims.value.length >= 1 && selectedMeasures.value.length >= 1 && result.value.rows.length > 0
 )
 
-const dimLabel     = f => (locale.value === 'en' ? DIM_EN[f] : defs.value.dimensions.find(d => d.field === f)?.label) || f
-const measureLabel = a => (locale.value === 'en' ? MEASURE_EN[a] : defs.value.measures.find(m => m.alias === a)?.label) || a
-const metricText = k => (locale.value === 'en' ? MEASURE_EN[k] : METRIC_ZH[k]) || k
+const dimLabel     = f => dict.label('metric_dimensions', f, defs.value.dimensions.find(d => d.field === f)?.label || f)
+const measureLabel = a => dict.label('metric_measures', a, defs.value.measures.find(m => m.alias === a)?.label || a)
+const metricText = k => dict.label('metric_measures', k, k)
 const templateText = (id, key, fallback) => (locale.value === 'en' ? TEMPLATE_EN[id]?.[key] : fallback) || fallback
 const columnLabel = col => {
   if (!col) return ''

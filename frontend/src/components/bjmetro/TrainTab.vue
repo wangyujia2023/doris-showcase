@@ -79,9 +79,11 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import * as echarts from 'echarts'
 import { bjMetroApi } from '@/api'
 import { t } from '@/i18n'
+import { useDomChart } from '@/composables/useChart'
+
+const { renderChart } = useDomChart()
 
 const kpi        = ref(null)
 const punctTrend = ref([])
@@ -103,8 +105,7 @@ onMounted(async () => {
 })
 
 const renderPunctTrend = () => {
-  const c = echarts.init(document.getElementById('bj-punct-trend'))
-  c.setOption({
+  renderChart('bj-punct-trend', {
     tooltip: { trigger: 'axis' },
     grid: { left: 50, right: 20, top: 30, bottom: 40 },
     xAxis: { type: 'category', data: punctTrend.value.map(d => d.date), axisLabel: { color: '#999', fontSize: 10, rotate: 30 } },
@@ -117,16 +118,14 @@ const renderPunctTrend = () => {
       markLine: { data: [{ yAxis: 99, name: t('bjm.targetLine'), lineStyle: { color: '#f56c6c', type: 'dashed' } }] }
     }]
   })
-  window.addEventListener('resize', () => c.resize())
 }
 
 const renderFaultPie = () => {
-  const c = echarts.init(document.getElementById('bj-fault-pie'))
   // 按 device_type 合并
   const map = {}
   faultTypes.value.forEach(d => { map[d.device_type] = (map[d.device_type] || 0) + d.cnt })
   const colors = ['#f56c6c','#e6a23c','#409eff','#9c6cd4','#67c23a','#17b3a3','#c0c4cc','#f59e0b']
-  c.setOption({
+  renderChart('bj-fault-pie', {
     tooltip: { trigger: 'item' },
     legend: { bottom: 0, textStyle: { fontSize: 11 } },
     series: [{
@@ -136,7 +135,6 @@ const renderFaultPie = () => {
       label: { formatter: '{b}: {d}%', fontSize: 11 }
     }]
   })
-  window.addEventListener('resize', () => c.resize())
 }
 </script>
 

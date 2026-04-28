@@ -121,9 +121,11 @@
 <script setup>
 import { ref, onMounted, nextTick } from 'vue'
 import { Loading } from '@element-plus/icons-vue'
-import * as echarts from 'echarts'
 import { bjMetroApi } from '@/api'
 import { t } from '@/i18n'
+import { useDomChart } from '@/composables/useChart'
+
+const { renderChart } = useDomChart()
 
 const kpi         = ref(null)
 const flowTrend   = ref([])
@@ -156,10 +158,9 @@ onMounted(async () => {
 })
 
 const renderFlowTrend = () => {
-  const c = echarts.init(document.getElementById('bj-flow-trend'))
   const hours = flowTrend.value.map(d => `${String(d.hour).padStart(2,'0')}:00`)
   const vals  = flowTrend.value.map(d => d.passengers)
-  c.setOption({
+  renderChart('bj-flow-trend', {
     tooltip: { trigger: 'axis' },
     grid: { left: 50, right: 20, top: 20, bottom: 30 },
     xAxis: { type: 'category', data: hours, axisLabel: { color: '#999', fontSize: 11 } },
@@ -170,12 +171,10 @@ const renderFlowTrend = () => {
       areaStyle: { color: { type: 'linear', x:0,y:0,x2:0,y2:1, colorStops: [{ offset:0, color:'rgba(64,158,255,.25)' },{ offset:1, color:'rgba(64,158,255,.01)' }] } },
     }]
   })
-  window.addEventListener('resize', () => c.resize())
 }
 
 const renderPunctuality = () => {
-  const c = echarts.init(document.getElementById('bj-punctuality'))
-  c.setOption({
+  renderChart('bj-punctuality', {
     tooltip: { trigger: 'item' },
     radar: {
       indicator: punctuality.value.map(d => ({ name: d.line_name, max: 100, min: 96 })),
@@ -188,7 +187,6 @@ const renderPunctuality = () => {
                lineStyle: { color: '#409eff' }, itemStyle: { color: '#409eff' } }]
     }]
   })
-  window.addEventListener('resize', () => c.resize())
 }
 </script>
 

@@ -7,7 +7,7 @@
         <div class="kc-value" :style="k.alert ? 'color:#f56c6c' : ''">
           {{ k.value }}<span class="kc-unit">{{ k.unit }}</span>
         </div>
-        <div class="kc-sub" :class="k.ok ? 'ok' : 'err'">{{ k.ok ? '✓ 达标' : '✗ 不达标' }}</div>
+        <div class="kc-sub" :class="k.ok ? 'ok' : 'err'">{{ k.ok ? `✓ ${t('regulatory.pass')}` : `✗ ${t('regulatory.fail')}` }}</div>
       </div>
     </div>
 
@@ -24,7 +24,7 @@
           </el-table-column>
           <el-table-column :label="t('regulatory.freq')" width="55" align="center">
             <template #default="{ row }">
-              <el-tag :type="row.freq==='月' ? 'success' : 'warning'" size="small">{{ row.freq }}</el-tag>
+              <el-tag :type="row.freq==='月' ? 'success' : 'warning'" size="small">{{ freqLabel(row.freq) }}</el-tag>
             </template>
           </el-table-column>
           <el-table-column :label="t('regulatory.deadline')" width="80" prop="deadline"/>
@@ -75,7 +75,7 @@
 import { ref, onMounted, watch } from 'vue'
 import * as echarts from 'echarts'
 import { regulatoryApi } from '@/api'
-import { t } from '@/i18n'
+import { t, locale } from '@/i18n'
 
 const props = defineProps({ period: String })
 
@@ -93,20 +93,30 @@ const REPORT_META = [
   { code:'G22', name:'贷款投向',      freq:'季', deadline:'季末后30日',baseScore:96.2 },
   { code:'G31', name:'单一客户集中',  freq:'季', deadline:'季末后30日',baseScore:97.8 },
 ]
+const REPORT_META_EN = {
+  G01: 'Balance Sheet', G03: 'Capital Adequacy', G04A: 'Five-category Loans',
+  G11: 'Liquidity Coverage Ratio', G11A: 'Net Stable Funding', G21: 'Credit Balance',
+  G22: 'Loan Use', G31: 'Single Customer Concentration',
+}
 
 const statusType  = s => ({ submitted:'success', draft:'info', pending:'warning', rejected:'danger' }[s]||'info')
 const actionType  = a => ({ accept:'success', submit:'primary', qc:'warning', draft:'info', reject:'danger' }[a]||'info')
-const actionLabel = a => ({ accept:'审核通过', submit:'已报送', qc:'质检通过', draft:'起草', reject:'退回' }[a]||a)
+const actionLabel = a => (locale.value === 'en'
+  ? { accept:'Accepted', submit:'Submitted', qc:'QC Passed', draft:'Draft', reject:'Rejected' }
+  : { accept:'审核通过', submit:'已报送', qc:'质检通过', draft:'起草', reject:'退回' })[a] || a
+const reportName = m => locale.value === 'en' ? (REPORT_META_EN[m.code] || m.name) : m.name
+const freqLabel = f => locale.value === 'en' ? ({ '月':'M', '季':'Q' }[f] || f) : f
+const deadlineLabel = d => locale.value === 'en' ? ({ '次月15日':'Next month 15th', '季末后30日':'30 days after quarter end', '次月20日':'Next month 20th' }[d] || d) : d
 
 const buildKpis = (d) => {
   if (!d) return []
   return [
-    { label:'资本充足率',    value: (d.car_ratio*100).toFixed(2),    unit:'%', color:'#409eff', ok: d.car_ratio>=0.105 },
-    { label:'核心一级充足率',value: ((d.cet1_ratio||0.091)*100).toFixed(2), unit:'%', color:'#67c23a', ok: (d.cet1_ratio||0.091)>=0.075 },
-    { label:'流动性覆盖率',  value: (d.lcr_ratio*100).toFixed(1),    unit:'%', color: d.lcr_ratio<1?'#f56c6c':'#67c23a', ok: d.lcr_ratio>=1.0, alert: d.lcr_ratio<1 },
-    { label:'不良贷款率',    value: (d.npl_ratio*100).toFixed(2),    unit:'%', color:'#e6a23c', ok: d.npl_ratio<=0.05 },
-    { label:'拨备覆盖率',    value: (d.provision_coverage*100).toFixed(1), unit:'%', color:'#9c6cd4', ok: d.provision_coverage>=1.5 },
-    { label:'合规综合得分',  value: d.compliance_score,               unit:'分', color:'#17b3a3', ok: d.compliance_score>=80 },
+    { label:t('regulatory.kpiCar'), value: (d.car_ratio*100).toFixed(2), unit:'%', color:'#409eff', ok: d.car_ratio>=0.105 },
+    { label:t('regulatory.kpiCet1'), value: ((d.cet1_ratio||0.091)*100).toFixed(2), unit:'%', color:'#67c23a', ok: (d.cet1_ratio||0.091)>=0.075 },
+    { label:t('regulatory.kpiLcr'), value: (d.lcr_ratio*100).toFixed(1), unit:'%', color: d.lcr_ratio<1?'#f56c6c':'#67c23a', ok: d.lcr_ratio>=1.0, alert: d.lcr_ratio<1 },
+    { label:t('regulatory.kpiNpl'), value: (d.npl_ratio*100).toFixed(2), unit:'%', color:'#e6a23c', ok: d.npl_ratio<=0.05 },
+    { label:t('regulatory.kpiProvision'), value: (d.provision_coverage*100).toFixed(1), unit:'%', color:'#9c6cd4', ok: d.provision_coverage>=1.5 },
+    { label:t('regulatory.kpiScore'), value: d.compliance_score, unit:t('regulatory.scoreUnit'), color:'#17b3a3', ok: d.compliance_score>=80 },
   ]
 }
 
@@ -120,7 +130,9 @@ const load = async () => {
   reportList.value = REPORT_META.map(m => ({
     ...m,
     status: ['G01','G03','G04A','G11','G21'].includes(m.code) ? 'submitted' : 'pending',
-    statusLabel: ['G01','G03','G04A','G11','G21'].includes(m.code) ? '已报送' : '待处理',
+    name: reportName(m),
+    deadline: deadlineLabel(m.deadline),
+    statusLabel: ['G01','G03','G04A','G11','G21'].includes(m.code) ? t('regulatory.submitted') : t('regulatory.pendingStatus'),
     score: m.baseScore,
   }))
   submitLog.value = (log.data || []).slice(0, 15)
@@ -139,18 +151,18 @@ const renderTrend = (xData, cars, lcrs, npls) => {
   const c = echarts.init(el)
   c.setOption({
     tooltip: { trigger:'axis' },
-    legend: { data:['资本充足率%','LCR%','不良率%'], top:0, textStyle:{fontSize:11} },
+    legend: { data:[t('regulatory.kpiCarPct'),'LCR%',t('regulatory.kpiNplPct')], top:0, textStyle:{fontSize:11} },
     grid: { left:50, right:20, top:30, bottom:30 },
     xAxis: { type:'category', data: xData, axisLabel:{color:'#999',fontSize:10} },
     yAxis: [
       { type:'value', name:'%', axisLabel:{color:'#999',fontSize:10}, splitLine:{lineStyle:{color:'#f0f2f5'}} },
     ],
     series: [
-      { name:'资本充足率%', type:'line', data:cars, smooth:true, symbol:'circle', symbolSize:4,
+      { name:t('regulatory.kpiCarPct'), type:'line', data:cars, smooth:true, symbol:'circle', symbolSize:4,
         lineStyle:{color:'#409eff',width:2}, itemStyle:{color:'#409eff'} },
       { name:'LCR%', type:'line', data:lcrs, smooth:true, symbol:'circle', symbolSize:4,
         lineStyle:{color:'#67c23a',width:2}, itemStyle:{color:'#67c23a'} },
-      { name:'不良率%', type:'line', data:npls, smooth:true, symbol:'circle', symbolSize:4,
+      { name:t('regulatory.kpiNplPct'), type:'line', data:npls, smooth:true, symbol:'circle', symbolSize:4,
         lineStyle:{color:'#e6a23c',width:2}, itemStyle:{color:'#e6a23c'},
         yAxisIndex:0 },
     ]

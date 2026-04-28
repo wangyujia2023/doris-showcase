@@ -8,7 +8,7 @@
         <el-option value="INFO" label="INFO" /><el-option value="WARN" label="WARN" /><el-option value="ERROR" label="ERROR" />
       </el-select>
       <el-select v-model="filters.service" clearable :placeholder="t('observe.phService')" style="width:130px" @change="load">
-        <el-option v-for="s in (stats.svc_counts||[])" :key="s.service" :value="s.service" :label="s.service" />
+        <el-option v-for="s in (stats.svc_counts||[])" :key="s.service" :value="s.service" :label="svcLabel(s.service)" />
       </el-select>
       <el-button type="primary" :loading="loading" @click="() => { page=1; load() }"><el-icon><Refresh /></el-icon> {{ t('observe.refreshBtn') }}</el-button>
       <el-button type="warning" :loading="classifying" @click="runClassify"><el-icon><MagicStick /></el-icon> {{ t('observe.aiTagBtn') }}</el-button>
@@ -38,7 +38,7 @@
             class="facet-item" :class="{active:filters.service===s.service}"
             @click="toggleFilter('service',s.service)">
             <span class="svc-dot" :style="{background:svcColor(s.service)}"/>
-            <span class="facet-lbl">{{s.service}}</span>
+            <span class="facet-lbl">{{ svcLabel(s.service) }}</span>
             <span class="facet-cnt">{{s.cnt?.toLocaleString()}}</span>
           </div>
         </div>
@@ -48,7 +48,7 @@
           <div v-for="p in (stats.top_paths||[]).slice(0,5)" :key="p.path"
             class="facet-item path-item" @click="filters.path=p.path;load()">
             <div style="font-size:11px;color:#409eff;word-break:break-all">{{p.path}}</div>
-            <div style="font-size:10px;color:#909399">{{p.count}}次 · {{p.avg_duration}}ms</div>
+            <div style="font-size:10px;color:#909399">{{p.count}}{{ t('observe.times') }} · {{p.avg_duration}}ms</div>
           </div>
         </div>
       </div>
@@ -56,8 +56,8 @@
       <div class="log-main">
         <div class="card hist-card">
           <div style="display:flex;justify-content:space-between;margin-bottom:6px">
-            <span style="font-weight:600;font-size:13px">Top路径请求量</span>
-            <el-tag size="small" effect="plain">共 {{ stats.total?.toLocaleString()||0 }} 条</el-tag>
+            <span style="font-weight:600;font-size:13px">{{ t('observe.topPaths') }}</span>
+            <el-tag size="small" effect="plain">{{ t('observe.totalLogs', [stats.total?.toLocaleString()||0]) }}</el-tag>
           </div>
           <v-chart :option="chartOpt" style="height:100px" autoresize />
         </div>
@@ -68,10 +68,10 @@
             <div class="log-row" :class="rowCls(log)" @click="toggleExpand(idx)">
               <span :class="`lv-badge lv-${log.level?.toLowerCase()}`">{{log.level}}</span>
               <span class="log-ts">{{(log.timestamp||'').toString().slice(0,19)}}</span>
-              <span class="log-svc" :style="{color:svcColor(log.service)}">{{log.service}}</span>
+              <span class="log-svc" :style="{color:svcColor(log.service)}">{{ svcLabel(log.service) }}</span>
               <span class="log-msg">{{log.message}}</span>
               <span class="log-dur" :style="durColor(log.duration_ms)">{{log.duration_ms}}ms</span>
-              <span v-if="log.db_time_ms>0" style="font-size:10px;color:#909399;flex-shrink:0">db:{{log.db_time_ms}}ms</span>
+              <span v-if="log.db_time_ms>0" style="font-size:10px;color:#909399;flex-shrink:0">{{ t('observe.dbShort') }}:{{log.db_time_ms}}ms</span>
               <el-icon size="11" style="margin-left:6px;color:#dcdfe6;flex-shrink:0"><ArrowDown /></el-icon>
             </div>
             <div v-if="expanded.has(idx)" class="log-detail">
@@ -125,7 +125,13 @@ const dataSource = ref('—')
 const SVC_COLORS = {'首页大盘':'#409eff','行为分析':'#67c23a','用户宽表':'#e6a23c','人群圈选':'#9b59b6',
   '银行报表':'#f56c6c','日志观测':'#1abc9c','链路追踪':'#3498db','指标平台':'#e67e22',
   '标签分析':'#c0392b','经营管理':'#2ecc71','系统配置':'#95a5a6','CDP后台':'#7f8c8d'}
+const SERVICE_EN = {
+  '首页大盘':'Dashboard', '行为分析':'Behavior', '用户宽表':'User Wide', '人群圈选':'Segment',
+  '银行报表':'Bank Report', '日志观测':'Log Observe', '链路追踪':'Trace', '指标平台':'Metrics',
+  '标签分析':'Tag Analysis', '经营管理':'Management', '系统配置':'System Config', 'CDP后台':'CDP Backend',
+}
 const svcColor = s => SVC_COLORS[s] || '#909399'
+const svcLabel = s => locale.value === 'en' ? (SERVICE_EN[s] || s) : s
 const durColor = ms => ms>1000?{color:'#f56c6c',fontWeight:'700'}:ms>300?{color:'#e6a23c'}:{color:'#67c23a'}
 const rowCls = log => log.level==='ERROR'?'row-error':log.level==='WARN'?'row-warn':''
 
@@ -133,12 +139,12 @@ function toggleFilter(key, val) { filters[key] = filters[key]===val?'':val; page
 function toggleExpand(idx) { const s=new Set(expanded.value); s.has(idx)?s.delete(idx):s.add(idx); expanded.value=s }
 
 const statCards = computed(() => [
-  {label:'总请求', value:(stats.value.total||0).toLocaleString(), color:'#303133'},
+  {label:t('observe.totalReq'), value:(stats.value.total||0).toLocaleString(), color:'#303133'},
   {label:'ERROR', value:stats.value.errors||0, color:'#f56c6c'},
   {label:'WARN',  value:stats.value.warns||0,  color:'#e6a23c'},
-  {label:'慢请求', value:stats.value.slow||0,   color:'#e6a23c'},
-  {label:'均耗时', value:(stats.value.avg_duration_ms||0)+'ms', color:'#409eff'},
-  {label:'均DB耗时', value:(stats.value.avg_db_ms||0)+'ms', color:'#67c23a'},
+  {label:t('observe.slowReq'), value:stats.value.slow||0,   color:'#e6a23c'},
+  {label:t('observe.avgDuration'), value:(stats.value.avg_duration_ms||0)+'ms', color:'#409eff'},
+  {label:t('observe.avgDbDuration'), value:(stats.value.avg_db_ms||0)+'ms', color:'#67c23a'},
 ])
 
 const chartOpt = computed(() => {
@@ -159,10 +165,10 @@ async function runClassify() {
   try {
     const res = await observeApi.classify()
     if (res.status === 'success') {
-      ElMessage.success(`AI打标签完成，更新 ${res.updated} 条`)
+      ElMessage.success(t('observe.classifyOk', [res.updated]))
       await load()
     } else {
-      ElMessage.warning(res.message || 'AI分类失败')
+      ElMessage.warning(res.message || t('observe.classifyFail'))
     }
   } finally { classifying.value = false }
 }

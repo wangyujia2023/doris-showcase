@@ -5,8 +5,11 @@
 import logging
 from contextlib import asynccontextmanager
 
+from pathlib import Path
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from backend.settings import settings
 from backend.doris.connect import get_pool, close_pool
@@ -63,6 +66,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+Path(settings.UPLOAD_DIR).mkdir(parents=True, exist_ok=True)
+app.mount("/api/uploads", StaticFiles(directory=settings.UPLOAD_DIR), name="uploads")
 app.include_router(router, prefix="/api")
 
 

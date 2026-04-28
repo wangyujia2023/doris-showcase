@@ -69,9 +69,11 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import * as echarts from 'echarts'
 import { bjMetroApi } from '@/api'
 import { t } from '@/i18n'
+import { useDomChart } from '@/composables/useChart'
+
+const { renderChart } = useDomChart()
 
 const hourly     = ref([])
 const trend30d   = ref([])
@@ -113,9 +115,8 @@ const loadOd = async () => {
 }
 
 const renderHourly = () => {
-  const c = echarts.init(document.getElementById('bj-hourly'))
   const labels = hourly.value.map(d => `${String(d.hour).padStart(2,'0')}:00`)
-  c.setOption({
+  renderChart('bj-hourly', {
     tooltip: { trigger: 'axis' },
     legend: { bottom: 0, textStyle: { fontSize: 11 } },
     grid: { left: 50, right: 20, top: 20, bottom: 40 },
@@ -131,12 +132,10 @@ const renderHourly = () => {
         lineStyle: { color: '#67c23a', width: 2, type: 'dashed' } },
     ]
   })
-  window.addEventListener('resize', () => c.resize())
 }
 
 const renderTrend = () => {
-  const c = echarts.init(document.getElementById('bj-flow-30d'))
-  c.setOption({
+  renderChart('bj-flow-30d', {
     tooltip: { trigger: 'axis' },
     grid: { left: 60, right: 20, top: 20, bottom: 30 },
     xAxis: { type: 'category', data: trend30d.value.map(d => d.date), axisLabel: { color: '#999', fontSize: 10, rotate: 30 } },
@@ -148,13 +147,11 @@ const renderTrend = () => {
         borderRadius: [3,3,0,0] }
     }]
   })
-  window.addEventListener('resize', () => c.resize())
 }
 
 const renderHotStations = () => {
-  const c = echarts.init(document.getElementById('bj-hot-stations'))
   const top = hotStations.value.slice(0, 15).reverse()
-  c.setOption({
+  renderChart('bj-hot-stations', {
     tooltip: { trigger: 'axis', formatter: p => `${p[0].name}: ${p[0].value?.toLocaleString()}${t('bjm.unitWanTimes')}` },
     grid: { left: 80, right: 60, top: 10, bottom: 10 },
     xAxis: { type: 'value', axisLabel: { color: '#999', fontSize: 11 }, splitLine: { lineStyle: { color: '#f0f2f5' } } },
@@ -167,7 +164,6 @@ const renderHotStations = () => {
       label: { show: true, position: 'right', formatter: p => (p.value/10000).toFixed(1)+t('bjm.unitWanTimes'), fontSize: 10, color: '#64748b' }
     }]
   })
-  window.addEventListener('resize', () => c.resize())
 }
 </script>
 

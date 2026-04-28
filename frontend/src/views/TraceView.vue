@@ -11,7 +11,7 @@
         <el-icon><Refresh /></el-icon> {{ t('trace.refreshBtn') }}
       </el-button>
       <div style="margin-left:auto;font-size:12px;color:#909399">
-        基于内存 sys_logs 实时采集 · Doris 链路还原
+        {{ t('trace.liveHint') }}
       </div>
     </div>
 
@@ -41,9 +41,9 @@
             </div>
             <div class="tr-meta">
               <span class="mono">{{ t.trace_id?.slice(0, 16) }}…</span>
-              <span style="margin-left:auto">{{ t.span_count }} spans</span>
+              <span style="margin-left:auto">{{ t.span_count }} {{ t('trace.spans') }}</span>
             </div>
-            <div style="font-size:11px;color:#67c23a">{{ t.service }}</div>
+            <div style="font-size:11px;color:#67c23a">{{ svcLabel(t.service) }}</div>
             <div style="font-size:10px;color:#c0c4cc">{{ t.start_time?.toString().slice(0, 19) }}</div>
           </div>
         </div>
@@ -66,9 +66,9 @@
               <el-tag :type="hasError ? 'danger' : 'success'" effect="dark" size="small">
                 {{ hasError ? 'ERROR' : 'OK' }}
               </el-tag>
-              <span class="s-item">总耗时 <b style="color:#409eff">{{ fmtMs(detail.total_duration_ms) }}</b></span>
-              <span class="s-item">{{ detail.spans?.length }} spans</span>
-              <span class="s-item">{{ (detail.services || []).join(' → ') }}</span>
+              <span class="s-item">{{ t('trace.totalDuration') }} <b style="color:#409eff">{{ fmtMs(detail.total_duration_ms) }}</b></span>
+              <span class="s-item">{{ detail.spans?.length }} {{ t('trace.spans') }}</span>
+              <span class="s-item">{{ (detail.services || []).map(svcLabel).join(' → ') }}</span>
             </div>
           </div>
 
@@ -76,7 +76,7 @@
           <div class="svc-legend">
             <div v-for="s in detail.services" :key="s" class="svc-item">
               <span class="dot" :style="{ background: svcColor(s) }"/>
-              <span>{{ s }}</span>
+              <span>{{ svcLabel(s) }}</span>
             </div>
           </div>
 
@@ -111,7 +111,7 @@
                 <span class="idx-num">{{ idx + 1 }}</span>
                 <span class="dot" :style="{ background: svcColor(span.service) }"/>
                 <div class="span-info">
-                  <div class="span-svc">{{ span.service }}</div>
+                  <div class="span-svc">{{ svcLabel(span.service) }}</div>
                   <div class="span-op" :title="span.operation">{{ span.operation }}</div>
                 </div>
                 <el-tag v-if="span.status === 'ERROR'" type="danger" size="small" effect="dark" style="flex-shrink:0">ERR</el-tag>
@@ -171,7 +171,7 @@
             </div>
             <div class="stat-card">
               <div class="stat-val" style="color:#f56c6c">{{ errSpans.length }}</div>
-              <div class="stat-lbl">Error Spans</div>
+              <div class="stat-lbl">{{ t('trace.errorSpans') }}</div>
             </div>
             <div class="stat-card">
               <div class="stat-val" style="color:#67c23a">{{ fmtMs(dbTotalMs) }}</div>
@@ -206,6 +206,12 @@ const SVC_COLORS = {
   'behavior-service': '#67c23a', 'trace-service': '#3498db',
   'user-service': '#e6a23c',
 }
+const SERVICE_EN = {
+  'CDP后台':'CDP Backend', '首页大盘':'Dashboard', '行为分析':'Behavior',
+  '用户宽表':'User Wide', '人群圈选':'Segment', '银行报表':'Bank Report',
+  '日志观测':'Log Observe', '链路追踪':'Trace', '指标平台':'Metrics',
+  '标签分析':'Tag Analysis', '经营管理':'Management',
+}
 const SVC_PALETTE = ['#409eff','#67c23a','#e6a23c','#9b59b6','#f56c6c','#1abc9c','#e67e22','#27ae60','#c0392b','#3498db']
 const _colorCache = {}
 let   _colorIdx   = 0
@@ -214,6 +220,7 @@ const svcColor = s => {
   if (!_colorCache[s]) _colorCache[s] = SVC_PALETTE[_colorIdx++ % SVC_PALETTE.length]
   return _colorCache[s]
 }
+const svcLabel = s => locale.value === 'en' ? (SERVICE_EN[s] || s) : s
 
 const fmtMs = ms => {
   if (ms == null) return '—'

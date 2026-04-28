@@ -15,22 +15,22 @@
         </el-form-item>
         <el-form-item :label="t('user.labelAsset')">
           <el-select v-model="query.asset_level" clearable :placeholder="t('user.phAll')" style="width:130px">
-            <el-option v-for="o in assetLevels" :key="o" :label="o" :value="o" />
+            <el-option v-for="o in assetLevels" :key="o.value" :label="o.label" :value="o.value" />
           </el-select>
         </el-form-item>
         <el-form-item :label="t('user.labelActive')">
           <el-select v-model="query.active_level" clearable :placeholder="t('user.phAll')" style="width:110px">
-            <el-option v-for="o in activeLevels" :key="o" :label="o" :value="o" />
+            <el-option v-for="o in activeLevels" :key="o.value" :label="o.label" :value="o.value" />
           </el-select>
         </el-form-item>
         <el-form-item :label="t('user.labelLifecycle')">
           <el-select v-model="query.lifecycle_stage" clearable :placeholder="t('user.phAll')" style="width:120px">
-            <el-option v-for="o in lifecycles" :key="o" :label="o" :value="o" />
+            <el-option v-for="o in lifecycles" :key="o.value" :label="o.label" :value="o.value" />
           </el-select>
         </el-form-item>
         <el-form-item :label="t('user.labelChannel')">
           <el-select v-model="query.preferred_channel" clearable :placeholder="t('user.phAll')" style="width:110px">
-            <el-option v-for="o in channels" :key="o" :label="o" :value="o" />
+            <el-option v-for="o in channels" :key="o.value" :label="o.label" :value="o.value" />
           </el-select>
         </el-form-item>
         <el-form-item :label="t('user.labelAge')">
@@ -89,7 +89,7 @@
         <el-table-column prop="city"      :label="t('user.colCity')"   width="80" />
         <el-table-column prop="asset_level" :label="t('user.colAsset')" width="100">
           <template #default="{row}">
-            <el-tag :type="assetTagType(row.asset_level)" size="small">{{ row.asset_level }}</el-tag>
+            <el-tag :type="assetTagType(row.asset_level)" size="small">{{ dictLabel('asset_level', row.asset_level) }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column prop="aum_total" :label="t('user.colAum')" width="100" sortable>
@@ -104,13 +104,17 @@
         <el-table-column prop="loan_amount"    :label="t('user.colLoan')" width="90">
           <template #default="{row}">{{ fmtNum(row.loan_amount) }}</template>
         </el-table-column>
-        <el-table-column prop="preferred_channel" :label="t('user.colChannel')" width="90" />
+        <el-table-column prop="preferred_channel" :label="t('user.colChannel')" width="90">
+          <template #default="{row}">{{ dictLabel('channel', row.preferred_channel) }}</template>
+        </el-table-column>
         <el-table-column prop="active_level"   :label="t('user.colActiveLevel')" width="90">
           <template #default="{row}">
-            <el-tag :type="activeTagType(row.active_level)" size="small">{{ row.active_level }}</el-tag>
+            <el-tag :type="activeTagType(row.active_level)" size="small">{{ dictLabel('active_level', row.active_level) }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="lifecycle_stage" :label="t('user.colLifecycle')" width="100" />
+        <el-table-column prop="lifecycle_stage" :label="t('user.colLifecycle')" width="100">
+          <template #default="{row}">{{ dictLabel('lifecycle_stage', row.lifecycle_stage) }}</template>
+        </el-table-column>
         <el-table-column prop="credit_score"   :label="t('user.colCredit')" width="80" />
         <el-table-column prop="churn_prob"     :label="t('user.colChurn')" width="90">
           <template #default="{row}">
@@ -156,7 +160,7 @@
           <el-descriptions-item :label="t('user.dAge')">{{ selectedUser.age }}</el-descriptions-item>
           <el-descriptions-item :label="t('user.dCity')">{{ selectedUser.city }}</el-descriptions-item>
           <el-descriptions-item :label="t('user.dAsset')">
-            <el-tag :type="assetTagType(selectedUser.asset_level)" size="small">{{ selectedUser.asset_level }}</el-tag>
+            <el-tag :type="assetTagType(selectedUser.asset_level)" size="small">{{ dictLabel('asset_level', selectedUser.asset_level) }}</el-tag>
           </el-descriptions-item>
           <el-descriptions-item :label="t('user.dAum')">{{ fmtNum(selectedUser.aum_total) }} {{ t('user.wan') }}</el-descriptions-item>
           <el-descriptions-item :label="t('user.dDeposit')">{{ fmtNum(selectedUser.deposit_amount) }} {{ t('user.wan') }}</el-descriptions-item>
@@ -165,11 +169,11 @@
           <el-descriptions-item :label="t('user.dLoan')">{{ fmtNum(selectedUser.loan_amount) }} {{ t('user.wan') }}</el-descriptions-item>
           <el-descriptions-item :label="t('user.dCredit')">{{ selectedUser.credit_score }}</el-descriptions-item>
           <el-descriptions-item :label="t('user.dCreditGrade')">{{ selectedUser.credit_grade }}</el-descriptions-item>
-          <el-descriptions-item :label="t('user.dRisk')">{{ ['','保守','稳健','平衡','进取','激进'][selectedUser.risk_level] }}</el-descriptions-item>
-          <el-descriptions-item :label="t('user.dChannel')">{{ selectedUser.preferred_channel }}</el-descriptions-item>
+          <el-descriptions-item :label="t('user.dRisk')">{{ dictLabel('risk_level', selectedUser.risk_level) }}</el-descriptions-item>
+          <el-descriptions-item :label="t('user.dChannel')">{{ dictLabel('channel', selectedUser.preferred_channel) }}</el-descriptions-item>
           <el-descriptions-item :label="t('user.dLogin')">{{ selectedUser.app_login_30d }} {{ t('user.times') }}</el-descriptions-item>
-          <el-descriptions-item :label="t('user.dActiveLevel')">{{ selectedUser.active_level }}</el-descriptions-item>
-          <el-descriptions-item :label="t('user.dLifecycle')">{{ selectedUser.lifecycle_stage }}</el-descriptions-item>
+          <el-descriptions-item :label="t('user.dActiveLevel')">{{ dictLabel('active_level', selectedUser.active_level) }}</el-descriptions-item>
+          <el-descriptions-item :label="t('user.dLifecycle')">{{ dictLabel('lifecycle_stage', selectedUser.lifecycle_stage) }}</el-descriptions-item>
           <el-descriptions-item :label="t('user.dChurn')">{{ ((selectedUser.churn_prob || 0) * 100).toFixed(1) }}%</el-descriptions-item>
           <el-descriptions-item :label="t('user.dAnomalyFlag')">
             <el-tag :type="selectedUser.anomaly_flag ? 'danger' : 'success'" size="small">
@@ -192,15 +196,20 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, computed } from 'vue'
 import { userApi } from '@/api'
 import { ElMessage } from 'element-plus'
-import { t, locale } from '@/i18n'
+import { t } from '@/i18n'
+import { useDictionaryStore } from '@/store/dictionary'
 
-const assetLevels = ['VIP私行', 'VIP钻石', 'VIP铂金', 'VIP黄金', '普通']
-const activeLevels = ['高活', '中活', '低活', '沉睡']
-const lifecycles   = ['新客', '成长', '成熟', '沉睡', '流失预警']
-const channels     = ['APP', '网点', '小程序', '网银']
+const dict = useDictionaryStore()
+const optionList = (type, values) => computed(() => values.map(value => ({ value, label: dict.label(type, value, value) })))
+const dictLabel = (type, value) => dict.label(type, value, value || '-')
+
+const assetLevels = optionList('asset_level', ['VIP私行', 'VIP钻石', 'VIP铂金', 'VIP黄金', '普通'])
+const activeLevels = optionList('active_level', ['高活', '中活', '低活', '沉睡'])
+const lifecycles   = optionList('lifecycle_stage', ['新客', '成长', '成熟', '沉睡', '流失预警'])
+const channels     = optionList('channel', ['APP', '网点', '小程序', '网银'])
 
 const query = reactive({
   user_name: '', id_card: '', phone: '',

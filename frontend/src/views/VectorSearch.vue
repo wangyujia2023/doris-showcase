@@ -33,7 +33,11 @@
             <el-icon><Plus /></el-icon>
           </el-button>
         </div>
-        <div v-if="!users.length" class="empty-tip"><el-empty :image-size="50" :description="t('vec.initFirst')" /></div>
+        <el-alert v-if="loadError" type="warning" :closable="false" show-icon style="margin-bottom:8px">
+          <template #title>{{ loadError }}</template>
+        </el-alert>
+        <div v-if="dataLoading" class="empty-tip"><el-icon class="is-loading"><Refresh /></el-icon> {{ t('common.loading') }}</div>
+        <div v-else-if="!users.length" class="empty-tip"><el-empty :image-size="50" :description="t('vec.initFirst')" /></div>
         <div v-else class="user-grid">
           <div
             v-for="u in users" :key="u.user_id"
@@ -285,7 +289,10 @@ import { ref, computed, onMounted, defineComponent, h, reactive } from 'vue'
 import { ElMessage } from 'element-plus'
 import { RefreshRight, Search, Plus, Upload, Picture, PriceTag, ChatLineRound, Refresh, Delete } from '@element-plus/icons-vue'
 import { vectorApi } from '@/api'
-import { t, locale } from '@/i18n'
+import { t } from '@/i18n'
+import { useDictionaryStore } from '@/store/dictionary'
+
+const dict = useDictionaryStore()
 
 // ── 向量柱状图组件 ──────────────────────────────────────────────
 const VecBar = defineComponent({
@@ -328,6 +335,8 @@ const dimLabels = ref([])
 const initing   = ref(false)
 const clearing  = ref(false)
 const searching = ref(false)
+const dataLoading = ref(false)
+const loadError = ref('')
 const sqlOpen   = ref(true)
 
 const searchMode   = ref('hybrid')
@@ -367,46 +376,9 @@ function userAvatarSrc(u) {
   return u?.photo_url || avatarUrl(u?.avatar_style || u?.user_name || 'user')
 }
 function labelText(name) {
-  const map = {
-    zh: {
-      '活跃达人': '活跃达人',
-      '高价值客户': '高价值客户',
-      '年轻潮流': '年轻潮流',
-      '理财达人': '理财达人',
-      '科技爱好者': '科技爱好者',
-      '运动健康': '运动健康',
-      '娱乐消费': '娱乐消费',
-      '稳健保守': '稳健保守',
-      '冒险进取': '冒险进取',
-      '学生群体': '学生群体',
-      '行为特征': '行为特征',
-      '资产特征': '资产特征',
-      '人群特征': '人群特征',
-      '兴趣特征': '兴趣特征',
-      '消费特征': '消费特征',
-      '风险特征': '风险特征',
-    },
-    en: {
-      '活跃达人': 'Active Users',
-      '高价值客户': 'High Value',
-      '年轻潮流': 'Young Trend',
-      '理财达人': 'Wealth Planner',
-      '科技爱好者': 'Tech Enthusiast',
-      '运动健康': 'Fitness Lover',
-      '娱乐消费': 'Entertainment',
-      '稳健保守': 'Conservative',
-      '冒险进取': 'Risk Taker',
-      '学生群体': 'Students',
-      '行为特征': 'Behavior',
-      '资产特征': 'Assets',
-      '人群特征': 'Demographic',
-      '兴趣特征': 'Interest',
-      '消费特征': 'Consumption',
-      '风险特征': 'Risk',
-    },
-  }
-  return map[locale.value]?.[name] || name
+  return dict.label('vector_tags', name, name)
 }
+
 function scoreColor(sim) {
   if (sim >= 0.9) return '#67c23a'
   if (sim >= 0.7) return '#409eff'
@@ -474,10 +446,28 @@ async function doSearch() {
 
 // ── 数据加载 ────────────────────────────────────────────────────
 async function loadData() {
+  dataLoading.value = true
+  loadError.value = ''
+  const safeLoad = async (loader, fallback, name) => {
+    try {
+      return await loader()
+    } catch (err) {
+      loadError.value = `${name}: ${err?.response?.data?.detail || err?.message || 'load failed'}`
+      return fallback
+    }
+  }
   try {
-    const [u, lb, dl] = await Promise.all([vectorApi.users(), vectorApi.labels(), vectorApi.dimLabels()])
-    users.value = u; labels.value = lb; dimLabels.value = dl
-  } catch {}
+    const [u, lb, dl] = await Promise.all([
+      safeLoad(vectorApi.users, [], 'users'),
+      safeLoad(vectorApi.labels, [], 'labels'),
+      safeLoad(vectorApi.dimLabels, [], 'dimensions'),
+    ])
+    users.value = Array.isArray(u) ? u : []
+    labels.value = Array.isArray(lb) ? lb : []
+    dimLabels.value = Array.isArray(dl) ? dl : []
+  } finally {
+    dataLoading.value = false
+  }
 }
 async function initData() {
   initing.value = true

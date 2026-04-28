@@ -3,21 +3,21 @@
 
     <!-- ── 顶部栏 ── -->
     <div class="topbar">
-      <div class="top-logo">🏦 银行监管报送<span>一表通</span></div>
+      <div class="top-logo">🏦 {{ t('report.logo') }}<span>{{ t('report.oneTable') }}</span></div>
       <div class="top-sep"></div>
-      <div class="top-period">报告期：<strong>2024年Q1</strong></div>
-      <div class="top-period">机构：<strong>某商业银行股份有限公司</strong></div>
+      <div class="top-period">{{ t('report.period') }}：<strong>2024 Q1</strong></div>
+      <div class="top-period">{{ t('report.org') }}：<strong>{{ t('report.orgName') }}</strong></div>
       <div class="status-chips">
-        <span class="chip ok">✓ 已审核 {{ chips.ok }}</span>
-        <span class="chip warn">⚠ 待核查 {{ chips.warn }}</span>
-        <span class="chip err">✗ 校验失败 {{ chips.err }}</span>
+        <span class="chip ok">✓ {{ t('report.audited') }} {{ chips.ok }}</span>
+        <span class="chip warn">⚠ {{ t('report.pending') }} {{ chips.warn }}</span>
+        <span class="chip err">✗ {{ t('report.failed') }} {{ chips.err }}</span>
       </div>
       <div class="top-right">
         <button class="btn btn-init" @click="handleInit" :disabled="initing">
-          {{ initing ? '初始化中…' : '⚙ 初始化数据' }}
+          {{ initing ? t('report.initializing') : t('report.initData') }}
         </button>
-        <button class="btn btn-check" @click="activeTab='qc'">🔍 一键质检</button>
-        <button class="btn btn-submit">📤 报送监管</button>
+        <button class="btn btn-check" @click="activeTab='qc'">{{ t('report.qualityCheck') }}</button>
+        <button class="btn btn-submit">{{ t('report.submit') }}</button>
       </div>
     </div>
 
@@ -26,14 +26,14 @@
 
       <!-- 左侧导航 -->
       <div class="sidebar">
-        <div v-for="group in navGroups" :key="group.title" class="nav-group">
+        <div v-for="group in displayNavGroups" :key="group.title" class="nav-group">
           <div class="nav-group-title">{{ group.title }}</div>
           <div v-for="item in group.items" :key="item.code"
                class="nav-item" :class="{ active: currentCode === item.code }"
                @click="selectReport(item.code)">
             <div class="nav-code">{{ item.code }}</div>
             <div class="nav-name">{{ item.name }}</div>
-            <div class="nav-freq" :class="item.freq==='月'?'freq-m':'freq-q'">{{ item.freq }}</div>
+            <div class="nav-freq" :class="item.freq==='月'?'freq-m':'freq-q'">{{ freqLabel(item.freq) }}</div>
             <div class="nav-dot" :class="`nd-${item.status}`"></div>
           </div>
         </div>
@@ -51,7 +51,7 @@
           <div class="rh-tags">
             <span class="tag tag-cbirc">NFRA</span>
             <span class="tag" :class="meta.freqTag==='月'?'tag-month':'tag-qtr'">
-              {{ meta.freqTag==='月' ? '月报 · 次月15日前' : '季报 · 季末后30日' }}
+              {{ meta.freqTag==='月' ? t('report.monthDue') : t('report.quarterDue') }}
             </span>
           </div>
         </div>
@@ -59,7 +59,7 @@
         <!-- Tab -->
         <div class="tab-bar">
           <div class="tab" :class="{active:activeTab==='data'}"    @click="switchTab('data')">{{ t('regulatory.tabOverview') }}</div>
-          <div class="tab" :class="{active:activeTab==='formula'}" @click="switchTab('formula')">🔢 {{ locale==='zh'?'计算逻辑':'Formulas' }}</div>
+          <div class="tab" :class="{active:activeTab==='formula'}" @click="switchTab('formula')">{{ t('report.formula') }}</div>
           <div class="tab" :class="{active:activeTab==='qc'}"      @click="switchTab('qc')">{{ t('regulatory.tabQuality') }}</div>
           <div class="tab" :class="{active:activeTab==='ddl'}"     @click="switchTab('ddl')">🗄️ DDL</div>
         </div>
@@ -70,7 +70,7 @@
           <!-- 报表数据 -->
           <div v-show="activeTab==='data'">
             <div v-if="tableLoading" class="loading-placeholder">
-              <div class="spinner"></div> 加载中…
+              <div class="spinner"></div> {{ t('report.loading') }}
             </div>
             <table v-else class="report-table">
               <thead>
@@ -94,26 +94,26 @@
 
           <!-- 数据质量 -->
           <div v-show="activeTab==='qc'">
-            <div v-if="qcLoading" class="loading-placeholder"><div class="spinner"></div> 加载质检结果…</div>
+            <div v-if="qcLoading" class="loading-placeholder"><div class="spinner"></div> {{ t('report.loadingQc') }}</div>
             <template v-else>
               <div class="qc-grid">
                 <div class="qc-card">
-                  <div class="qc-card-title">完整性</div>
+                  <div class="qc-card-title">{{ t('report.completeness') }}</div>
                   <div class="qc-score pass">{{ qcData.score >= 95 ? '98' : Math.round(qcData.score) }}<span style="font-size:14px">%</span></div>
                   <div class="qc-meta">{{ qcData.passed }}/{{ qcData.total }} 规则通过</div>
                 </div>
                 <div class="qc-card">
-                  <div class="qc-card-title">平衡校验</div>
-                  <div class="qc-score" :class="balancePass?'pass':'warn'">{{ balancePass?'通过':'异常' }}</div>
-                  <div class="qc-meta">资产=负债+权益</div>
+                  <div class="qc-card-title">{{ t('report.balanceCheck') }}</div>
+                  <div class="qc-score" :class="balancePass?'pass':'warn'">{{ balancePass?t('report.pass'):t('report.abnormal') }}</div>
+                  <div class="qc-meta">{{ t('report.balanceMeta') }}</div>
                 </div>
                 <div class="qc-card">
-                  <div class="qc-card-title">勾稽规则</div>
+                  <div class="qc-card-title">{{ t('report.ruleCheck') }}</div>
                   <div class="qc-score" :class="qcData.passed===qcData.total?'pass':'warn'">
                     {{ qcData.passed }}/{{ qcData.total }}
                   </div>
                   <div class="qc-meta" :style="{color: qcData.passed<qcData.total?'#d97706':'#059669'}">
-                    {{ qcData.total - qcData.passed }} 条规则不符
+                    {{ t('report.rulesFailed', [qcData.total - qcData.passed]) }}
                   </div>
                 </div>
               </div>
@@ -137,7 +137,7 @@
       <!-- 右侧面板 -->
       <div class="right-panel">
         <div class="rp-section">
-          <div class="rp-title">监管核心指标</div>
+          <div class="rp-title">{{ t('report.coreIndicators') }}</div>
           <div v-if="indLoading" class="loading-placeholder small"><div class="spinner"></div></div>
           <div v-else class="indicator-list">
             <div v-for="ind in indicators" :key="ind.name" class="ind-item">
@@ -156,7 +156,7 @@
         </div>
 
         <div class="rp-section">
-          <div class="rp-title">本月报送日历</div>
+          <div class="rp-title">{{ t('report.monthlyCalendar') }}</div>
           <div class="cal-list">
             <div v-for="c in calendar" :key="c.date+c.name" class="cal-item">
               <div class="cal-date">{{ c.date }}</div>
@@ -167,7 +167,7 @@
         </div>
 
         <div class="rp-section">
-          <div class="rp-title">最近报送记录</div>
+          <div class="rp-title">{{ t('report.recentHistory') }}</div>
           <div class="hist-list">
             <div v-for="h in history" :key="h.title" class="hist-item"
                  :style="{borderLeftColor:h.warn?'#f59e0b':'#10b981'}">
@@ -184,7 +184,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { regulatoryApi } from '@/api/index.js'
+import { regulatoryApi } from '@/api'
 import { t, locale } from '@/i18n'
 
 // ── 静态元数据 ─────────────────────────────────────────────────
@@ -219,6 +219,24 @@ const REPORT_META = {
          desc:'统计银行账簿利率风险敏感性缺口及净利息收入变动敏感度' },
   G42: { code:'G42', name:'杠杆率',           freqTag:'季', period:'2024-Q1',
          desc:'统计一级资本与调整后表内外资产余额的比率，≥4%' },
+}
+
+const REPORT_META_EN = {
+  G01: { name:'Balance Sheet', desc:'Bank ending assets, liabilities and equity · Regulator: NFRA' },
+  G02: { name:'Income Statement', desc:'Revenue, cost and profit by reporting period · Monthly flash report' },
+  G03: { name:'Capital Adequacy Report', desc:'Capital structure and risk-weighted assets under Basel III' },
+  G04A:{ name:'Five-category Loan Quality', desc:'Loan quality distribution and non-performing loan statistics' },
+  G04B:{ name:'Migration Matrix', desc:'Loan migration across classification levels and asset quality trend' },
+  G11: { name:'Liquidity Coverage Ratio', desc:'HQLA and 30-day stress net cash outflow for LCR calculation' },
+  G11A:{ name:'Net Stable Funding Ratio', desc:'Available stable funding versus required stable funding' },
+  G12: { name:'Maturity Mismatch', desc:'Asset-liability gap by maturity bucket and cumulative liquidity gap' },
+  G21: { name:'RMB Credit Balance', desc:'Core monetary statistics for RMB loans, deposits and structures' },
+  G22: { name:'Loan Use Statistics', desc:'Loan distribution by national economy industry classification' },
+  G23: { name:'Real Estate Loans', desc:'Real estate development loans and personal mortgage statistics' },
+  G31: { name:'Single Customer Concentration', desc:'Single-name credit concentration and large exposure control' },
+  G32: { name:'Group Customer Credit', desc:'Credit exposure and concentration for related group customers' },
+  G40: { name:'Interest Rate Risk', desc:'Banking book interest rate gap and NII sensitivity' },
+  G42: { name:'Leverage Ratio', desc:'Tier-1 capital over adjusted on/off-balance-sheet assets, minimum 4%' },
 }
 
 // ── 静态公式内容 ───────────────────────────────────────────────
@@ -411,10 +429,21 @@ const history       = ref([])
 const qcData        = ref({ rules: [], total: 0, passed: 0, score: 0 })
 
 // ── 计算属性 ───────────────────────────────────────────────────
-const meta    = computed(() => REPORT_META[currentCode.value] || REPORT_META.G01)
+const meta    = computed(() => {
+  const base = REPORT_META[currentCode.value] || REPORT_META.G01
+  return locale.value === 'en' ? { ...base, ...(REPORT_META_EN[currentCode.value] || {}) } : base
+})
+const displayNavGroups = computed(() => navGroups.value.map(group => ({
+  ...group,
+  title: navGroupTitle(group.title),
+  items: group.items.map(item => ({ ...item, name: reportName(item.code, item.name) })),
+})))
 const currentFormula = computed(() => FORMULAS[currentCode.value] || '<div style="padding:20px;color:#9ca3af">计算逻辑文档完善中…</div>')
 const currentDdl     = computed(() => DDLS[currentCode.value]     || DDLS.G01)
 const balancePass    = computed(() => (qcData.value.rules||[]).find(r=>r.rule.includes('平衡'))?.pass ?? true)
+const reportName = (code, fallback) => locale.value === 'en' ? (REPORT_META_EN[code]?.name || fallback) : fallback
+const navGroupTitle = title => locale.value === 'en' ? ({ '资产负债类':'Balance Sheet', '资本与风险类':'Capital & Risk', '流动性类':'Liquidity', '信贷统计类':'Credit Statistics', '集中度与市场风险':'Concentration & Market Risk' }[title] || title) : title
+const freqLabel = freq => locale.value === 'en' ? ({ '月':'M', '季':'Q' }[freq] || freq) : freq
 
 // ── 单元格样式 ─────────────────────────────────────────────────
 function getCellClass(row, ci, col) {

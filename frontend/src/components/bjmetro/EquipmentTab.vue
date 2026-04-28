@@ -77,9 +77,11 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import * as echarts from 'echarts'
 import { bjMetroApi } from '@/api'
 import { t } from '@/i18n'
+import { useDomChart } from '@/composables/useChart'
+
+const { renderChart } = useDomChart()
 
 const kpi       = ref(null)
 const faultDist = ref([])
@@ -111,9 +113,8 @@ onMounted(async () => {
 })
 
 const renderDist = () => {
-  const c = echarts.init(document.getElementById('bj-equip-dist'))
   const colors = ['#f56c6c','#e6a23c','#409eff','#9c6cd4','#67c23a','#17b3a3','#c0c4cc','#f59e0b']
-  c.setOption({
+  renderChart('bj-equip-dist', {
     tooltip: { trigger: 'item' },
     legend: { bottom: 0, textStyle: { fontSize: 11 } },
     series: [{
@@ -126,12 +127,10 @@ const renderDist = () => {
       label: { formatter: '{b}\n{d}%', fontSize: 11 }
     }]
   })
-  window.addEventListener('resize', () => c.resize())
 }
 
 const renderByLine = () => {
-  const c = echarts.init(document.getElementById('bj-equip-byline'))
-  c.setOption({
+  renderChart('bj-equip-byline', {
     tooltip: { trigger: 'axis' },
     grid: { left: 70, right: 20, top: 20, bottom: 30 },
     xAxis: { type: 'value', axisLabel: { color: '#999', fontSize: 11 }, splitLine: { lineStyle: { color: '#f0f2f5' } } },
@@ -145,7 +144,6 @@ const renderByLine = () => {
         itemStyle: { color: '#f56c6c', borderRadius: [0,3,3,0] } },
     ]
   })
-  window.addEventListener('resize', () => c.resize())
 }
 </script>
 
