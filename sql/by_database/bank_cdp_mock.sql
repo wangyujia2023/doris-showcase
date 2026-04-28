@@ -1,323 +1,477 @@
 -- ================================================================
 -- Database: bank_cdp
--- Type: mock data
--- Description: Core CDP mock data and dashboard mock data.
--- Execute after bank_cdp_schema.sql.
--- Execute: mysql -h <DORIS_FE_HOST> -P19030 -uroot -p < sql/by_database/bank_cdp_mock.sql
+-- Type: English mock data
+-- Source: generated from current Doris table metadata.
+-- Execute after schema SQL.
 -- ================================================================
 
--- ================================================================
--- Mock data - users
--- ================================================================
+CREATE DATABASE IF NOT EXISTS bank_cdp;
 USE bank_cdp;
 
-INSERT INTO user_wide (user_id, update_date, user_name, id_card, phone, gender, age, age_group,
-    city, province, education, occupation, register_date, asset_level, aum_total, deposit_amount,
-    fund_amount, loan_amount, wm_amount, insurance_amount, has_credit_card, has_debit_card,
-    has_mortgage, product_count, credit_score, credit_grade, risk_level, preferred_channel,
-    app_login_30d, app_last_login, active_level, lifecycle_stage, churn_prob, clv_score,
-    log_tags, anomaly_flag, created_at, updated_at)
-VALUES
-(10001,'2025-04-12','Alex Zhang','110***8881','138****0001',1,45,'36-45','Beijing','Beijing',5,'Finance',
- '2018-03-15','Private Banking',1280.50,520.00,380.00,0,350.00,30.50,1,1,0,8,820,'AAA',3,'APP',
- 28,'2025-04-11','High Active','Mature',0.05,95000.00,'["High Net Worth","Fund Preference"]',0,NOW(),NOW()),
+-- Table: aum_metrics
+TRUNCATE TABLE `aum_metrics`;
+INSERT INTO `aum_metrics` (`metric_date`, `product_type`, `aum_amount`, `client_count`, `avg_holding`, `inflow`, `yoy_growth`, `created_at`) VALUES
+  ('2025-04-01', 'Retail', 10.25, 10, 10.25, 10.25, 0.05, '2025-04-01 09:01:00'),
+  ('2025-04-02', 'Wealth', 20.50, 20, 20.50, 20.50, 0.10, '2025-04-02 09:02:00'),
+  ('2025-04-03', 'Credit', 30.75, 30, 30.75, 30.75, 0.15, '2025-04-03 09:03:00'),
+  ('2025-04-04', 'Risk', 41.00, 40, 41.00, 41.00, 0.20, '2025-04-04 09:04:00'),
+  ('2025-04-05', 'Operation', 51.25, 50, 51.25, 51.25, 0.25, '2025-04-05 09:05:00');
 
-(10002,'2025-04-12','Lily Lee','310***2222','139****0002',2,32,'26-35','Shanghai','Shanghai',6,'IT Engineer',
- '2021-06-20','Diamond',380.20,120.00,180.00,50.00,80.00,0,1,1,1,5,760,'AA',4,'APP',
- 45,'2025-04-12','High Active','Growth',0.08,42000.00,'["Wealth Preference","High Frequency Trading"]',0,NOW(),NOW()),
+-- Table: avatar_label
+TRUNCATE TABLE `avatar_label`;
+INSERT INTO `avatar_label` (`label_id`, `label_name`, `category`, `color`, `label_desc`, `label_embedding`, `user_count`, `create_time`) VALUES
+  (10001, 'Label 1', 'Retail', 'avatar_label_col', 'English mock description for avatar_label row 1', [0.10, 0.20, 0.30, 0.40], 10, '2025-04-01 09:01:00'),
+  (10002, 'Label 2', 'Wealth', 'avatar_label_col', 'English mock description for avatar_label row 2', [0.20, 0.30, 0.40, 0.50], 20, '2025-04-02 09:02:00'),
+  (10003, 'Label 3', 'Credit', 'avatar_label_col', 'English mock description for avatar_label row 3', [0.30, 0.40, 0.50, 0.60], 30, '2025-04-03 09:03:00'),
+  (10004, 'Label 4', 'Risk', 'avatar_label_col', 'English mock description for avatar_label row 4', [0.40, 0.50, 0.60, 0.70], 40, '2025-04-04 09:04:00'),
+  (10005, 'Label 5', 'Operation', 'avatar_label_col', 'English mock description for avatar_label row 5', [0.50, 0.60, 0.70, 0.80], 50, '2025-04-05 09:05:00');
 
-(10003,'2025-04-12','Fiona Wang','440***3333','136****0003',2,58,'46-55','Guangzhou','Guangdong',4,'Small Business Owner',
- '2019-11-08','Platinum',620.00,400.00,80.00,120.00,120.00,0,1,1,1,6,780,'AA',2,'Branch',
- 3,'2025-03-20','Low Active','Dormant',0.42,55000.00,'["Loan Demand","Remote Login"]',1,NOW(),NOW()),
+-- Table: bank_system_log
+TRUNCATE TABLE `bank_system_log`;
+INSERT INTO `bank_system_log` (`log_id`, `log_date`, `log_time`, `user_id`, `user_name`, `session_id`, `log_source`, `log_level`, `operation`, `ip_address`, `device_info`, `amount`, `result_code`, `error_msg`, `risk_score`, `log_content`, `created_at`) VALUES
+  (10001, '2025-04-01', '2025-04-01 09:01:00', 'bank_sys_001', 'User 1', 'bank_sys_001', 'bank_system_log_log_source_1', 'L1', 'bank_system_log_operation_1', 'bank_system_log_ip_address_1', 'bank_system_log_device_info_1', 10.2500, 'C0001', 'bank_system_log_error_msg_1', 0.05, 'English mock description for bank_system_log row 1', '2025-04-01 09:01:00'),
+  (10002, '2025-04-02', '2025-04-02 09:02:00', 'bank_sys_002', 'User 2', 'bank_sys_002', 'bank_system_log_log_source_2', 'L2', 'bank_system_log_operation_2', 'bank_system_log_ip_address_2', 'bank_system_log_device_info_2', 20.5000, 'C0002', 'bank_system_log_error_msg_2', 0.10, 'English mock description for bank_system_log row 2', '2025-04-02 09:02:00'),
+  (10003, '2025-04-03', '2025-04-03 09:03:00', 'bank_sys_003', 'User 3', 'bank_sys_003', 'bank_system_log_log_source_3', 'L3', 'bank_system_log_operation_3', 'bank_system_log_ip_address_3', 'bank_system_log_device_info_3', 30.7500, 'C0003', 'bank_system_log_error_msg_3', 0.15, 'English mock description for bank_system_log row 3', '2025-04-03 09:03:00'),
+  (10004, '2025-04-04', '2025-04-04 09:04:00', 'bank_sys_004', 'User 4', 'bank_sys_004', 'bank_system_log_log_source_4', 'L4', 'bank_system_log_operation_4', 'bank_system_log_ip_address_4', 'bank_system_log_device_info_4', 41.0000, 'C0004', 'bank_system_log_error_msg_4', 0.20, 'English mock description for bank_system_log row 4', '2025-04-04 09:04:00'),
+  (10005, '2025-04-05', '2025-04-05 09:05:00', 'bank_sys_005', 'User 5', 'bank_sys_005', 'bank_system_log_log_source_5', 'L5', 'bank_system_log_operation_5', 'bank_system_log_ip_address_5', 'bank_system_log_device_info_5', 51.2500, 'C0005', 'bank_system_log_error_msg_5', 0.25, 'English mock description for bank_system_log row 5', '2025-04-05 09:05:00');
 
-(10004,'2025-04-12','Charles Zhao','330***4444','135****0004',1,28,'26-35','Hangzhou','Zhejiang',5,'E-commerce Founder',
- '2024-01-10','Gold',85.30,30.00,35.00,20.00,0,0,1,1,0,3,680,'A',5,'Mini Program',
- 62,'2025-04-12','High Active','New Customer',0.15,8500.00,'["New Customer","Frequent Operation"]',0,NOW(),NOW()),
+-- Table: bank_system_log_ai_result
+TRUNCATE TABLE `bank_system_log_ai_result`;
+INSERT INTO `bank_system_log_ai_result` (`log_id`, `log_content`, `ai_tag`) VALUES
+  (10001, 'English mock description for bank_system_log_ai_result row 1', 'bank_system_log_ai_result_ai_tag_1'),
+  (10002, 'English mock description for bank_system_log_ai_result row 2', 'bank_system_log_ai_result_ai_tag_2'),
+  (10003, 'English mock description for bank_system_log_ai_result row 3', 'bank_system_log_ai_result_ai_tag_3'),
+  (10004, 'English mock description for bank_system_log_ai_result row 4', 'bank_system_log_ai_result_ai_tag_4'),
+  (10005, 'English mock description for bank_system_log_ai_result row 5', 'bank_system_log_ai_result_ai_tag_5');
 
-(10005,'2025-04-12','May Chen','510***5555','137****0005',2,41,'36-45','Chengdu','Sichuan',5,'Doctor',
- '2020-07-22','Diamond',445.80,200.00,150.00,0,95.80,0,1,1,0,5,810,'AAA',2,'APP',
- 15,'2025-04-10','Medium Active','Mature',0.18,48000.00,'["Insurance Preference","Conservative"]',0,NOW(),NOW()),
+-- Table: bank_system_log_bak
+TRUNCATE TABLE `bank_system_log_bak`;
+INSERT INTO `bank_system_log_bak` (`log_id`, `log_time`, `log_level`, `system_module`, `log_content`, `ip_addr`, `device_info`, `ai_tag`) VALUES
+  (10001, '2025-04-01 09:01:00', 'L1', 'bank_system_log_bak_system_module_1', 'English mock description for bank_system_log_bak row 1', 'bank_system_log_bak_ip_addr_1', 'bank_system_log_bak_device_info_1', 'bank_system_log_bak_ai_tag_1'),
+  (10002, '2025-04-02 09:02:00', 'L2', 'bank_system_log_bak_system_module_2', 'English mock description for bank_system_log_bak row 2', 'bank_system_log_bak_ip_addr_2', 'bank_system_log_bak_device_info_2', 'bank_system_log_bak_ai_tag_2'),
+  (10003, '2025-04-03 09:03:00', 'L3', 'bank_system_log_bak_system_module_3', 'English mock description for bank_system_log_bak row 3', 'bank_system_log_bak_ip_addr_3', 'bank_system_log_bak_device_info_3', 'bank_system_log_bak_ai_tag_3'),
+  (10004, '2025-04-04 09:04:00', 'L4', 'bank_system_log_bak_system_module_4', 'English mock description for bank_system_log_bak row 4', 'bank_system_log_bak_ip_addr_4', 'bank_system_log_bak_device_info_4', 'bank_system_log_bak_ai_tag_4'),
+  (10005, '2025-04-05 09:05:00', 'L5', 'bank_system_log_bak_system_module_5', 'English mock description for bank_system_log_bak row 5', 'bank_system_log_bak_ip_addr_5', 'bank_system_log_bak_device_info_5', 'bank_system_log_bak_ai_tag_5');
 
-(10006,'2025-04-12','William Liu','420***6666','133****0006',1,35,'26-35','Wuhan','Hubei',6,'Sales Manager',
- '2022-09-05','Standard',18.50,10.00,5.00,3.50,0,0,1,0,0,2,580,'B',3,'Online Banking',
- 8,'2025-04-08','Low Active','Churn Risk',0.68,1200.00,'[]',0,NOW(),NOW()),
+-- Table: bank_system_log_tagged
+TRUNCATE TABLE `bank_system_log_tagged`;
+INSERT INTO `bank_system_log_tagged` (`log_id`, `log_date`, `log_time`, `user_id`, `user_name`, `log_source`, `operation`, `amount`, `risk_score`, `log_content`, `ai_tag`, `ai_tag_group`, `is_exception`, `is_risk`, `classify_time`, `classify_method`) VALUES
+  (10001, '2025-04-01', '2025-04-01 09:01:00', 'bank_sys_001', 'User 1', 'bank_system_log_tagged_log_sourc', 'bank_system_log_tagged_operation_1', 10.2500, 0.05, 'English mock description for bank_system_log_tagged row 1', 'bank_system_log_tagged_ai_tag_1', 'bank_system_log_', 1, 1, '2025-04-01 09:01:00', 'bank_system_log_'),
+  (10002, '2025-04-02', '2025-04-02 09:02:00', 'bank_sys_002', 'User 2', 'bank_system_log_tagged_log_sourc', 'bank_system_log_tagged_operation_2', 20.5000, 0.10, 'English mock description for bank_system_log_tagged row 2', 'bank_system_log_tagged_ai_tag_2', 'bank_system_log_', 0, 0, '2025-04-02 09:02:00', 'bank_system_log_'),
+  (10003, '2025-04-03', '2025-04-03 09:03:00', 'bank_sys_003', 'User 3', 'bank_system_log_tagged_log_sourc', 'bank_system_log_tagged_operation_3', 30.7500, 0.15, 'English mock description for bank_system_log_tagged row 3', 'bank_system_log_tagged_ai_tag_3', 'bank_system_log_', 1, 1, '2025-04-03 09:03:00', 'bank_system_log_'),
+  (10004, '2025-04-04', '2025-04-04 09:04:00', 'bank_sys_004', 'User 4', 'bank_system_log_tagged_log_sourc', 'bank_system_log_tagged_operation_4', 41.0000, 0.20, 'English mock description for bank_system_log_tagged row 4', 'bank_system_log_tagged_ai_tag_4', 'bank_system_log_', 0, 0, '2025-04-04 09:04:00', 'bank_system_log_'),
+  (10005, '2025-04-05', '2025-04-05 09:05:00', 'bank_sys_005', 'User 5', 'bank_system_log_tagged_log_sourc', 'bank_system_log_tagged_operation_5', 51.2500, 0.25, 'English mock description for bank_system_log_tagged row 5', 'bank_system_log_tagged_ai_tag_5', 'bank_system_log_', 1, 1, '2025-04-05 09:05:00', 'bank_system_log_');
 
-(10007,'2025-04-12','Lina Sun','610***7777','132****0007',2,50,'46-55','Xian','Shaanxi',4,'Teacher',
- '2017-04-18','Platinum',560.00,380.00,60.00,0,120.00,0,1,1,0,4,800,'AAA',1,'Branch',
- 2,'2025-03-01','Low Active','Dormant',0.55,60000.00,'["Large Transfer"]',1,NOW(),NOW()),
+-- Table: bank_system_log_with_ai
+TRUNCATE TABLE `bank_system_log_with_ai`;
+INSERT INTO `bank_system_log_with_ai` (`log_id`, `log_time`, `log_level`, `system_module`, `log_content`, `ai_tag`) VALUES
+  (10001, '2025-04-01 09:01:00', 'L1', 'bank_system_log_with_ai_system_module_1', 'English mock description for bank_system_log_with_ai row 1', 'bank_system_log_with_ai_ai_tag_1'),
+  (10002, '2025-04-02 09:02:00', 'L2', 'bank_system_log_with_ai_system_module_2', 'English mock description for bank_system_log_with_ai row 2', 'bank_system_log_with_ai_ai_tag_2'),
+  (10003, '2025-04-03 09:03:00', 'L3', 'bank_system_log_with_ai_system_module_3', 'English mock description for bank_system_log_with_ai row 3', 'bank_system_log_with_ai_ai_tag_3'),
+  (10004, '2025-04-04 09:04:00', 'L4', 'bank_system_log_with_ai_system_module_4', 'English mock description for bank_system_log_with_ai row 4', 'bank_system_log_with_ai_ai_tag_4'),
+  (10005, '2025-04-05 09:05:00', 'L5', 'bank_system_log_with_ai_system_module_5', 'English mock description for bank_system_log_with_ai row 5', 'bank_system_log_with_ai_ai_tag_5');
 
-(10008,'2025-04-12','Tony Zhou','120***8888','131****0008',1,38,'36-45','Tianjin','Tianjin',5,'Civil Servant',
- '2023-02-28','Gold',125.60,80.00,30.00,0,15.60,0,1,1,0,3,720,'A',3,'APP',
- 20,'2025-04-11','Medium Active','Growth',0.22,15000.00,'["Conservative"]',0,NOW(),NOW()),
+-- Table: biz_metrics
+TRUNCATE TABLE `biz_metrics`;
+INSERT INTO `biz_metrics` (`metric_date`, `metric_type`, `amount`, `yoy_growth`, `mom_growth`, `target_amount`, `created_at`) VALUES
+  ('2025-04-01', 'Revenue', 10.25, 0.05, 0.05, 10.25, '2025-04-01 09:01:00'),
+  ('2025-04-02', 'Cost', 20.50, 0.10, 0.10, 20.50, '2025-04-02 09:02:00'),
+  ('2025-04-03', 'Profit', 30.75, 0.15, 0.15, 30.75, '2025-04-03 09:03:00'),
+  ('2025-04-04', 'GMV', 41.00, 0.20, 0.20, 41.00, '2025-04-04 09:04:00'),
+  ('2025-04-05', 'Fee', 51.25, 0.25, 0.25, 51.25, '2025-04-05 09:05:00');
 
-(10009,'2025-04-12','Ruby Wu','350***9999','130****0009',2,29,'26-35','Fuzhou','Fujian',6,'Accountant',
- '2024-03-15','Gold',92.40,40.00,42.40,0,10.00,0,1,1,0,3,700,'A',4,'APP',
- 35,'2025-04-12','High Active','New Customer',0.10,9800.00,'["Fund Preference"]',0,NOW(),NOW()),
+-- Table: bj_metro_daily_flow
+TRUNCATE TABLE `bj_metro_daily_flow`;
+INSERT INTO `bj_metro_daily_flow` (`flow_date`, `station_id`, `line_id`, `inbound_count`, `outbound_count`, `peak_inbound`) VALUES
+  ('2025-04-01', 'bj_metro_001', 'bj_metro_0', 10, 10, 1),
+  ('2025-04-02', 'bj_metro_002', 'bj_metro_0', 20, 20, 2),
+  ('2025-04-03', 'bj_metro_003', 'bj_metro_0', 30, 30, 3),
+  ('2025-04-04', 'bj_metro_004', 'bj_metro_0', 40, 40, 4),
+  ('2025-04-05', 'bj_metro_005', 'bj_metro_0', 50, 50, 5);
 
-(10010,'2025-04-12','Michael Zheng','370***0010','129****0010',1,55,'46-55','Jinan','Shandong',3,'Business Owner',
- '2016-08-12','Private Banking',2100.80,800.00,600.00,0,700.00,0.80,1,1,0,9,880,'AAA',4,'Branch',
- 5,'2025-04-09','Medium Active','Mature',0.08,180000.00,'["High Net Worth","VIP"]',0,NOW(),NOW());
+-- Table: bj_metro_fault_log
+TRUNCATE TABLE `bj_metro_fault_log`;
+INSERT INTO `bj_metro_fault_log` (`fault_id`, `fault_time`, `line_id`, `station_id`, `device_type`, `fault_type`, `severity`, `description`, `resolve_time`, `resolve_min`, `status`, `handler`) VALUES
+  ('bj_metro_001', '2025-04-01 09:01:00', 'bj_metro_0', 'bj_metro_001', 'Retail', 'Retail', 'bj_metro_fault_log_s', 'English mock description for bj_metro_fault_log row 1', '2025-04-01 09:01:00', 1, 'Normal', 'bj_metro_fault_log_handler_1'),
+  ('bj_metro_002', '2025-04-02 09:02:00', 'bj_metro_0', 'bj_metro_002', 'Wealth', 'Wealth', 'bj_metro_fault_log_s', 'English mock description for bj_metro_fault_log row 2', '2025-04-02 09:02:00', 2, 'Running', 'bj_metro_fault_log_handler_2'),
+  ('bj_metro_003', '2025-04-03 09:03:00', 'bj_metro_0', 'bj_metro_003', 'Credit', 'Credit', 'bj_metro_fault_log_s', 'English mock description for bj_metro_fault_log row 3', '2025-04-03 09:03:00', 3, 'Success', 'bj_metro_fault_log_handler_3'),
+  ('bj_metro_004', '2025-04-04 09:04:00', 'bj_metro_0', 'bj_metro_004', 'Risk', 'Risk', 'bj_metro_fault_log_s', 'English mock description for bj_metro_fault_log row 4', '2025-04-04 09:04:00', 4, 'Active', 'bj_metro_fault_log_handler_4'),
+  ('bj_metro_005', '2025-04-05 09:05:00', 'bj_metro_0', 'bj_metro_005', 'Operation', 'Operation', 'bj_metro_fault_log_s', 'English mock description for bj_metro_fault_log row 5', '2025-04-05 09:05:00', 5, 'Completed', 'bj_metro_fault_log_handler_5');
 
--- ================================================================
--- Mock data - user tag bitmaps
--- ================================================================
-INSERT INTO user_tag (tag_date, tag_category, tag_name, tag_value, user_bitmap, user_count, updated_at)
-VALUES
--- Asset Level
-('2025-04-12','ASSET','asset_level','Private Banking',    TO_BITMAP(10001)|TO_BITMAP(10010), 2, NOW()),
-('2025-04-12','ASSET','asset_level','Diamond',    TO_BITMAP(10002)|TO_BITMAP(10005), 2, NOW()),
-('2025-04-12','ASSET','asset_level','Platinum',    TO_BITMAP(10003)|TO_BITMAP(10007), 2, NOW()),
-('2025-04-12','ASSET','asset_level','Gold',    TO_BITMAP(10004)|TO_BITMAP(10008)|TO_BITMAP(10009), 3, NOW()),
-('2025-04-12','ASSET','asset_level','Standard',       TO_BITMAP(10006), 1, NOW()),
--- Activity Level
-('2025-04-12','BEHAVIOR','active_level','High Active',   TO_BITMAP(10001)|TO_BITMAP(10002)|TO_BITMAP(10004)|TO_BITMAP(10009), 4, NOW()),
-('2025-04-12','BEHAVIOR','active_level','Medium Active',   TO_BITMAP(10005)|TO_BITMAP(10008)|TO_BITMAP(10010), 3, NOW()),
-('2025-04-12','BEHAVIOR','active_level','Low Active',   TO_BITMAP(10003)|TO_BITMAP(10006)|TO_BITMAP(10007), 3, NOW()),
--- Lifecycle
-('2025-04-12','LIFECYCLE','lifecycle_stage','New Customer',       TO_BITMAP(10004)|TO_BITMAP(10009), 2, NOW()),
-('2025-04-12','LIFECYCLE','lifecycle_stage','Growth',       TO_BITMAP(10002)|TO_BITMAP(10008), 2, NOW()),
-('2025-04-12','LIFECYCLE','lifecycle_stage','Mature',       TO_BITMAP(10001)|TO_BITMAP(10005)|TO_BITMAP(10010), 3, NOW()),
-('2025-04-12','LIFECYCLE','lifecycle_stage','Dormant',       TO_BITMAP(10003)|TO_BITMAP(10007), 2, NOW()),
-('2025-04-12','LIFECYCLE','lifecycle_stage','Churn Risk',   TO_BITMAP(10006), 1, NOW()),
--- Preferred Channel
-('2025-04-12','CHANNEL','preferred_channel','APP',        TO_BITMAP(10001)|TO_BITMAP(10002)|TO_BITMAP(10005)|TO_BITMAP(10009), 4, NOW()),
-('2025-04-12','CHANNEL','preferred_channel','Branch',       TO_BITMAP(10003)|TO_BITMAP(10007)|TO_BITMAP(10010), 3, NOW()),
-('2025-04-12','CHANNEL','preferred_channel','Mini Program',     TO_BITMAP(10004), 1, NOW()),
-('2025-04-12','CHANNEL','preferred_channel','Online Banking',       TO_BITMAP(10006)|TO_BITMAP(10008), 2, NOW()),
--- Anomaly Flag
-('2025-04-12','RISK','anomaly_flag','1',           TO_BITMAP(10003)|TO_BITMAP(10007), 2, NOW());
+-- Table: bj_metro_hourly_flow
+TRUNCATE TABLE `bj_metro_hourly_flow`;
+INSERT INTO `bj_metro_hourly_flow` (`flow_date`, `flow_hour`, `line_id`, `total_passengers`, `overcapacity_cnt`) VALUES
+  ('2025-04-01', 1, 'bj_metro_0', 1, 10),
+  ('2025-04-02', 2, 'bj_metro_0', 2, 20),
+  ('2025-04-03', 3, 'bj_metro_0', 3, 30),
+  ('2025-04-04', 4, 'bj_metro_0', 4, 40),
+  ('2025-04-05', 5, 'bj_metro_0', 5, 50);
 
--- ================================================================
--- Mock data - user behavior
--- ================================================================
-INSERT INTO user_behavior (event_id, user_id, event_date, event_time, event_type, event_category,
-    channel, product_code, amount, result_code, session_id, device_type)
-VALUES
-(1001,10001,'2025-04-12','2025-04-12 09:15:00','LOGIN','LOGIN','APP','',0,'SUCCESS','s001','iOS'),
-(1002,10001,'2025-04-12','2025-04-12 09:16:00','BROWSE_PRODUCT','BROWSE','APP','FUND_001',0,'SUCCESS','s001','iOS'),
-(1003,10001,'2025-04-12','2025-04-12 09:20:00','TRANSACTION','TRANSACTION','APP','FUND_001',50000,'SUCCESS','s001','iOS'),
-(1004,10002,'2025-04-12','2025-04-12 10:00:00','LOGIN','LOGIN','APP','',0,'SUCCESS','s002','Android'),
-(1005,10002,'2025-04-12','2025-04-12 10:05:00','TRANSACTION','TRANSACTION','APP','WM_002',100000,'SUCCESS','s002','Android'),
-(1006,10003,'2025-04-11','2025-04-11 14:00:00','LOGIN','LOGIN','Branch','',0,'SUCCESS','s003','PC'),
-(1007,10004,'2025-04-12','2025-04-12 11:00:00','REGISTER','REGISTER','Mini Program','',0,'SUCCESS','s004','Android'),
-(1008,10004,'2025-04-12','2025-04-12 11:05:00','LOGIN','LOGIN','Mini Program','',0,'SUCCESS','s004','Android'),
-(1009,10004,'2025-04-12','2025-04-12 11:10:00','BROWSE_PRODUCT','BROWSE','Mini Program','LOAN_003',0,'SUCCESS','s004','Android'),
-(1010,10005,'2025-04-12','2025-04-12 08:30:00','LOGIN','LOGIN','APP','',0,'SUCCESS','s005','iOS'),
-(1011,10005,'2025-04-12','2025-04-12 08:35:00','BROWSE_PRODUCT','BROWSE','APP','INS_001',0,'SUCCESS','s005','iOS'),
-(1012,10001,'2025-04-11','2025-04-11 15:00:00','LOGIN','LOGIN','APP','',0,'SUCCESS','s006','iOS'),
-(1013,10001,'2025-04-11','2025-04-11 15:05:00','TRANSACTION','TRANSACTION','APP','FUND_002',30000,'SUCCESS','s006','iOS'),
-(1014,10002,'2025-04-11','2025-04-11 16:00:00','LOGIN','LOGIN','APP','',0,'SUCCESS','s007','Android'),
-(1015,10002,'2025-04-11','2025-04-11 16:30:00','APPLY','APPLY','APP','LOAN_001',0,'SUCCESS','s007','Android'),
-(1016,10008,'2025-04-12','2025-04-12 09:00:00','LOGIN','LOGIN','APP','',0,'SUCCESS','s008','Android'),
-(1017,10009,'2025-04-12','2025-04-12 10:30:00','REGISTER','REGISTER','APP','',0,'SUCCESS','s009','iOS'),
-(1018,10009,'2025-04-12','2025-04-12 10:35:00','LOGIN','LOGIN','APP','',0,'SUCCESS','s009','iOS'),
-(1019,10009,'2025-04-12','2025-04-12 10:40:00','BROWSE_PRODUCT','BROWSE','APP','FUND_003',0,'SUCCESS','s009','iOS'),
-(1020,10009,'2025-04-12','2025-04-12 10:45:00','APPLY','APPLY','APP','FUND_003',0,'SUCCESS','s009','iOS'),
-(1021,10009,'2025-04-12','2025-04-12 10:50:00','TRANSACTION','TRANSACTION','APP','FUND_003',20000,'SUCCESS','s009','iOS');
+-- Table: bj_metro_lines
+TRUNCATE TABLE `bj_metro_lines`;
+INSERT INTO `bj_metro_lines` (`line_id`, `line_name`, `line_color`, `total_stations`, `total_length_km`, `open_year`, `daily_capacity_w`, `peak_interval_s`, `offpeak_interval_s`, `status`) VALUES
+  ('bj_metro_0', 'Line 1', 'bj_metro_l', 1, 10.25, 1, 1, 1, 1, 'Normal'),
+  ('bj_metro_0', 'Line 2', 'bj_metro_l', 2, 20.50, 2, 2, 2, 2, 'Running'),
+  ('bj_metro_0', 'Line 3', 'bj_metro_l', 3, 30.75, 3, 3, 3, 3, 'Success'),
+  ('bj_metro_0', 'Line 4', 'bj_metro_l', 4, 41.00, 4, 4, 4, 4, 'Active'),
+  ('bj_metro_0', 'Line 5', 'bj_metro_l', 5, 51.25, 5, 5, 5, 5, 'Completed');
 
--- ================================================================
--- Mock data - logs
--- ================================================================
-INSERT INTO user_log_raw (log_id, log_date, log_time, user_id, session_id, log_level,
-    log_source, log_content, operation_type, ip_address, user_region, created_at)
-VALUES
-(9001,'2025-04-12','2025-04-12 09:15:00',10001,'s001','INFO','APP',
- 'user_id=10001 action=LOGIN device=iOS ip=1.2.3.4 result=SUCCESS','LOGIN','1.2.3.4','Beijing',NOW()),
+-- Table: bj_metro_train_ops
+TRUNCATE TABLE `bj_metro_train_ops`;
+INSERT INTO `bj_metro_train_ops` (`ops_date`, `line_id`, `planned_trains`, `actual_trains`, `punctuality_rate`, `delay_count`, `max_delay_sec`, `total_mileage_km`, `fault_count`) VALUES
+  ('2025-04-01', 'bj_metro_0', 1, 1, 0.0500, 10, 1, 26, 10),
+  ('2025-04-02', 'bj_metro_0', 2, 2, 0.1000, 20, 2, 27, 20),
+  ('2025-04-03', 'bj_metro_0', 3, 3, 0.1500, 30, 3, 28, 30),
+  ('2025-04-04', 'bj_metro_0', 4, 4, 0.2000, 40, 4, 29, 40),
+  ('2025-04-05', 'bj_metro_0', 5, 5, 0.2500, 50, 5, 30, 50);
 
-(9002,'2025-04-12','2025-04-12 09:20:00',10001,'s001','INFO','APP',
- 'user_id=10001 action=TRANSFER amount=50000 to_account=6217****1234 result=SUCCESS','TRANSFER','1.2.3.4','Beijing',NOW()),
+-- Table: db_call_log
+TRUNCATE TABLE `db_call_log`;
+INSERT INTO `db_call_log` (`trace_id`, `span_id`, `call_time`, `operation`, `table_name`, `sql_text`, `duration_ms`, `rows_returned`, `offset_ms`, `error_message`) VALUES
+  ('db_call__001', 'db_call__001', '2025-04-01 09:01:00', 'db_call_log_oper', 'Table 1', 'INSERT INTO target_table SELECT * FROM source_table', 0.0500, 1, 1, 'English mock description for db_call_log row 1'),
+  ('db_call__002', 'db_call__002', '2025-04-02 09:02:00', 'db_call_log_oper', 'Table 2', 'INSERT INTO target_table SELECT * FROM source_table', 0.1000, 2, 2, 'English mock description for db_call_log row 2'),
+  ('db_call__003', 'db_call__003', '2025-04-03 09:03:00', 'db_call_log_oper', 'Table 3', 'INSERT INTO target_table SELECT * FROM source_table', 0.1500, 3, 3, 'English mock description for db_call_log row 3'),
+  ('db_call__004', 'db_call__004', '2025-04-04 09:04:00', 'db_call_log_oper', 'Table 4', 'INSERT INTO target_table SELECT * FROM source_table', 0.2000, 4, 4, 'English mock description for db_call_log row 4'),
+  ('db_call__005', 'db_call__005', '2025-04-05 09:05:00', 'db_call_log_oper', 'Table 5', 'INSERT INTO target_table SELECT * FROM source_table', 0.2500, 5, 5, 'English mock description for db_call_log row 5');
 
-(9003,'2025-04-12','2025-04-12 10:00:00',10002,'s002','INFO','APP',
- 'user_id=10002 action=LOGIN device=Android ip=5.6.7.8 result=SUCCESS','LOGIN','5.6.7.8','Shanghai',NOW()),
+-- Table: fund_basic
+TRUNCATE TABLE `fund_basic`;
+INSERT INTO `fund_basic` (`fund_id`, `fund_name`, `fund_type`, `sector_tag`, `manager_id`, `risk_level`, `fee_rate`, `inception_date`, `nav_yesterday`, `cumulative_nav`, `realtime_iopv`, `iopv_deviation`, `capital_inflow`, `capital_outflow`, `capital_net`, `trade_status`, `ret_1m`, `ret_3m`, `ret_6m`, `ret_1y`, `ret_inception`, `sharpe`, `sortino`, `alpha`, `beta`, `max_drawdown`, `volatility`, `update_ts`) VALUES
+  ('fund_bas_0', 'Fund 1', 'Retail', 'fund_basic_sector_ta', 'fund_bas_0', 1, 0.0500, '2025-04-01', 1.1100, 1.1100, 1.1100, 1.1100, 1.1100, 1.1100, 1.1100, 'Normal', 1.1100, 1.1100, 1.1100, 1.1100, 1.1100, 1.1100, 1.1100, 1.1100, 1.1100, 1.1100, 1.1100, '2025-04-01 09:01:00'),
+  ('fund_bas_0', 'Fund 2', 'Wealth', 'fund_basic_sector_ta', 'fund_bas_0', 2, 0.1000, '2025-04-02', 2.2200, 2.2200, 2.2200, 2.2200, 2.2200, 2.2200, 2.2200, 'Running', 2.2200, 2.2200, 2.2200, 2.2200, 2.2200, 2.2200, 2.2200, 2.2200, 2.2200, 2.2200, 2.2200, '2025-04-02 09:02:00'),
+  ('fund_bas_0', 'Fund 3', 'Credit', 'fund_basic_sector_ta', 'fund_bas_0', 3, 0.1500, '2025-04-03', 3.3300, 3.3300, 3.3300, 3.3300, 3.3300, 3.3300, 3.3300, 'Success', 3.3300, 3.3300, 3.3300, 3.3300, 3.3300, 3.3300, 3.3300, 3.3300, 3.3300, 3.3300, 3.3300, '2025-04-03 09:03:00'),
+  ('fund_bas_0', 'Fund 4', 'Risk', 'fund_basic_sector_ta', 'fund_bas_0', 4, 0.2000, '2025-04-04', 4.4400, 4.4400, 4.4400, 4.4400, 4.4400, 4.4400, 4.4400, 'Active', 4.4400, 4.4400, 4.4400, 4.4400, 4.4400, 4.4400, 4.4400, 4.4400, 4.4400, 4.4400, 4.4400, '2025-04-04 09:04:00'),
+  ('fund_bas_0', 'Fund 5', 'Operation', 'fund_basic_sector_ta', 'fund_bas_0', 5, 0.2500, '2025-04-05', 5.5500, 5.5500, 5.5500, 5.5500, 5.5500, 5.5500, 5.5500, 'Completed', 5.5500, 5.5500, 5.5500, 5.5500, 5.5500, 5.5500, 5.5500, 5.5500, 5.5500, 5.5500, 5.5500, '2025-04-05 09:05:00');
 
-(9004,'2025-04-12','2025-04-12 14:00:00',10003,'s003','WARN','CORE_BANK',
- 'user_id=10003 action=LOGIN ip=221.1.2.3 region=Guangzhou device=PC Remote login detected: historical_region=Guangzhou current_ip_region=Heilongjiang','LOGIN','221.1.2.3','Heilongjiang',NOW()),
+-- Table: fund_manager
+TRUNCATE TABLE `fund_manager`;
+INSERT INTO `fund_manager` (`manager_id`, `name`, `tenure_years`, `aum_bn`, `style_tag`, `turnover_rate`, `avg_alpha`, `total_return`, `max_drawdown`, `sharpe`) VALUES
+  ('fund_man_0', 'Fund Manager 1', 1.1100, 1000.25, 'fund_manager_style_t', 0.0500, 1.1100, 1.1100, 1.1100, 1.1100),
+  ('fund_man_0', 'Fund Manager 2', 2.2200, 2000.50, 'fund_manager_style_t', 0.1000, 2.2200, 2.2200, 2.2200, 2.2200),
+  ('fund_man_0', 'Fund Manager 3', 3.3300, 3000.75, 'fund_manager_style_t', 0.1500, 3.3300, 3.3300, 3.3300, 3.3300),
+  ('fund_man_0', 'Fund Manager 4', 4.4400, 4001.00, 'fund_manager_style_t', 0.2000, 4.4400, 4.4400, 4.4400, 4.4400),
+  ('fund_man_0', 'Fund Manager 5', 5.5500, 5001.25, 'fund_manager_style_t', 0.2500, 5.5500, 5.5500, 5.5500, 5.5500);
 
-(9005,'2025-04-12','2025-04-12 14:05:00',10003,'s003','WARN','CORE_BANK',
- 'user_id=10003 action=TRANSFER amount=800000 to_account=9988****5678 Large transfer alert, risk control review triggered','TRANSFER','221.1.2.3','Heilongjiang',NOW()),
+-- Table: fund_nav_history
+TRUNCATE TABLE `fund_nav_history`;
+INSERT INTO `fund_nav_history` (`trade_date`, `fund_id`, `nav`, `cumulative_nav`, `daily_return`, `benchmark_ret`, `excess_ret`, `drawdown`, `rolling_sharpe`, `rolling_alpha`, `script_name`, `script_color`) VALUES
+  ('2025-04-01', 'fund_nav_0', 1.1100, 1.1100, 1.1100, 1.1100, 1.1100, 1.1100, 1.1100, 1.1100, 'Script 1', 'fund_nav_h'),
+  ('2025-04-02', 'fund_nav_0', 2.2200, 2.2200, 2.2200, 2.2200, 2.2200, 2.2200, 2.2200, 2.2200, 'Script 2', 'fund_nav_h'),
+  ('2025-04-03', 'fund_nav_0', 3.3300, 3.3300, 3.3300, 3.3300, 3.3300, 3.3300, 3.3300, 3.3300, 'Script 3', 'fund_nav_h'),
+  ('2025-04-04', 'fund_nav_0', 4.4400, 4.4400, 4.4400, 4.4400, 4.4400, 4.4400, 4.4400, 4.4400, 'Script 4', 'fund_nav_h'),
+  ('2025-04-05', 'fund_nav_0', 5.5500, 5.5500, 5.5500, 5.5500, 5.5500, 5.5500, 5.5500, 5.5500, 'Script 5', 'fund_nav_h');
 
-(9006,'2025-04-12','2025-04-12 11:00:00',10004,'s004','INFO','Mini Program',
- 'user_id=10004 action=REGISTER channel=Mini Program referral=Campaign A','LOGIN','10.1.1.1','Hangzhou',NOW()),
+-- Table: fund_position
+TRUNCATE TABLE `fund_position`;
+INSERT INTO `fund_position` (`fund_id`, `report_date`, `stock_code`, `stock_name`, `sector_l1`, `weight_pct`, `market_value_mn`, `price_contrib`, `alpha_contrib`) VALUES
+  ('fund_pos_0', '2025-04-01', 'C0001', 'Stock 1', 'fund_position_sector', 0.0500, 1.1100, 1000.25, 1.1100),
+  ('fund_pos_0', '2025-04-02', 'C0002', 'Stock 2', 'fund_position_sector', 0.1000, 2.2200, 2000.50, 2.2200),
+  ('fund_pos_0', '2025-04-03', 'C0003', 'Stock 3', 'fund_position_sector', 0.1500, 3.3300, 3000.75, 3.3300),
+  ('fund_pos_0', '2025-04-04', 'C0004', 'Stock 4', 'fund_position_sector', 0.2000, 4.4400, 4001.00, 4.4400),
+  ('fund_pos_0', '2025-04-05', 'C0005', 'Stock 5', 'fund_position_sector', 0.2500, 5.5500, 5001.25, 5.5500);
 
-(9007,'2025-04-12','2025-04-12 11:10:00',10004,'s004','INFO','Mini Program',
- 'user_id=10004 action=QUERY product=Loan Product amount_range=100k-500k','QUERY','10.1.1.1','Hangzhou',NOW()),
+-- Table: ground_station
+TRUNCATE TABLE `ground_station`;
+INSERT INTO `ground_station` (`station_id`, `station_name`, `location`, `latitude`, `longitude`, `station_type`, `status`, `antenna_count`, `coverage_radius_km`, `daily_contacts`, `uptime_pct`) VALUES
+  (10001, 'Station 1', 'ground_station_location_1', 1.1100, 1.1100, 'Retail', 'Normal', 10, 26, 1, 0.0500),
+  (10002, 'Station 2', 'ground_station_location_2', 2.2200, 2.2200, 'Wealth', 'Running', 20, 27, 2, 0.1000),
+  (10003, 'Station 3', 'ground_station_location_3', 3.3300, 3.3300, 'Credit', 'Success', 30, 28, 3, 0.1500),
+  (10004, 'Station 4', 'ground_station_location_4', 4.4400, 4.4400, 'Risk', 'Active', 40, 29, 4, 0.2000),
+  (10005, 'Station 5', 'ground_station_location_5', 5.5500, 5.5500, 'Operation', 'Completed', 50, 30, 5, 0.2500);
 
-(9008,'2025-04-12','2025-04-12 08:30:00',10005,'s005','INFO','APP',
- 'user_id=10005 action=LOGIN device=iOS result=SUCCESS','LOGIN','20.3.4.5','Chengdu',NOW()),
+-- Table: mdm_jfmat
+TRUNCATE TABLE `mdm_jfmat`;
+INSERT INTO `mdm_jfmat` (`code`, `active`, `property_full`, `material_name`, `thread_spec`, `performance_grade`, `standard_code`) VALUES
+  ('C0001', 1, 'mdm_jfmat_property_full_1', 'Material 1', 'mdm_jfmat_thread_spec_1', 'mdm_jfmat_performance_grade_1', 'C0001'),
+  ('C0002', 2, 'mdm_jfmat_property_full_2', 'Material 2', 'mdm_jfmat_thread_spec_2', 'mdm_jfmat_performance_grade_2', 'C0002'),
+  ('C0003', 3, 'mdm_jfmat_property_full_3', 'Material 3', 'mdm_jfmat_thread_spec_3', 'mdm_jfmat_performance_grade_3', 'C0003'),
+  ('C0004', 4, 'mdm_jfmat_property_full_4', 'Material 4', 'mdm_jfmat_thread_spec_4', 'mdm_jfmat_performance_grade_4', 'C0004'),
+  ('C0005', 5, 'mdm_jfmat_property_full_5', 'Material 5', 'mdm_jfmat_thread_spec_5', 'mdm_jfmat_performance_grade_5', 'C0005');
 
-(9009,'2025-04-12','2025-04-12 22:00:00',10007,'s010','ERROR','CORE_BANK',
- 'user_id=10007 action=TRANSFER amount=500000 Frequent operation alert: fifth transfer within 30 minutes, blocked by risk control','TRANSFER','110.2.3.4','Xian',NOW()),
+-- Table: mfg_metrics_v2
+TRUNCATE TABLE `mfg_metrics_v2`;
+INSERT INTO `mfg_metrics_v2` (`ts`, `machine_id`, `line_id`, `machine_type`, `script_name`, `script_color`, `temperature`, `bearing_temp`, `coolant_temp`, `vibration`, `noise_level`, `spindle_speed`, `feed_rate`, `cutting_force`, `torque`, `motor_current`, `power_kw`, `hydraulic_bar`, `air_pressure`, `coolant_flow`, `tool_wear_pct`, `oee`, `availability`, `performance_rate`, `quality_rate`, `output_count`, `planned_output`, `defect_count`, `scrap_count`, `rework_count`, `cycle_time_s`, `plan_cycle_s`, `run_hours`, `yield_rate`, `first_pass_yield`, `scrap_rate`, `rework_rate`, `cpk_value`, `ppm_value`, `surface_roughness`, `dimensional_error`, `hardness_hrc`, `tensile_strength`, `energy_kwh`, `energy_per_unit`, `co2_kg`, `env_temp`, `env_humidity`, `coolant_consumed_l`, `compressed_air_m3`, `water_l`, `tool_change_cnt`, `alarm_count`, `unplanned_down_min`, `planned_down_min`, `mtbf_h`) VALUES
+  ('2025-04-01 09:01:00', 'mfg_metr_001', 'mfg_metr_0', 'Retail', 'Script 1', 'mfg_metric', 1.1100, 1.1100, 1.1100, 0.0500, 1, 1, 0.0500, 1.1100, 1.1100, 1.1100, 1.1100, 1.1100, 1.1100, 1.1100, 0.0500, 1.1100, 1.1100, 0.0500, 0.0500, 10, 1, 10, 10, 10, 1.1100, 1.1100, 1.1100, 0.0500, 1.1100, 0.0500, 0.0500, 1.1100, 1, 1.1100, 1.1100, 1.1100, 1.1100, 1.1100, 1.1100, 1.1100, 1.1100, 1.1100, 1.1100, 1.1100, 1.1100, 10, 10, 1.1100, 1.1100, 1.1100),
+  ('2025-04-02 09:02:00', 'mfg_metr_002', 'mfg_metr_0', 'Wealth', 'Script 2', 'mfg_metric', 2.2200, 2.2200, 2.2200, 0.1000, 2, 2, 0.1000, 2.2200, 2.2200, 2.2200, 2.2200, 2.2200, 2.2200, 2.2200, 0.1000, 2.2200, 2.2200, 0.1000, 0.1000, 20, 2, 20, 20, 20, 2.2200, 2.2200, 2.2200, 0.1000, 2.2200, 0.1000, 0.1000, 2.2200, 2, 2.2200, 2.2200, 2.2200, 2.2200, 2.2200, 2.2200, 2.2200, 2.2200, 2.2200, 2.2200, 2.2200, 2.2200, 20, 20, 2.2200, 2.2200, 2.2200),
+  ('2025-04-03 09:03:00', 'mfg_metr_003', 'mfg_metr_0', 'Credit', 'Script 3', 'mfg_metric', 3.3300, 3.3300, 3.3300, 0.1500, 3, 3, 0.1500, 3.3300, 3.3300, 3.3300, 3.3300, 3.3300, 3.3300, 3.3300, 0.1500, 3.3300, 3.3300, 0.1500, 0.1500, 30, 3, 30, 30, 30, 3.3300, 3.3300, 3.3300, 0.1500, 3.3300, 0.1500, 0.1500, 3.3300, 3, 3.3300, 3.3300, 3.3300, 3.3300, 3.3300, 3.3300, 3.3300, 3.3300, 3.3300, 3.3300, 3.3300, 3.3300, 30, 30, 3.3300, 3.3300, 3.3300),
+  ('2025-04-04 09:04:00', 'mfg_metr_004', 'mfg_metr_0', 'Risk', 'Script 4', 'mfg_metric', 4.4400, 4.4400, 4.4400, 0.2000, 4, 4, 0.2000, 4.4400, 4.4400, 4.4400, 4.4400, 4.4400, 4.4400, 4.4400, 0.2000, 4.4400, 4.4400, 0.2000, 0.2000, 40, 4, 40, 40, 40, 4.4400, 4.4400, 4.4400, 0.2000, 4.4400, 0.2000, 0.2000, 4.4400, 4, 4.4400, 4.4400, 4.4400, 4.4400, 4.4400, 4.4400, 4.4400, 4.4400, 4.4400, 4.4400, 4.4400, 4.4400, 40, 40, 4.4400, 4.4400, 4.4400),
+  ('2025-04-05 09:05:00', 'mfg_metr_005', 'mfg_metr_0', 'Operation', 'Script 5', 'mfg_metric', 5.5500, 5.5500, 5.5500, 0.2500, 5, 5, 0.2500, 5.5500, 5.5500, 5.5500, 5.5500, 5.5500, 5.5500, 5.5500, 0.2500, 5.5500, 5.5500, 0.2500, 0.2500, 50, 5, 50, 50, 50, 5.5500, 5.5500, 5.5500, 0.2500, 5.5500, 0.2500, 0.2500, 5.5500, 5, 5.5500, 5.5500, 5.5500, 5.5500, 5.5500, 5.5500, 5.5500, 5.5500, 5.5500, 5.5500, 5.5500, 5.5500, 50, 50, 5.5500, 5.5500, 5.5500);
 
-(9010,'2025-04-12','2025-04-12 09:00:00',10008,'s008','INFO','APP',
- 'user_id=10008 action=LOGIN action=BROWSE_PRODUCT product=Wealth Product result=SUCCESS','LOGIN','30.4.5.6','Tianjin',NOW());
+-- Table: mfg_production_metrics
+TRUNCATE TABLE `mfg_production_metrics`;
+INSERT INTO `mfg_production_metrics` (`ts`, `machine_id`, `line_id`, `temperature`, `vibration`, `output_count`, `defect_count`, `oee`, `yield_rate`, `script_name`, `script_color`) VALUES
+  ('2025-04-01 09:01:00', 'mfg_prod_001', 'mfg_prod_0', 1.1100, 0.0500, 10, 10, 1.1100, 0.0500, 'Script 1', 'mfg_produc'),
+  ('2025-04-02 09:02:00', 'mfg_prod_002', 'mfg_prod_0', 2.2200, 0.1000, 20, 20, 2.2200, 0.1000, 'Script 2', 'mfg_produc'),
+  ('2025-04-03 09:03:00', 'mfg_prod_003', 'mfg_prod_0', 3.3300, 0.1500, 30, 30, 3.3300, 0.1500, 'Script 3', 'mfg_produc'),
+  ('2025-04-04 09:04:00', 'mfg_prod_004', 'mfg_prod_0', 4.4400, 0.2000, 40, 40, 4.4400, 0.2000, 'Script 4', 'mfg_produc'),
+  ('2025-04-05 09:05:00', 'mfg_prod_005', 'mfg_prod_0', 5.5500, 0.2500, 50, 50, 5.5500, 0.2500, 'Script 5', 'mfg_produc');
 
--- ================================================================
--- Mock data - AI log tags
--- ================================================================
-INSERT INTO user_log_tag (log_id, log_date, user_id, log_time, log_type, intent_tag,
-    anomaly_tag, risk_level, ai_raw_result, tag_source, created_at)
-VALUES
-(9001,'2025-04-12',10001,'2025-04-12 09:15:00','Login Log','Account Setting','Normal','Low Risk',
- '{"log_type":"Login Log","intent":"Account Setting","anomaly_type":"Normal","risk_score":0.05}','PYTHON_API',NOW()),
+-- Table: news_article
+TRUNCATE TABLE `news_article`;
+INSERT INTO `news_article` (`article_id`, `publish_ts`, `title`, `content`, `source`, `sector_tag`, `ai_summary`, `summarized`, `ai_sentiment`, `sentiment_score`, `sentiment_done`, `ai_extract`, `extracted`, `ai_method`) VALUES
+  ('news_art_001', '2025-04-01 09:01:00', 'Title 1', 'English mock description for news_article row 1', 'news_article_source_1', 'news_article_sector_tag_1', 'news_article_ai_summary_1', 1, '2025-04-01', 1, 1, 'news_article_ai_extract_1', 1, 'news_article_ai_meth'),
+  ('news_art_002', '2025-04-02 09:02:00', 'Title 2', 'English mock description for news_article row 2', 'news_article_source_2', 'news_article_sector_tag_2', 'news_article_ai_summary_2', 2, '2025-04-02', 2, 2, 'news_article_ai_extract_2', 2, 'news_article_ai_meth'),
+  ('news_art_003', '2025-04-03 09:03:00', 'Title 3', 'English mock description for news_article row 3', 'news_article_source_3', 'news_article_sector_tag_3', 'news_article_ai_summary_3', 3, '2025-04-03', 3, 3, 'news_article_ai_extract_3', 3, 'news_article_ai_meth'),
+  ('news_art_004', '2025-04-04 09:04:00', 'Title 4', 'English mock description for news_article row 4', 'news_article_source_4', 'news_article_sector_tag_4', 'news_article_ai_summary_4', 4, '2025-04-04', 4, 4, 'news_article_ai_extract_4', 4, 'news_article_ai_meth'),
+  ('news_art_005', '2025-04-05 09:05:00', 'Title 5', 'English mock description for news_article row 5', 'news_article_source_5', 'news_article_sector_tag_5', 'news_article_ai_summary_5', 5, '2025-04-05', 5, 5, 'news_article_ai_extract_5', 5, 'news_article_ai_meth');
 
-(9002,'2025-04-12',10001,'2025-04-12 09:20:00','Transfer Log','Transfer','Normal','Low Risk',
- '{"log_type":"Transfer Log","intent":"Transfer","anomaly_type":"Normal","risk_score":0.1}','PYTHON_API',NOW()),
+-- Table: position_metrics
+TRUNCATE TABLE `position_metrics`;
+INSERT INTO `position_metrics` (`metric_date`, `asset_class`, `position_amount`, `position_ratio`, `market_value`, `profit_loss`, `pl_ratio`, `created_at`) VALUES
+  ('2025-04-01', 'position_metrics_asset_class_1', 10.25, 0.05, 10.25, 10.25, 0.05, '2025-04-01 09:01:00'),
+  ('2025-04-02', 'position_metrics_asset_class_2', 20.50, 0.10, 20.50, 20.50, 0.10, '2025-04-02 09:02:00'),
+  ('2025-04-03', 'position_metrics_asset_class_3', 30.75, 0.15, 30.75, 30.75, 0.15, '2025-04-03 09:03:00'),
+  ('2025-04-04', 'position_metrics_asset_class_4', 41.00, 0.20, 41.00, 41.00, 0.20, '2025-04-04 09:04:00'),
+  ('2025-04-05', 'position_metrics_asset_class_5', 51.25, 0.25, 51.25, 51.25, 0.25, '2025-04-05 09:05:00');
 
-(9003,'2025-04-12',10002,'2025-04-12 10:00:00','Login Log','Account Setting','Normal','Low Risk',
- '{"log_type":"Login Log","intent":"Account Setting","anomaly_type":"Normal","risk_score":0.05}','PYTHON_API',NOW()),
+-- Table: product_marketing
+TRUNCATE TABLE `product_marketing`;
+INSERT INTO `product_marketing` (`metric_date`, `product_name`, `category`, `sales_amount`, `sales_count`, `success_rate`, `customer_acquisition`, `repurchase_rate`, `rating`, `created_at`) VALUES
+  ('2025-04-01', 'Product 1', 'Retail', 10.25, 10, 0.05, 1, 0.05, 10.2, '2025-04-01 09:01:00'),
+  ('2025-04-02', 'Product 2', 'Wealth', 20.50, 20, 0.10, 2, 0.10, 20.5, '2025-04-02 09:02:00'),
+  ('2025-04-03', 'Product 3', 'Credit', 30.75, 30, 0.15, 3, 0.15, 30.8, '2025-04-03 09:03:00'),
+  ('2025-04-04', 'Product 4', 'Risk', 41.00, 40, 0.20, 4, 0.20, 41.0, '2025-04-04 09:04:00'),
+  ('2025-04-05', 'Product 5', 'Operation', 51.25, 50, 0.25, 5, 0.25, 51.2, '2025-04-05 09:05:00');
 
-(9004,'2025-04-12',10003,'2025-04-12 14:00:00','Anomaly Log','Account Setting','Remote Login','High Risk',
- '{"log_type":"Anomaly Log","intent":"Account Setting","anomaly_type":"Remote Login","risk_score":0.88}','PYTHON_API',NOW()),
+-- Table: risk_metrics
+TRUNCATE TABLE `risk_metrics`;
+INSERT INTO `risk_metrics` (`metric_date`, `risk_level`, `exposure_amount`, `default_count`, `default_rate`, `coverage_ratio`, `overdue_amount`, `created_at`) VALUES
+  ('2025-04-01', 'Low', 10.25, 10, 0.0500, 26, 10.25, '2025-04-01 09:01:00'),
+  ('2025-04-02', 'Medium', 20.50, 20, 0.1000, 27, 20.50, '2025-04-02 09:02:00'),
+  ('2025-04-03', 'High', 30.75, 30, 0.1500, 28, 30.75, '2025-04-03 09:03:00'),
+  ('2025-04-04', 'Critical', 41.00, 40, 0.2000, 29, 41.00, '2025-04-04 09:04:00'),
+  ('2025-04-05', 'Low', 51.25, 50, 0.2500, 30, 51.25, '2025-04-05 09:05:00');
 
-(9005,'2025-04-12',10003,'2025-04-12 14:05:00','Transaction Log','Transfer','Large Transfer','High Risk',
- '{"log_type":"Transaction Log","intent":"Transfer","anomaly_type":"Large Transfer","risk_score":0.92}','PYTHON_API',NOW()),
+-- Table: satellite_collect_data
+TRUNCATE TABLE `satellite_collect_data`;
+INSERT INTO `satellite_collect_data` (`id`, `satellite_id`, `satellite_name`, `satellite_type`, `sensor_id`, `collect_time`, `data_type`, `target_id`, `target_type`, `longitude`, `latitude`, `data_quality`, `data_size`, `status`, `task_id`, `created_at`) VALUES
+  (10001, 'satellit_001', 'Satellite 1', 'Retail', 'satellit_001', 1, 'Retail', 'satellit_001', 'Retail', 10.250000, 10.250000, 1, 1, 'Normal', 'satellit_001', 1),
+  (10002, 'satellit_002', 'Satellite 2', 'Wealth', 'satellit_002', 2, 'Wealth', 'satellit_002', 'Wealth', 20.500000, 20.500000, 2, 2, 'Running', 'satellit_002', 2),
+  (10003, 'satellit_003', 'Satellite 3', 'Credit', 'satellit_003', 3, 'Credit', 'satellit_003', 'Credit', 30.750000, 30.750000, 3, 3, 'Success', 'satellit_003', 3),
+  (10004, 'satellit_004', 'Satellite 4', 'Risk', 'satellit_004', 4, 'Risk', 'satellit_004', 'Risk', 41.000000, 41.000000, 4, 4, 'Active', 'satellit_004', 4),
+  (10005, 'satellit_005', 'Satellite 5', 'Operation', 'satellit_005', 5, 'Operation', 'satellit_005', 'Operation', 51.250000, 51.250000, 5, 5, 'Completed', 'satellit_005', 5);
 
-(9006,'2025-04-12',10004,'2025-04-12 11:00:00','Login Log','Account Setting','Normal','Low Risk',
- '{"log_type":"Login Log","intent":"Account Setting","anomaly_type":"Normal","risk_score":0.05}','PYTHON_API',NOW()),
+-- Table: satellite_info
+TRUNCATE TABLE `satellite_info`;
+INSERT INTO `satellite_info` (`satellite_id`, `satellite_name`, `satellite_type`, `orbit_type`, `launch_date`, `status`, `operator`, `country`, `altitude_km`, `inclination_deg`, `period_min`, `payload_type`, `mass_kg`) VALUES
+  (10001, 'Satellite 1', 'Retail', 'Retail', '2025-04-01', 'Normal', 'satellite_info_operator_1', 'satellite_info_count', 1.1100, 1.1100, 1.1100, 'Retail', 1.1100),
+  (10002, 'Satellite 2', 'Wealth', 'Wealth', '2025-04-02', 'Running', 'satellite_info_operator_2', 'satellite_info_count', 2.2200, 2.2200, 2.2200, 'Wealth', 2.2200),
+  (10003, 'Satellite 3', 'Credit', 'Credit', '2025-04-03', 'Success', 'satellite_info_operator_3', 'satellite_info_count', 3.3300, 3.3300, 3.3300, 'Credit', 3.3300),
+  (10004, 'Satellite 4', 'Risk', 'Risk', '2025-04-04', 'Active', 'satellite_info_operator_4', 'satellite_info_count', 4.4400, 4.4400, 4.4400, 'Risk', 4.4400),
+  (10005, 'Satellite 5', 'Operation', 'Operation', '2025-04-05', 'Completed', 'satellite_info_operator_5', 'satellite_info_count', 5.5500, 5.5500, 5.5500, 'Operation', 5.5500);
 
-(9007,'2025-04-12',10004,'2025-04-12 11:10:00','Query Log','Loan Application','Normal','Low Risk',
- '{"log_type":"Query Log","intent":"Loan Application","anomaly_type":"Normal","risk_score":0.08}','PYTHON_API',NOW()),
+-- Table: satellite_task
+TRUNCATE TABLE `satellite_task`;
+INSERT INTO `satellite_task` (`task_id`, `satellite_id`, `task_type`, `task_time`, `target_area`, `priority`, `status`, `duration_min`, `data_volume_gb`, `resolution_m`, `coverage_km2`) VALUES
+  (10001, 10001, 'Retail', '2025-04-01 09:01:00', 'satellite_task_target_area_1', 1, 'Normal', 0.0500, 1.1100, 1.1100, 26),
+  (10002, 10002, 'Wealth', '2025-04-02 09:02:00', 'satellite_task_target_area_2', 2, 'Running', 0.1000, 2.2200, 2.2200, 27),
+  (10003, 10003, 'Credit', '2025-04-03 09:03:00', 'satellite_task_target_area_3', 3, 'Success', 0.1500, 3.3300, 3.3300, 28),
+  (10004, 10004, 'Risk', '2025-04-04 09:04:00', 'satellite_task_target_area_4', 4, 'Active', 0.2000, 4.4400, 4.4400, 29),
+  (10005, 10005, 'Operation', '2025-04-05 09:05:00', 'satellite_task_target_area_5', 5, 'Completed', 0.2500, 5.5500, 5.5500, 30);
 
-(9008,'2025-04-12',10005,'2025-04-12 08:30:00','Login Log','Account Setting','Normal','Low Risk',
- '{"log_type":"Login Log","intent":"Account Setting","anomaly_type":"Normal","risk_score":0.03}','PYTHON_API',NOW()),
+-- Table: satellite_telemetry
+TRUNCATE TABLE `satellite_telemetry`;
+INSERT INTO `satellite_telemetry` (`record_id`, `satellite_id`, `record_time`, `battery_pct`, `solar_power_w`, `cpu_temp_c`, `signal_strength_db`, `orbit_altitude_km`, `attitude_roll`, `attitude_pitch`, `attitude_yaw`, `anomaly_flag`) VALUES
+  (10001, 10001, '2025-04-01 09:01:00', 0.0500, 1.1100, 1.1100, 1.1100, 1.1100, 1.1100, 1.1100, 1.1100, 1),
+  (10002, 10002, '2025-04-02 09:02:00', 0.1000, 2.2200, 2.2200, 2.2200, 2.2200, 2.2200, 2.2200, 2.2200, 0),
+  (10003, 10003, '2025-04-03 09:03:00', 0.1500, 3.3300, 3.3300, 3.3300, 3.3300, 3.3300, 3.3300, 3.3300, 1),
+  (10004, 10004, '2025-04-04 09:04:00', 0.2000, 4.4400, 4.4400, 4.4400, 4.4400, 4.4400, 4.4400, 4.4400, 0),
+  (10005, 10005, '2025-04-05 09:05:00', 0.2500, 5.5500, 5.5500, 5.5500, 5.5500, 5.5500, 5.5500, 5.5500, 1);
 
-(9009,'2025-04-12',10007,'2025-04-12 22:00:00','Anomaly Log','Transfer','Frequent Operation','High Risk',
- '{"log_type":"Anomaly Log","intent":"Transfer","anomaly_type":"Frequent Operation","risk_score":0.95}','PYTHON_API',NOW()),
+-- Table: satellite_telemetry_hf
+TRUNCATE TABLE `satellite_telemetry_hf`;
+INSERT INTO `satellite_telemetry_hf` (`record_id`, `satellite_id`, `record_time`, `battery_pct`, `solar_power_w`, `cpu_temp_c`, `thermal_payload_c`, `signal_strength_db`, `link_snr_db`, `orbit_altitude_km`, `attitude_error_deg`, `data_buffer_pct`, `anomaly_flag`) VALUES
+  (10001, 10001, '2025-04-01 09:01:00', 0.0500, 1.1100, 1.1100, 1.1100, 1.1100, 1.1100, 1.1100, 1.1100, 0.0500, 1),
+  (10002, 10002, '2025-04-02 09:02:00', 0.1000, 2.2200, 2.2200, 2.2200, 2.2200, 2.2200, 2.2200, 2.2200, 0.1000, 0),
+  (10003, 10003, '2025-04-03 09:03:00', 0.1500, 3.3300, 3.3300, 3.3300, 3.3300, 3.3300, 3.3300, 3.3300, 0.1500, 1),
+  (10004, 10004, '2025-04-04 09:04:00', 0.2000, 4.4400, 4.4400, 4.4400, 4.4400, 4.4400, 4.4400, 4.4400, 0.2000, 0),
+  (10005, 10005, '2025-04-05 09:05:00', 0.2500, 5.5500, 5.5500, 5.5500, 5.5500, 5.5500, 5.5500, 5.5500, 0.2500, 1);
 
-(9010,'2025-04-12',10008,'2025-04-12 09:00:00','Login Log','Buy Wealth Product','Normal','Low Risk',
- '{"log_type":"Login Log","intent":"Buy Wealth Product","anomaly_type":"Normal","risk_score":0.06}','PYTHON_API',NOW());
+-- Table: sec_account_snapshot
+TRUNCATE TABLE `sec_account_snapshot`;
+INSERT INTO `sec_account_snapshot` (`account_id`, `client_name`, `branch_id`, `branch_name`, `rm_name`, `client_tier`, `risk_level`, `total_asset`, `cash_amt`, `market_value`, `unrealized_pnl`, `pnl_pct`, `margin_debt`, `maintenance_ratio`, `concentration_pct`, `position_count`, `trade_count_today`, `turnover_today`, `last_trade_ts`, `update_ts`) VALUES
+  ('sec_acco_001', 'Client 1', 'sec_acco_0', 'Branch 1', 'Rm 1', 'sec_account_snapshot', 1, 1.1100, 1.1100, 1.1100, 1.1100, 0.0500, 1.1100, 0.0500, 0.0500, 10, 10, 1.1100, '2025-04-01 09:01:00', '2025-04-01 09:01:00'),
+  ('sec_acco_002', 'Client 2', 'sec_acco_0', 'Branch 2', 'Rm 2', 'sec_account_snapshot', 2, 2.2200, 2.2200, 2.2200, 2.2200, 0.1000, 2.2200, 0.1000, 0.1000, 20, 20, 2.2200, '2025-04-02 09:02:00', '2025-04-02 09:02:00'),
+  ('sec_acco_003', 'Client 3', 'sec_acco_0', 'Branch 3', 'Rm 3', 'sec_account_snapshot', 3, 3.3300, 3.3300, 3.3300, 3.3300, 0.1500, 3.3300, 0.1500, 0.1500, 30, 30, 3.3300, '2025-04-03 09:03:00', '2025-04-03 09:03:00'),
+  ('sec_acco_004', 'Client 4', 'sec_acco_0', 'Branch 4', 'Rm 4', 'sec_account_snapshot', 4, 4.4400, 4.4400, 4.4400, 4.4400, 0.2000, 4.4400, 0.2000, 0.2000, 40, 40, 4.4400, '2025-04-04 09:04:00', '2025-04-04 09:04:00'),
+  ('sec_acco_005', 'Client 5', 'sec_acco_0', 'Branch 5', 'Rm 5', 'sec_account_snapshot', 5, 5.5500, 5.5500, 5.5500, 5.5500, 0.2500, 5.5500, 0.2500, 0.2500, 50, 50, 5.5500, '2025-04-05 09:05:00', '2025-04-05 09:05:00');
 
--- ================================================================
--- Mock data - tag dictionary
--- ================================================================
-INSERT INTO tag_dict (tag_id, tag_category, tag_name, tag_label, tag_desc, value_type,
-    value_options, source_table, source_field, is_ai_tag, enable_bitmap, status, sort_order, created_at)
-VALUES
-(1,'ASSET','asset_level','Asset Level','Customer AUM tier classification','ENUM',
- '["Private Banking","Diamond","Platinum","Gold","Standard"]','user_wide','asset_level',0,1,1,1,NOW()),
-(2,'BEHAVIOR','active_level','Activity Level','Customer app activity level','ENUM',
- '["High Active","Medium Active","Low Active","Dormant"]','user_wide','active_level',0,1,1,2,NOW()),
-(3,'LIFECYCLE','lifecycle_stage','Lifecycle','Customer lifecycle stage','ENUM',
- '["New Customer","Growth","Mature","Dormant","Churn Risk"]','user_wide','lifecycle_stage',0,1,1,3,NOW()),
-(4,'CHANNEL','preferred_channel','Preferred Channel','Most used service channel','ENUM',
- '["APP","Branch","Mini Program","Online Banking"]','user_wide','preferred_channel',0,1,1,4,NOW()),
-(5,'RISK','anomaly_flag','Anomaly Flag','Whether abnormal behavior exists','BOOLEAN',
- '["0","1"]','user_wide','anomaly_flag',0,1,1,5,NOW()),
-(6,'LOG_AI','log_type','Log Type','Log operation type identified by AI','ENUM',
- '["Login Log","Transaction Log","Query Log","Transfer Log","Anomaly Log"]','user_log_tag','log_type',1,0,1,6,NOW()),
-(7,'LOG_AI','intent_tag','Intent','User operation intent identified by AI','ENUM',
- '["Balance Inquiry","Transfer","Buy Wealth Product","Loan Application","Account Setting","Other"]','user_log_tag','intent_tag',1,0,1,7,NOW()),
-(8,'LOG_AI','anomaly_tag','Anomaly Tag','Anomaly type identified by AI','ENUM',
- '["Normal","Remote Login","Large Transfer","Frequent Operation","Suspicious Account"]','user_log_tag','anomaly_tag',1,1,1,8,NOW()),
-(9,'LOG_AI','risk_level','Risk Level','Risk level evaluated by AI','ENUM',
- '["Low Risk","Medium Risk","High Risk"]','user_log_tag','risk_level',1,1,1,9,NOW());
+-- Table: sec_branch_metrics
+TRUNCATE TABLE `sec_branch_metrics`;
+INSERT INTO `sec_branch_metrics` (`ts`, `branch_id`, `branch_name`, `turnover_amt`, `commission_amt`, `buy_amt`, `sell_amt`, `net_inflow_amt`, `active_clients`, `margin_clients`, `avg_maintenance`, `phase_name`) VALUES
+  ('2025-04-01 09:01:00', 'sec_bran_0', 'Branch 1', 1.1100, 1.1100, 1.1100, 1.1100, 1.1100, 1, 1, 1.1100, 'Phase 1'),
+  ('2025-04-02 09:02:00', 'sec_bran_0', 'Branch 2', 2.2200, 2.2200, 2.2200, 2.2200, 2.2200, 2, 2, 2.2200, 'Phase 2'),
+  ('2025-04-03 09:03:00', 'sec_bran_0', 'Branch 3', 3.3300, 3.3300, 3.3300, 3.3300, 3.3300, 3, 3, 3.3300, 'Phase 3'),
+  ('2025-04-04 09:04:00', 'sec_bran_0', 'Branch 4', 4.4400, 4.4400, 4.4400, 4.4400, 4.4400, 4, 4, 4.4400, 'Phase 4'),
+  ('2025-04-05 09:05:00', 'sec_bran_0', 'Branch 5', 5.5500, 5.5500, 5.5500, 5.5500, 5.5500, 5, 5, 5.5500, 'Phase 5');
 
+-- Table: sec_market_minute
+TRUNCATE TABLE `sec_market_minute`;
+INSERT INTO `sec_market_minute` (`ts`, `symbol`, `security_name`, `sector_name`, `last_price`, `change_pct`, `volume_lot`, `turnover_amt`, `net_inflow_amt`, `phase_name`) VALUES
+  ('2025-04-01 09:01:00', 'C0001', 'Security 1', 'Sector 1', 1000.25, 0.0500, 1, 1.1100, 1.1100, 'Phase 1'),
+  ('2025-04-02 09:02:00', 'C0002', 'Security 2', 'Sector 2', 2000.50, 0.1000, 2, 2.2200, 2.2200, 'Phase 2'),
+  ('2025-04-03 09:03:00', 'C0003', 'Security 3', 'Sector 3', 3000.75, 0.1500, 3, 3.3300, 3.3300, 'Phase 3'),
+  ('2025-04-04 09:04:00', 'C0004', 'Security 4', 'Sector 4', 4001.00, 0.2000, 4, 4.4400, 4.4400, 'Phase 4'),
+  ('2025-04-05 09:05:00', 'C0005', 'Security 5', 'Sector 5', 5001.25, 0.2500, 5, 5.5500, 5.5500, 'Phase 5');
 
--- ================================================================
--- Dashboard / management overview mock data
--- ================================================================
-USE bank_cdp;
+-- Table: sec_position_snapshot
+TRUNCATE TABLE `sec_position_snapshot`;
+INSERT INTO `sec_position_snapshot` (`account_id`, `symbol`, `security_name`, `sector_name`, `branch_id`, `branch_name`, `qty`, `available_qty`, `avg_cost`, `last_price`, `market_value`, `cost_amount`, `unrealized_pnl`, `pnl_pct`, `weight_pct`, `update_ts`) VALUES
+  ('sec_posi_001', 'C0001', 'Security 1', 'Sector 1', 'sec_posi_0', 'Branch 1', 1, 1, 1000.25, 1000.25, 1.1100, 1000.25, 1.1100, 0.0500, 0.0500, '2025-04-01 09:01:00'),
+  ('sec_posi_002', 'C0002', 'Security 2', 'Sector 2', 'sec_posi_0', 'Branch 2', 2, 2, 2000.50, 2000.50, 2.2200, 2000.50, 2.2200, 0.1000, 0.1000, '2025-04-02 09:02:00'),
+  ('sec_posi_003', 'C0003', 'Security 3', 'Sector 3', 'sec_posi_0', 'Branch 3', 3, 3, 3000.75, 3000.75, 3.3300, 3000.75, 3.3300, 0.1500, 0.1500, '2025-04-03 09:03:00'),
+  ('sec_posi_004', 'C0004', 'Security 4', 'Sector 4', 'sec_posi_0', 'Branch 4', 4, 4, 4001.00, 4001.00, 4.4400, 4001.00, 4.4400, 0.2000, 0.2000, '2025-04-04 09:04:00'),
+  ('sec_posi_005', 'C0005', 'Security 5', 'Sector 5', 'sec_posi_0', 'Branch 5', 5, 5, 5001.25, 5001.25, 5.5500, 5001.25, 5.5500, 0.2500, 0.2500, '2025-04-05 09:05:00');
 
-INSERT INTO biz_metrics VALUES
-('2024-04-01', 'Revenue', 85000000, 12.5, 3.2, 80000000, CURRENT_TIMESTAMP),
-('2024-04-02', 'Revenue', 87500000, 13.1, 2.9, 80000000, CURRENT_TIMESTAMP),
-('2024-04-03', 'Revenue', 89200000, 14.2, 1.9, 80000000, CURRENT_TIMESTAMP),
-('2024-04-04', 'Revenue', 91100000, 15.3, 2.1, 80000000, CURRENT_TIMESTAMP),
-('2024-04-05', 'Revenue', 93500000, 16.8, 2.6, 80000000, CURRENT_TIMESTAMP),
-('2024-04-01', 'Cost', 32000000, -2.1, 1.5, 30000000, CURRENT_TIMESTAMP),
-('2024-04-02', 'Cost', 31800000, -1.9, -0.6, 30000000, CURRENT_TIMESTAMP),
-('2024-04-03', 'Cost', 31500000, -2.3, -0.9, 30000000, CURRENT_TIMESTAMP),
-('2024-04-04', 'Cost', 31200000, -2.5, -0.9, 30000000, CURRENT_TIMESTAMP),
-('2024-04-05', 'Cost', 31000000, -2.8, -0.6, 30000000, CURRENT_TIMESTAMP),
-('2024-04-01', 'Profit', 53000000, 21.2, 4.8, 50000000, CURRENT_TIMESTAMP),
-('2024-04-02', 'Profit', 55700000, 23.5, 5.1, 50000000, CURRENT_TIMESTAMP),
-('2024-04-03', 'Profit', 57700000, 25.1, 3.6, 50000000, CURRENT_TIMESTAMP),
-('2024-04-04', 'Profit', 59900000, 27.8, 3.8, 50000000, CURRENT_TIMESTAMP),
-('2024-04-05', 'Profit', 62500000, 29.6, 4.3, 50000000, CURRENT_TIMESTAMP);
+-- Table: sec_risk_snapshot
+TRUNCATE TABLE `sec_risk_snapshot`;
+INSERT INTO `sec_risk_snapshot` (`alert_id`, `account_id`, `client_name`, `branch_id`, `branch_name`, `alert_type`, `risk_level`, `metric_value`, `threshold_value`, `position_symbol`, `position_name`, `suggestion`, `status`, `update_ts`) VALUES
+  ('sec_risk_001', 'sec_risk_001', 'Client 1', 'sec_risk_0', 'Branch 1', 'Retail', 'Low', 1.1100, 1.1100, 'C0001', 'Position 1', 'sec_risk_snapshot_suggestion_1', 'Normal', '2025-04-01 09:01:00'),
+  ('sec_risk_002', 'sec_risk_002', 'Client 2', 'sec_risk_0', 'Branch 2', 'Wealth', 'Medium', 2.2200, 2.2200, 'C0002', 'Position 2', 'sec_risk_snapshot_suggestion_2', 'Running', '2025-04-02 09:02:00'),
+  ('sec_risk_003', 'sec_risk_003', 'Client 3', 'sec_risk_0', 'Branch 3', 'Credit', 'High', 3.3300, 3.3300, 'C0003', 'Position 3', 'sec_risk_snapshot_suggestion_3', 'Success', '2025-04-03 09:03:00'),
+  ('sec_risk_004', 'sec_risk_004', 'Client 4', 'sec_risk_0', 'Branch 4', 'Risk', 'Critical', 4.4400, 4.4400, 'C0004', 'Position 4', 'sec_risk_snapshot_suggestion_4', 'Active', '2025-04-04 09:04:00'),
+  ('sec_risk_005', 'sec_risk_005', 'Client 5', 'sec_risk_0', 'Branch 5', 'Operation', 'Low', 5.5500, 5.5500, 'C0005', 'Position 5', 'sec_risk_snapshot_suggestion_5', 'Completed', '2025-04-05 09:05:00');
 
--- AUM data
-INSERT INTO aum_metrics VALUES
-('2024-04-01', 'Equity Fund', 12500000000, 45000, 277777.78, 500000000, 18.5, CURRENT_TIMESTAMP),
-('2024-04-02', 'Equity Fund', 12800000000, 46200, 277099.00, 300000000, 19.2, CURRENT_TIMESTAMP),
-('2024-04-03', 'Equity Fund', 13100000000, 47500, 275789.47, 300000000, 19.8, CURRENT_TIMESTAMP),
-('2024-04-04', 'Equity Fund', 13450000000, 49000, 274489.80, 350000000, 20.5, CURRENT_TIMESTAMP),
-('2024-04-05', 'Equity Fund', 13800000000, 50500, 273267.33, 350000000, 21.2, CURRENT_TIMESTAMP),
-('2024-04-01', 'Bond Fund', 8300000000, 28000, 296428.57, 200000000, 8.5, CURRENT_TIMESTAMP),
-('2024-04-02', 'Bond Fund', 8450000000, 28500, 296491.23, 150000000, 9.1, CURRENT_TIMESTAMP),
-('2024-04-03', 'Bond Fund', 8600000000, 29000, 296551.72, 150000000, 9.7, CURRENT_TIMESTAMP),
-('2024-04-04', 'Bond Fund', 8750000000, 29500, 296610.17, 150000000, 10.2, CURRENT_TIMESTAMP),
-('2024-04-05', 'Bond Fund', 8900000000, 30000, 296666.67, 150000000, 10.8, CURRENT_TIMESTAMP),
-('2024-04-01', 'Money Market Fund', 5200000000, 52000, 100000, 100000000, 3.2, CURRENT_TIMESTAMP),
-('2024-04-02', 'Money Market Fund', 5350000000, 53500, 100000, 150000000, 3.8, CURRENT_TIMESTAMP),
-('2024-04-03', 'Money Market Fund', 5500000000, 55000, 100000, 150000000, 4.5, CURRENT_TIMESTAMP),
-('2024-04-04', 'Money Market Fund', 5650000000, 56500, 100000, 150000000, 5.1, CURRENT_TIMESTAMP),
-('2024-04-05', 'Money Market Fund', 5800000000, 58000, 100000, 150000000, 5.7, CURRENT_TIMESTAMP),
-('2024-04-01', 'Mixed Fund', 7100000000, 32000, 221875, 300000000, 12.5, CURRENT_TIMESTAMP),
-('2024-04-02', 'Mixed Fund', 7250000000, 33000, 219696.97, 150000000, 13.2, CURRENT_TIMESTAMP),
-('2024-04-03', 'Mixed Fund', 7400000000, 34000, 217647.06, 150000000, 13.9, CURRENT_TIMESTAMP),
-('2024-04-04', 'Mixed Fund', 7550000000, 35000, 215714.29, 150000000, 14.6, CURRENT_TIMESTAMP),
-('2024-04-05', 'Mixed Fund', 7700000000, 36000, 213888.89, 150000000, 15.3, CURRENT_TIMESTAMP);
+-- Table: sec_trade_detail
+TRUNCATE TABLE `sec_trade_detail`;
+INSERT INTO `sec_trade_detail` (`trade_id`, `ts`, `account_id`, `client_name`, `branch_id`, `branch_name`, `rm_name`, `symbol`, `security_name`, `sector_name`, `side`, `price`, `qty`, `amount`, `fee`, `channel`, `phase_name`) VALUES
+  ('sec_trad_001', '2025-04-01 09:01:00', 'sec_trad_001', 'Client 1', 'sec_trad_0', 'Branch 1', 'Rm 1', 'C0001', 'Security 1', 'Sector 1', 'sec_trade_', 1000.25, 1, 1000.25, 1.1100, 'Mobile App', 'Phase 1'),
+  ('sec_trad_002', '2025-04-02 09:02:00', 'sec_trad_002', 'Client 2', 'sec_trad_0', 'Branch 2', 'Rm 2', 'C0002', 'Security 2', 'Sector 2', 'sec_trade_', 2000.50, 2, 2000.50, 2.2200, 'Branch', 'Phase 2'),
+  ('sec_trad_003', '2025-04-03 09:03:00', 'sec_trad_003', 'Client 3', 'sec_trad_0', 'Branch 3', 'Rm 3', 'C0003', 'Security 3', 'Sector 3', 'sec_trade_', 3000.75, 3, 3000.75, 3.3300, 'Web', 'Phase 3'),
+  ('sec_trad_004', '2025-04-04 09:04:00', 'sec_trad_004', 'Client 4', 'sec_trad_0', 'Branch 4', 'Rm 4', 'C0004', 'Security 4', 'Sector 4', 'sec_trade_', 4001.00, 4, 4001.00, 4.4400, 'Mini Program', 'Phase 4'),
+  ('sec_trad_005', '2025-04-05 09:05:00', 'sec_trad_005', 'Client 5', 'sec_trad_0', 'Branch 5', 'Rm 5', 'C0005', 'Security 5', 'Sector 5', 'sec_trade_', 5001.25, 5, 5001.25, 5.5500, 'API', 'Phase 5');
 
--- Risk metric data
-INSERT INTO risk_metrics VALUES
-('2024-04-01', 'Low', 5000000000, 15, 0.0008, 185.5, 250000000, CURRENT_TIMESTAMP),
-('2024-04-02', 'Low', 4950000000, 14, 0.0007, 187.2, 240000000, CURRENT_TIMESTAMP),
-('2024-04-03', 'Low', 4900000000, 13, 0.0006, 189.1, 230000000, CURRENT_TIMESTAMP),
-('2024-04-04', 'Low', 4850000000, 12, 0.0005, 191.3, 220000000, CURRENT_TIMESTAMP),
-('2024-04-05', 'Low', 4800000000, 11, 0.0004, 193.5, 210000000, CURRENT_TIMESTAMP),
-('2024-04-01', 'Medium', 8200000000, 35, 0.0018, 125.8, 650000000, CURRENT_TIMESTAMP),
-('2024-04-02', 'Medium', 8150000000, 34, 0.0017, 127.2, 640000000, CURRENT_TIMESTAMP),
-('2024-04-03', 'Medium', 8100000000, 33, 0.0016, 128.5, 630000000, CURRENT_TIMESTAMP),
-('2024-04-04', 'Medium', 8050000000, 32, 0.0016, 129.8, 620000000, CURRENT_TIMESTAMP),
-('2024-04-05', 'Medium', 8000000000, 31, 0.0015, 131.2, 610000000, CURRENT_TIMESTAMP),
-('2024-04-01', 'High', 2800000000, 42, 0.0095, 75.2, 480000000, CURRENT_TIMESTAMP),
-('2024-04-02', 'High', 2750000000, 40, 0.0091, 76.5, 470000000, CURRENT_TIMESTAMP),
-('2024-04-03', 'High', 2700000000, 38, 0.0088, 77.8, 460000000, CURRENT_TIMESTAMP),
-('2024-04-04', 'High', 2650000000, 36, 0.0085, 79.2, 450000000, CURRENT_TIMESTAMP),
-('2024-04-05', 'High', 2600000000, 34, 0.0082, 80.5, 440000000, CURRENT_TIMESTAMP);
+-- Table: service_log
+TRUNCATE TABLE `service_log`;
+INSERT INTO `service_log` (`trace_id`, `span_id`, `request_time`, `method`, `path`, `status_code`, `duration_ms`, `ip_address`, `user_agent`, `error_message`, `tags`) VALUES
+  ('service__001', 'service__001', '2025-04-01 09:01:00', 'service_log_meth', 'service_log_path_1', 1, 0.0500, 'service_log_ip_address_1', 'service_log_user_agent_1', 'English mock description for service_log row 1', '["demo","english","mock"]'),
+  ('service__002', 'service__002', '2025-04-02 09:02:00', 'service_log_meth', 'service_log_path_2', 2, 0.1000, 'service_log_ip_address_2', 'service_log_user_agent_2', 'English mock description for service_log row 2', '["demo","english","mock"]'),
+  ('service__003', 'service__003', '2025-04-03 09:03:00', 'service_log_meth', 'service_log_path_3', 3, 0.1500, 'service_log_ip_address_3', 'service_log_user_agent_3', 'English mock description for service_log row 3', '["demo","english","mock"]'),
+  ('service__004', 'service__004', '2025-04-04 09:04:00', 'service_log_meth', 'service_log_path_4', 4, 0.2000, 'service_log_ip_address_4', 'service_log_user_agent_4', 'English mock description for service_log row 4', '["demo","english","mock"]'),
+  ('service__005', 'service__005', '2025-04-05 09:05:00', 'service_log_meth', 'service_log_path_5', 5, 0.2500, 'service_log_ip_address_5', 'service_log_user_agent_5', 'English mock description for service_log row 5', '["demo","english","mock"]');
 
--- Position metric data
-INSERT INTO position_metrics VALUES
-('2024-04-01', 'Stock', 8500000000, 35.2, 8650000000, 150000000, 1.76, CURRENT_TIMESTAMP),
-('2024-04-02', 'Stock', 8600000000, 35.5, 8780000000, 180000000, 2.09, CURRENT_TIMESTAMP),
-('2024-04-03', 'Stock', 8700000000, 35.8, 8920000000, 220000000, 2.53, CURRENT_TIMESTAMP),
-('2024-04-04', 'Stock', 8800000000, 36.1, 9060000000, 260000000, 2.95, CURRENT_TIMESTAMP),
-('2024-04-05', 'Stock', 8900000000, 36.4, 9200000000, 300000000, 3.37, CURRENT_TIMESTAMP),
-('2024-04-01', 'Bond', 9200000000, 38.1, 9150000000, -50000000, -0.55, CURRENT_TIMESTAMP),
-('2024-04-02', 'Bond', 9300000000, 38.3, 9270000000, -30000000, -0.32, CURRENT_TIMESTAMP),
-('2024-04-03', 'Bond', 9400000000, 38.6, 9390000000, -10000000, -0.11, CURRENT_TIMESTAMP),
-('2024-04-04', 'Bond', 9500000000, 38.9, 9500000000, 0, 0.00, CURRENT_TIMESTAMP),
-('2024-04-05', 'Bond', 9600000000, 39.2, 9620000000, 20000000, 0.21, CURRENT_TIMESTAMP),
-('2024-04-01', 'Derivative', 3800000000, 15.7, 3850000000, 50000000, 1.32, CURRENT_TIMESTAMP),
-('2024-04-02', 'Derivative', 3750000000, 15.4, 3820000000, 70000000, 1.87, CURRENT_TIMESTAMP),
-('2024-04-03', 'Derivative', 3700000000, 15.2, 3780000000, 80000000, 2.16, CURRENT_TIMESTAMP),
-('2024-04-04', 'Derivative', 3650000000, 14.9, 3740000000, 90000000, 2.47, CURRENT_TIMESTAMP),
-('2024-04-05', 'Derivative', 3600000000, 14.7, 3700000000, 100000000, 2.78, CURRENT_TIMESTAMP),
-('2024-04-01', 'Cash', 2200000000, 10.9, 2200000000, 0, 0.00, CURRENT_TIMESTAMP),
-('2024-04-02', 'Cash', 2180000000, 9.8, 2180000000, 0, 0.00, CURRENT_TIMESTAMP),
-('2024-04-03', 'Cash', 2160000000, 8.9, 2160000000, 0, 0.00, CURRENT_TIMESTAMP),
-('2024-04-04', 'Cash', 2140000000, 8.8, 2140000000, 0, 0.00, CURRENT_TIMESTAMP),
-('2024-04-05', 'Cash', 2120000000, 8.7, 2120000000, 0, 0.00, CURRENT_TIMESTAMP);
+-- Table: sys_logs
+TRUNCATE TABLE `sys_logs`;
+INSERT INTO `sys_logs` (`trace_id`, `log_time`, `level`, `service`, `method`, `path`, `status_code`, `duration_ms`, `db_time_ms`, `message`, `log_tag`) VALUES
+  ('sys_logs_001', '2025-04-01 09:01:00.000', 'L1', 'sys_logs_service_1', 'sys_logs_m', 'sys_logs_path_1', 1, 0.0500, 1.1100, 'English mock description for sys_logs row 1', 'sys_logs_log_tag_1'),
+  ('sys_logs_002', '2025-04-02 09:02:00.000', 'L2', 'sys_logs_service_2', 'sys_logs_m', 'sys_logs_path_2', 2, 0.1000, 2.2200, 'English mock description for sys_logs row 2', 'sys_logs_log_tag_2'),
+  ('sys_logs_003', '2025-04-03 09:03:00.000', 'L3', 'sys_logs_service_3', 'sys_logs_m', 'sys_logs_path_3', 3, 0.1500, 3.3300, 'English mock description for sys_logs row 3', 'sys_logs_log_tag_3'),
+  ('sys_logs_004', '2025-04-04 09:04:00.000', 'L4', 'sys_logs_service_4', 'sys_logs_m', 'sys_logs_path_4', 4, 0.2000, 4.4400, 'English mock description for sys_logs row 4', 'sys_logs_log_tag_4'),
+  ('sys_logs_005', '2025-04-05 09:05:00.000', 'L5', 'sys_logs_service_5', 'sys_logs_m', 'sys_logs_path_5', 5, 0.2500, 5.5500, 'English mock description for sys_logs row 5', 'sys_logs_log_tag_5');
 
--- Product marketing data
-INSERT INTO product_marketing VALUES
-('2024-04-01', 'Stable Growth Fund A', 'Mixed Fund', 15000000, 180, 92.5, 45, 78.5, 4.8, CURRENT_TIMESTAMP),
-('2024-04-02', 'Stable Growth Fund A', 'Mixed Fund', 16200000, 195, 93.2, 52, 79.1, 4.8, CURRENT_TIMESTAMP),
-('2024-04-03', 'Stable Growth Fund A', 'Mixed Fund', 17500000, 210, 93.8, 58, 79.6, 4.9, CURRENT_TIMESTAMP),
-('2024-04-04', 'Stable Growth Fund A', 'Mixed Fund', 18900000, 228, 94.3, 65, 80.1, 4.9, CURRENT_TIMESTAMP),
-('2024-04-05', 'Stable Growth Fund A', 'Mixed Fund', 20500000, 246, 94.8, 72, 80.6, 4.9, CURRENT_TIMESTAMP),
-('2024-04-01', 'Innovation Growth Fund B', 'Equity Fund', 25800000, 280, 88.5, 65, 72.3, 4.6, CURRENT_TIMESTAMP),
-('2024-04-02', 'Innovation Growth Fund B', 'Equity Fund', 27500000, 298, 89.1, 72, 73.1, 4.7, CURRENT_TIMESTAMP),
-('2024-04-03', 'Innovation Growth Fund B', 'Equity Fund', 29500000, 318, 89.7, 80, 73.8, 4.7, CURRENT_TIMESTAMP),
-('2024-04-04', 'Innovation Growth Fund B', 'Equity Fund', 31800000, 340, 90.2, 88, 74.5, 4.7, CURRENT_TIMESTAMP),
-('2024-04-05', 'Innovation Growth Fund B', 'Equity Fund', 34200000, 365, 90.8, 97, 75.2, 4.8, CURRENT_TIMESTAMP),
-('2024-04-01', 'Fixed Income Fund C', 'Bond Fund', 12500000, 420, 95.8, 28, 85.2, 4.9, CURRENT_TIMESTAMP),
-('2024-04-02', 'Fixed Income Fund C', 'Bond Fund', 13200000, 445, 96.1, 32, 85.6, 4.9, CURRENT_TIMESTAMP),
-('2024-04-03', 'Fixed Income Fund C', 'Bond Fund', 14000000, 470, 96.4, 36, 86.0, 4.9, CURRENT_TIMESTAMP),
-('2024-04-04', 'Fixed Income Fund C', 'Bond Fund', 14900000, 496, 96.7, 40, 86.3, 4.9, CURRENT_TIMESTAMP),
-('2024-04-05', 'Fixed Income Fund C', 'Bond Fund', 15800000, 525, 97.0, 44, 86.7, 5.0, CURRENT_TIMESTAMP),
-('2024-04-01', 'High Liquidity Money Fund D', 'Money Market Fund', 8500000, 850, 97.5, 15, 92.1, 4.8, CURRENT_TIMESTAMP),
-('2024-04-02', 'High Liquidity Money Fund D', 'Money Market Fund', 9200000, 920, 97.8, 18, 92.5, 4.8, CURRENT_TIMESTAMP),
-('2024-04-03', 'High Liquidity Money Fund D', 'Money Market Fund', 10000000, 1000, 98.0, 22, 92.8, 4.8, CURRENT_TIMESTAMP),
-('2024-04-04', 'High Liquidity Money Fund D', 'Money Market Fund', 10900000, 1090, 98.2, 26, 93.1, 4.9, CURRENT_TIMESTAMP),
-('2024-04-05', 'High Liquidity Money Fund D', 'Money Market Fund', 11800000, 1180, 98.4, 30, 93.4, 4.9, CURRENT_TIMESTAMP);
+-- Table: sys_spans
+TRUNCATE TABLE `sys_spans`;
+INSERT INTO `sys_spans` (`trace_id`, `span_id`, `parent_span_id`, `span_time`, `service`, `operation`, `offset_ms`, `duration_ms`, `status`, `db_query`) VALUES
+  ('sys_span_001', 'sys_span_001', 'sys_span_001', '2025-04-01 09:01:00.000', 'sys_spans_service_1', 'sys_spans_operation_1', 1.1100, 0.0500, 'Normal', 'sys_spans_db_query_1'),
+  ('sys_span_002', 'sys_span_002', 'sys_span_002', '2025-04-02 09:02:00.000', 'sys_spans_service_2', 'sys_spans_operation_2', 2.2200, 0.1000, 'Running', 'sys_spans_db_query_2'),
+  ('sys_span_003', 'sys_span_003', 'sys_span_003', '2025-04-03 09:03:00.000', 'sys_spans_service_3', 'sys_spans_operation_3', 3.3300, 0.1500, 'Success', 'sys_spans_db_query_3'),
+  ('sys_span_004', 'sys_span_004', 'sys_span_004', '2025-04-04 09:04:00.000', 'sys_spans_service_4', 'sys_spans_operation_4', 4.4400, 0.2000, 'Active', 'sys_spans_db_query_4'),
+  ('sys_span_005', 'sys_span_005', 'sys_span_005', '2025-04-05 09:05:00.000', 'sys_spans_service_5', 'sys_spans_operation_5', 5.5500, 0.2500, 'Completed', 'sys_spans_db_query_5');
+
+-- Table: tag_dict
+TRUNCATE TABLE `tag_dict`;
+INSERT INTO `tag_dict` (`tag_id`, `tag_category`, `tag_name`, `tag_label`, `tag_desc`, `value_type`, `value_options`, `source_table`, `source_field`, `is_ai_tag`, `enable_bitmap`, `status`, `sort_order`, `created_at`) VALUES
+  (10001, 'Retail', 'Tag 1', 'tag_dict_tag_label_1', 'English mock description for tag_dict row 1', 'Retail', 'tag_dict_value_options_1', 'tag_dict_source_table_1', 'tag_dict_source_field_1', 1, 1, 1, 1, '2025-04-01 09:01:00'),
+  (10002, 'Wealth', 'Tag 2', 'tag_dict_tag_label_2', 'English mock description for tag_dict row 2', 'Wealth', 'tag_dict_value_options_2', 'tag_dict_source_table_2', 'tag_dict_source_field_2', 0, 2, 2, 2, '2025-04-02 09:02:00'),
+  (10003, 'Credit', 'Tag 3', 'tag_dict_tag_label_3', 'English mock description for tag_dict row 3', 'Credit', 'tag_dict_value_options_3', 'tag_dict_source_table_3', 'tag_dict_source_field_3', 1, 3, 3, 3, '2025-04-03 09:03:00'),
+  (10004, 'Risk', 'Tag 4', 'tag_dict_tag_label_4', 'English mock description for tag_dict row 4', 'Risk', 'tag_dict_value_options_4', 'tag_dict_source_table_4', 'tag_dict_source_field_4', 0, 4, 4, 4, '2025-04-04 09:04:00'),
+  (10005, 'Operation', 'Tag 5', 'tag_dict_tag_label_5', 'English mock description for tag_dict row 5', 'Operation', 'tag_dict_value_options_5', 'tag_dict_source_table_5', 'tag_dict_source_field_5', 1, 5, 5, 5, '2025-04-05 09:05:00');
+
+-- Table: user_avatar
+TRUNCATE TABLE `user_avatar`;
+INSERT INTO `user_avatar` (`user_id`, `user_name`, `avatar_style`, `description`, `photo_embedding`, `labels`, `create_time`) VALUES
+  (10001, 'User 1', 'user_avatar_avatar_style_1', 'English mock description for user_avatar row 1', [0.10, 0.20, 0.30, 0.40], 'user_avatar_labels_1', '2025-04-01 09:01:00'),
+  (10002, 'User 2', 'user_avatar_avatar_style_2', 'English mock description for user_avatar row 2', [0.20, 0.30, 0.40, 0.50], 'user_avatar_labels_2', '2025-04-02 09:02:00'),
+  (10003, 'User 3', 'user_avatar_avatar_style_3', 'English mock description for user_avatar row 3', [0.30, 0.40, 0.50, 0.60], 'user_avatar_labels_3', '2025-04-03 09:03:00'),
+  (10004, 'User 4', 'user_avatar_avatar_style_4', 'English mock description for user_avatar row 4', [0.40, 0.50, 0.60, 0.70], 'user_avatar_labels_4', '2025-04-04 09:04:00'),
+  (10005, 'User 5', 'user_avatar_avatar_style_5', 'English mock description for user_avatar row 5', [0.50, 0.60, 0.70, 0.80], 'user_avatar_labels_5', '2025-04-05 09:05:00');
+
+-- Table: user_avatar_bak
+TRUNCATE TABLE `user_avatar_bak`;
+INSERT INTO `user_avatar_bak` (`user_id`, `user_name`, `avatar_style`, `description`, `photo_embedding`, `labels`, `create_time`) VALUES
+  (10001, 'User 1', 'user_avatar_bak_avatar_style_1', 'English mock description for user_avatar_bak row 1', [0.10, 0.20, 0.30, 0.40], 'user_avatar_bak_labels_1', '2025-04-01 09:01:00'),
+  (10002, 'User 2', 'user_avatar_bak_avatar_style_2', 'English mock description for user_avatar_bak row 2', [0.20, 0.30, 0.40, 0.50], 'user_avatar_bak_labels_2', '2025-04-02 09:02:00'),
+  (10003, 'User 3', 'user_avatar_bak_avatar_style_3', 'English mock description for user_avatar_bak row 3', [0.30, 0.40, 0.50, 0.60], 'user_avatar_bak_labels_3', '2025-04-03 09:03:00'),
+  (10004, 'User 4', 'user_avatar_bak_avatar_style_4', 'English mock description for user_avatar_bak row 4', [0.40, 0.50, 0.60, 0.70], 'user_avatar_bak_labels_4', '2025-04-04 09:04:00'),
+  (10005, 'User 5', 'user_avatar_bak_avatar_style_5', 'English mock description for user_avatar_bak row 5', [0.50, 0.60, 0.70, 0.80], 'user_avatar_bak_labels_5', '2025-04-05 09:05:00');
+
+-- Table: user_avatar_photo
+TRUNCATE TABLE `user_avatar_photo`;
+INSERT INTO `user_avatar_photo` (`user_id`, `photo_url`, `create_time`) VALUES
+  (10001, 'http://example.com/user_avatar_photo/1', '2025-04-01 09:01:00'),
+  (10002, 'http://example.com/user_avatar_photo/2', '2025-04-02 09:02:00'),
+  (10003, 'http://example.com/user_avatar_photo/3', '2025-04-03 09:03:00'),
+  (10004, 'http://example.com/user_avatar_photo/4', '2025-04-04 09:04:00'),
+  (10005, 'http://example.com/user_avatar_photo/5', '2025-04-05 09:05:00');
+
+-- Table: user_base
+TRUNCATE TABLE `user_base`;
+INSERT INTO `user_base` (`user_id`, `user_name`, `id_card_mask`, `auth_status`, `avatar_url`, `create_time`) VALUES
+  ('user_bas_001', 'User 1', 'user_base_id_card_mask_1', 1, 'http://example.com/user_base/1', '2025-04-01 09:01:00'),
+  ('user_bas_002', 'User 2', 'user_base_id_card_mask_2', 2, 'http://example.com/user_base/2', '2025-04-02 09:02:00'),
+  ('user_bas_003', 'User 3', 'user_base_id_card_mask_3', 3, 'http://example.com/user_base/3', '2025-04-03 09:03:00'),
+  ('user_bas_004', 'User 4', 'user_base_id_card_mask_4', 4, 'http://example.com/user_base/4', '2025-04-04 09:04:00'),
+  ('user_bas_005', 'User 5', 'user_base_id_card_mask_5', 5, 'http://example.com/user_base/5', '2025-04-05 09:05:00');
+
+-- Table: user_behavior
+TRUNCATE TABLE `user_behavior`;
+INSERT INTO `user_behavior` (`event_id`, `user_id`, `event_date`, `event_time`, `event_type`, `event_category`, `channel`, `product_code`, `amount`, `result_code`, `session_id`, `device_type`, `ip_address`, `extra_props`) VALUES
+  (10001, 10001, '2025-04-01', '2025-04-01 09:01:00', 'Retail', 'Retail', 'Mobile App', 'C0001', 10.2500, 'C0001', 'user_beh_001', 'Retail', 'user_behavior_ip_address_1', 'user_behavior_extra_props_1'),
+  (10002, 10002, '2025-04-02', '2025-04-02 09:02:00', 'Wealth', 'Wealth', 'Branch', 'C0002', 20.5000, 'C0002', 'user_beh_002', 'Wealth', 'user_behavior_ip_address_2', 'user_behavior_extra_props_2'),
+  (10003, 10003, '2025-04-03', '2025-04-03 09:03:00', 'Credit', 'Credit', 'Web', 'C0003', 30.7500, 'C0003', 'user_beh_003', 'Credit', 'user_behavior_ip_address_3', 'user_behavior_extra_props_3'),
+  (10004, 10004, '2025-04-04', '2025-04-04 09:04:00', 'Risk', 'Risk', 'Mini Program', 'C0004', 41.0000, 'C0004', 'user_beh_004', 'Risk', 'user_behavior_ip_address_4', 'user_behavior_extra_props_4'),
+  (10005, 10005, '2025-04-05', '2025-04-05 09:05:00', 'Operation', 'Operation', 'API', 'C0005', 51.2500, 'C0005', 'user_beh_005', 'Operation', 'user_behavior_ip_address_5', 'user_behavior_extra_props_5');
+
+-- Table: user_log_raw
+TRUNCATE TABLE `user_log_raw`;
+INSERT INTO `user_log_raw` (`log_id`, `log_date`, `log_time`, `user_id`, `session_id`, `log_level`, `log_source`, `log_content`, `operation_type`, `ip_address`, `user_region`, `device_info`, `response_code`, `response_time`, `filebeat_host`, `raw_json`, `created_at`) VALUES
+  (10001, '2025-04-01', '2025-04-01 09:01:00', 10001, 'user_log_001', 'L1', 'user_log_raw_log_source_1', 'English mock description for user_log_raw row 1', 'Retail', 'user_log_raw_ip_address_1', 'user_log_raw_user_region_1', 'user_log_raw_device_info_1', 'C0001', 1, 'user_log_raw_filebeat_host_1', '["demo","english","mock"]', '2025-04-01 09:01:00'),
+  (10002, '2025-04-02', '2025-04-02 09:02:00', 10002, 'user_log_002', 'L2', 'user_log_raw_log_source_2', 'English mock description for user_log_raw row 2', 'Wealth', 'user_log_raw_ip_address_2', 'user_log_raw_user_region_2', 'user_log_raw_device_info_2', 'C0002', 2, 'user_log_raw_filebeat_host_2', '["demo","english","mock"]', '2025-04-02 09:02:00'),
+  (10003, '2025-04-03', '2025-04-03 09:03:00', 10003, 'user_log_003', 'L3', 'user_log_raw_log_source_3', 'English mock description for user_log_raw row 3', 'Credit', 'user_log_raw_ip_address_3', 'user_log_raw_user_region_3', 'user_log_raw_device_info_3', 'C0003', 3, 'user_log_raw_filebeat_host_3', '["demo","english","mock"]', '2025-04-03 09:03:00'),
+  (10004, '2025-04-04', '2025-04-04 09:04:00', 10004, 'user_log_004', 'L4', 'user_log_raw_log_source_4', 'English mock description for user_log_raw row 4', 'Risk', 'user_log_raw_ip_address_4', 'user_log_raw_user_region_4', 'user_log_raw_device_info_4', 'C0004', 4, 'user_log_raw_filebeat_host_4', '["demo","english","mock"]', '2025-04-04 09:04:00'),
+  (10005, '2025-04-05', '2025-04-05 09:05:00', 10005, 'user_log_005', 'L5', 'user_log_raw_log_source_5', 'English mock description for user_log_raw row 5', 'Operation', 'user_log_raw_ip_address_5', 'user_log_raw_user_region_5', 'user_log_raw_device_info_5', 'C0005', 5, 'user_log_raw_filebeat_host_5', '["demo","english","mock"]', '2025-04-05 09:05:00');
+
+-- Table: user_log_tag
+TRUNCATE TABLE `user_log_tag`;
+INSERT INTO `user_log_tag` (`log_id`, `log_date`, `user_id`, `log_time`, `log_type`, `intent_tag`, `anomaly_tag`, `risk_level`, `ai_raw_result`, `tag_source`, `manual_label`, `created_at`) VALUES
+  (10001, '2025-04-01', 10001, '2025-04-01 09:01:00', 'Retail', 'user_log_tag_intent_tag_1', 'user_log_tag_anomaly_tag_1', 'Low', 'user_log_tag_ai_raw_result_1', 'user_log_tag_tag', 'user_log_tag_manual_label_1', '2025-04-01 09:01:00'),
+  (10002, '2025-04-02', 10002, '2025-04-02 09:02:00', 'Wealth', 'user_log_tag_intent_tag_2', 'user_log_tag_anomaly_tag_2', 'Medium', 'user_log_tag_ai_raw_result_2', 'user_log_tag_tag', 'user_log_tag_manual_label_2', '2025-04-02 09:02:00'),
+  (10003, '2025-04-03', 10003, '2025-04-03 09:03:00', 'Credit', 'user_log_tag_intent_tag_3', 'user_log_tag_anomaly_tag_3', 'High', 'user_log_tag_ai_raw_result_3', 'user_log_tag_tag', 'user_log_tag_manual_label_3', '2025-04-03 09:03:00'),
+  (10004, '2025-04-04', 10004, '2025-04-04 09:04:00', 'Risk', 'user_log_tag_intent_tag_4', 'user_log_tag_anomaly_tag_4', 'Critical', 'user_log_tag_ai_raw_result_4', 'user_log_tag_tag', 'user_log_tag_manual_label_4', '2025-04-04 09:04:00'),
+  (10005, '2025-04-05', 10005, '2025-04-05 09:05:00', 'Operation', 'user_log_tag_intent_tag_5', 'user_log_tag_anomaly_tag_5', 'Low', 'user_log_tag_ai_raw_result_5', 'user_log_tag_tag', 'user_log_tag_manual_label_5', '2025-04-05 09:05:00');
+
+-- Table: user_segment
+TRUNCATE TABLE `user_segment`;
+INSERT INTO `user_segment` (`segment_id`, `segment_name`, `segment_desc`, `rule_config`, `segment_type`, `snap_date`, `status`, `created_by`, `created_at`, `updated_at`, `segment_bitmap`, `user_count`) VALUES
+  (10001, 'Segment 1', 'English mock description for user_segment row 1', 'user_segment_rule_config_1', 'Retail', '2025-04-01', 1, 'user_segment_created_by_1', '2025-04-01 09:01:00', '2025-04-01 09:01:00', bitmap_from_string('10001,10011'), 10),
+  (10002, 'Segment 2', 'English mock description for user_segment row 2', 'user_segment_rule_config_2', 'Wealth', '2025-04-02', 2, 'user_segment_created_by_2', '2025-04-02 09:02:00', '2025-04-02 09:02:00', bitmap_from_string('10002,10012'), 20),
+  (10003, 'Segment 3', 'English mock description for user_segment row 3', 'user_segment_rule_config_3', 'Credit', '2025-04-03', 3, 'user_segment_created_by_3', '2025-04-03 09:03:00', '2025-04-03 09:03:00', bitmap_from_string('10003,10013'), 30),
+  (10004, 'Segment 4', 'English mock description for user_segment row 4', 'user_segment_rule_config_4', 'Risk', '2025-04-04', 4, 'user_segment_created_by_4', '2025-04-04 09:04:00', '2025-04-04 09:04:00', bitmap_from_string('10004,10014'), 40),
+  (10005, 'Segment 5', 'English mock description for user_segment row 5', 'user_segment_rule_config_5', 'Operation', '2025-04-05', 5, 'user_segment_created_by_5', '2025-04-05 09:05:00', '2025-04-05 09:05:00', bitmap_from_string('10005,10015'), 50);
+
+-- Table: user_tag
+TRUNCATE TABLE `user_tag`;
+INSERT INTO `user_tag` (`tag_date`, `tag_category`, `tag_name`, `tag_value`, `user_bitmap`, `user_count`, `updated_at`) VALUES
+  ('2025-04-01', 'Retail', 'Tag 1', 'user_tag_tag_value_1', bitmap_from_string('10001,10011'), 10, '2025-04-01 09:01:00'),
+  ('2025-04-02', 'Wealth', 'Tag 2', 'user_tag_tag_value_2', bitmap_from_string('10002,10012'), 20, '2025-04-02 09:02:00'),
+  ('2025-04-03', 'Credit', 'Tag 3', 'user_tag_tag_value_3', bitmap_from_string('10003,10013'), 30, '2025-04-03 09:03:00'),
+  ('2025-04-04', 'Risk', 'Tag 4', 'user_tag_tag_value_4', bitmap_from_string('10004,10014'), 40, '2025-04-04 09:04:00'),
+  ('2025-04-05', 'Operation', 'Tag 5', 'user_tag_tag_value_5', bitmap_from_string('10005,10015'), 50, '2025-04-05 09:05:00');
+
+-- Table: user_wide
+TRUNCATE TABLE `user_wide`;
+INSERT INTO `user_wide` (`user_id`, `update_date`, `user_name`, `id_card`, `phone`, `gender`, `age`, `age_group`, `city`, `province`, `education`, `occupation`, `register_date`, `asset_level`, `aum_total`, `deposit_amount`, `fund_amount`, `loan_amount`, `wm_amount`, `insurance_amount`, `has_credit_card`, `has_debit_card`, `has_mortgage`, `product_count`, `credit_score`, `credit_grade`, `risk_level`, `preferred_channel`, `app_login_30d`, `app_last_login`, `active_level`, `lifecycle_stage`, `churn_prob`, `clv_score`, `log_tags`, `anomaly_flag`, `created_at`, `updated_at`) VALUES
+  (10001, '2025-04-01', 'User 1', 'user_wide_id_card_1', '13800000001', 1, 26, 'user_wide_age_gr', 'Beijing', 'Beijing', 1, 'user_wide_occupation_1', '2025-04-01', 'Private Banking', 10.2500, 10.2500, 10.2500, 10.2500, 10.2500, 10.2500, 1, 1, 1, 10, 1, 'user_wid', 1, 'Mobile App', 1, '2025-04-01', 'High Active', 'user_wide_lifecycle_stage_1', 0.0500, 0.0500, '["demo","english","mock"]', 1, '2025-04-01 09:01:00', '2025-04-01 09:01:00'),
+  (10002, '2025-04-02', 'User 2', 'user_wide_id_card_2', '13800000002', 2, 27, 'user_wide_age_gr', 'Shanghai', 'Shanghai', 2, 'user_wide_occupation_2', '2025-04-02', 'Diamond', 20.5000, 20.5000, 20.5000, 20.5000, 20.5000, 20.5000, 0, 0, 0, 20, 2, 'user_wid', 2, 'Branch', 2, '2025-04-02', 'Medium Active', 'user_wide_lifecycle_stage_2', 0.1000, 0.1000, '["demo","english","mock"]', 0, '2025-04-02 09:02:00', '2025-04-02 09:02:00'),
+  (10003, '2025-04-03', 'User 3', 'user_wide_id_card_3', '13800000003', 1, 28, 'user_wide_age_gr', 'Shenzhen', 'Guangdong', 3, 'user_wide_occupation_3', '2025-04-03', 'Platinum', 30.7500, 30.7500, 30.7500, 30.7500, 30.7500, 30.7500, 1, 1, 1, 30, 3, 'user_wid', 3, 'Web', 3, '2025-04-03', 'Low Active', 'user_wide_lifecycle_stage_3', 0.1500, 0.1500, '["demo","english","mock"]', 1, '2025-04-03 09:03:00', '2025-04-03 09:03:00'),
+  (10004, '2025-04-04', 'User 4', 'user_wide_id_card_4', '13800000004', 2, 29, 'user_wide_age_gr', 'Hangzhou', 'Zhejiang', 4, 'user_wide_occupation_4', '2025-04-04', 'Gold', 41.0000, 41.0000, 41.0000, 41.0000, 41.0000, 41.0000, 0, 0, 0, 40, 4, 'user_wid', 4, 'Mini Program', 4, '2025-04-04', 'Dormant', 'user_wide_lifecycle_stage_4', 0.2000, 0.2000, '["demo","english","mock"]', 0, '2025-04-04 09:04:00', '2025-04-04 09:04:00'),
+  (10005, '2025-04-05', 'User 5', 'user_wide_id_card_5', '13800000005', 1, 30, 'user_wide_age_gr', 'Chengdu', 'Sichuan', 5, 'user_wide_occupation_5', '2025-04-05', 'Standard', 51.2500, 51.2500, 51.2500, 51.2500, 51.2500, 51.2500, 1, 1, 1, 50, 5, 'user_wid', 5, 'API', 5, '2025-04-05', 'High Active', 'user_wide_lifecycle_stage_5', 0.2500, 0.2500, '["demo","english","mock"]', 1, '2025-04-05 09:05:00', '2025-04-05 09:05:00');
+
+-- Table: user_wide_point_query
+TRUNCATE TABLE `user_wide_point_query`;
+INSERT INTO `user_wide_point_query` (`user_id`, `update_date`, `user_name`, `id_card`, `phone`, `gender`, `age`, `age_group`, `city`, `province`, `education`, `occupation`, `register_date`, `asset_level`, `aum_total`, `deposit_amount`, `fund_amount`, `loan_amount`, `wm_amount`, `insurance_amount`, `has_credit_card`, `has_debit_card`, `has_mortgage`, `product_count`, `credit_score`, `credit_grade`, `risk_level`, `preferred_channel`, `app_login_30d`, `app_last_login`, `active_level`, `lifecycle_stage`, `churn_prob`, `clv_score`, `log_tags`, `anomaly_flag`, `created_at`, `updated_at`) VALUES
+  (10001, '2025-04-01', 'User 1', 'user_wide_point_query_id_card_1', '13800000001', 1, 26, 'user_wide_point_', 'Beijing', 'Beijing', 1, 'user_wide_point_query_occupation', '2025-04-01', 'Private Banking', 10.2500, 10.2500, 10.2500, 10.2500, 10.2500, 10.2500, 1, 1, 1, 10, 1, 'user_wid', 1, 'Mobile App', 1, '2025-04-01', 'High Active', 'user_wide_point_query_lifecycle_', 0.0500, 0.0500, '["demo","english","mock"]', 1, '2025-04-01 09:01:00', '2025-04-01 09:01:00'),
+  (10002, '2025-04-02', 'User 2', 'user_wide_point_query_id_card_2', '13800000002', 2, 27, 'user_wide_point_', 'Shanghai', 'Shanghai', 2, 'user_wide_point_query_occupation', '2025-04-02', 'Diamond', 20.5000, 20.5000, 20.5000, 20.5000, 20.5000, 20.5000, 0, 0, 0, 20, 2, 'user_wid', 2, 'Branch', 2, '2025-04-02', 'Medium Active', 'user_wide_point_query_lifecycle_', 0.1000, 0.1000, '["demo","english","mock"]', 0, '2025-04-02 09:02:00', '2025-04-02 09:02:00'),
+  (10003, '2025-04-03', 'User 3', 'user_wide_point_query_id_card_3', '13800000003', 1, 28, 'user_wide_point_', 'Shenzhen', 'Guangdong', 3, 'user_wide_point_query_occupation', '2025-04-03', 'Platinum', 30.7500, 30.7500, 30.7500, 30.7500, 30.7500, 30.7500, 1, 1, 1, 30, 3, 'user_wid', 3, 'Web', 3, '2025-04-03', 'Low Active', 'user_wide_point_query_lifecycle_', 0.1500, 0.1500, '["demo","english","mock"]', 1, '2025-04-03 09:03:00', '2025-04-03 09:03:00'),
+  (10004, '2025-04-04', 'User 4', 'user_wide_point_query_id_card_4', '13800000004', 2, 29, 'user_wide_point_', 'Hangzhou', 'Zhejiang', 4, 'user_wide_point_query_occupation', '2025-04-04', 'Gold', 41.0000, 41.0000, 41.0000, 41.0000, 41.0000, 41.0000, 0, 0, 0, 40, 4, 'user_wid', 4, 'Mini Program', 4, '2025-04-04', 'Dormant', 'user_wide_point_query_lifecycle_', 0.2000, 0.2000, '["demo","english","mock"]', 0, '2025-04-04 09:04:00', '2025-04-04 09:04:00'),
+  (10005, '2025-04-05', 'User 5', 'user_wide_point_query_id_card_5', '13800000005', 1, 30, 'user_wide_point_', 'Chengdu', 'Sichuan', 5, 'user_wide_point_query_occupation', '2025-04-05', 'Standard', 51.2500, 51.2500, 51.2500, 51.2500, 51.2500, 51.2500, 1, 1, 1, 50, 5, 'user_wid', 5, 'API', 5, '2025-04-05', 'High Active', 'user_wide_point_query_lifecycle_', 0.2500, 0.2500, '["demo","english","mock"]', 1, '2025-04-05 09:05:00', '2025-04-05 09:05:00');
