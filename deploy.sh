@@ -65,6 +65,18 @@ PYTHON_BIN="${PYTHON_BIN:-python3}"
 NPM_BIN="${NPM_BIN:-npm}"
 
 echo "[2/6] 准备 Python 虚拟环境"
+if [ -d "$PROJECT_DIR/.venv" ] && [ -x "$PROJECT_DIR/.venv/bin/python" ]; then
+  if ! "$PROJECT_DIR/.venv/bin/python" -c "import sys; print(sys.executable)" >/dev/null 2>&1; then
+    echo "检测到不可用的旧 .venv，自动重建"
+    rm -rf "$PROJECT_DIR/.venv"
+  fi
+fi
+if [ -d "$PROJECT_DIR/.venv" ] && [ -x "$PROJECT_DIR/.venv/bin/pip" ]; then
+  if ! "$PROJECT_DIR/.venv/bin/pip" --version >/dev/null 2>&1; then
+    echo "检测到不可用的旧 pip，自动重建 .venv"
+    rm -rf "$PROJECT_DIR/.venv"
+  fi
+fi
 if [ ! -d "$PROJECT_DIR/.venv" ]; then
   "$PYTHON_BIN" -m venv "$PROJECT_DIR/.venv"
 fi
