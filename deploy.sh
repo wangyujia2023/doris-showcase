@@ -82,9 +82,10 @@ if [ ! -d "$PROJECT_DIR/.venv" ]; then
 fi
 "$PROJECT_DIR/.venv/bin/pip" install -r "$PROJECT_DIR/requirements.txt"
 
-echo "[3/6] 安装前端依赖"
+echo "[3/6] 安装前端依赖并构建"
 cd "$PROJECT_DIR/frontend"
 "$NPM_BIN" install
+"$NPM_BIN" run build
 cd "$PROJECT_DIR"
 
 echo "[4/6] 清理旧进程"
@@ -105,7 +106,7 @@ nohup "$PROJECT_DIR/.venv/bin/uvicorn" backend.app:app \
 
 echo "[6/6] 启动前端 $FRONTEND_PORT"
 cd "$PROJECT_DIR/frontend"
-nohup "$NPM_BIN" run dev -- --host "$FRONTEND_HOST" --port "$FRONTEND_PORT" \
+nohup "$NPM_BIN" run preview -- --host "$FRONTEND_HOST" --port "$FRONTEND_PORT" \
   > "$FRONTEND_LOG" 2>&1 &
 cd "$PROJECT_DIR"
 

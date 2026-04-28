@@ -51,6 +51,13 @@ export default defineConfig(({ mode }) => {
       proxy: {
         '/api': { target: `http://${backendProxyHost}:${backendPort}`, changeOrigin: true }
       }
+    },
+    preview: {
+      host: env.FRONTEND_HOST || '0.0.0.0',
+      port: frontendPort,
+      proxy: {
+        '/api': { target: `http://${backendProxyHost}:${backendPort}`, changeOrigin: true }
+      }
     }
   }
 })
