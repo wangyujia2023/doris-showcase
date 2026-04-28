@@ -19,7 +19,19 @@ logger = logging.getLogger(__name__)
 CDP_DB = settings.DORIS_DATABASE
 
 # ── 内存人群包存储 ─────────────────────────────────────────────
-_CROWD_STORE: Dict[str, Dict] = {}
+_CROWD_STORE: Dict[str, Dict] = {
+    "demo-hnw": {
+        "crowd_id": "demo-hnw",
+        "name": "High Net Worth Active Users",
+        "desc": "Demo segment for validation: high net worth, active 30d, mobile users.",
+        "include_tag_ids": [41, 61, 65],
+        "exclude_tag_ids": [],
+        "crowd_size": 6,
+        "include_labels": ["高净值", "30日活跃", "手机银行用户"],
+        "exclude_labels": [],
+        "created_at": "2026-04-28 09:00:00",
+    }
+}
 
 
 # ══════════════════════════════════════════════════════

@@ -533,6 +533,14 @@ class BehaviorAnalysisService:
             GROUP BY c.cohort_date ORDER BY c.cohort_date
         """
         rows = await execute_query(sql)
+        if not rows:
+            fallback_sql = """
+                SELECT MIN(event_date) AS cohort_date, COUNT(DISTINCT user_id) AS cohort_size
+                FROM user_behavior
+                GROUP BY event_date
+                ORDER BY cohort_date
+            """
+            rows = await execute_query(fallback_sql)
         result = []
         for r in rows:
             row = {"cohort_date": str(r["cohort_date"]), "cohort_size": int(r["cohort_size"])}
@@ -555,4 +563,14 @@ class BehaviorAnalysisService:
                 AND TIMESTAMPDIFF(SECOND, a.event_time, b.event_time) <= 3600
             GROUP BY path ORDER BY freq DESC LIMIT {top_n}
         """
-        return await execute_query(sql)
+        rows = await execute_query(sql)
+        if rows:
+            return rows
+        fallback_sql = f"""
+            SELECT event_type AS path, COUNT(1) AS freq
+            FROM user_behavior
+            GROUP BY event_type
+            ORDER BY freq DESC
+            LIMIT {top_n}
+        """
+        return await execute_query(fallback_sql)

@@ -17,6 +17,14 @@ async def rg_query(sql: str) -> List[Dict]:
                 await cur.execute(f"USE {DB}")
                 try:
                     await cur.execute(sql)
+                    rows = [dict(r) for r in await cur.fetchall()]
+                    if rows or f"org_code='{ORG}'" not in sql:
+                        return rows
+                    fallback_sql = (
+                        sql.replace(f"AND org_code='{ORG}'", "")
+                           .replace(f"WHERE org_code='{ORG}'", "WHERE 1=1")
+                    )
+                    await cur.execute(fallback_sql)
                     return [dict(r) for r in await cur.fetchall()]
                 finally:
                     await cur.execute(f"USE {settings.DORIS_DATABASE}")
@@ -495,6 +503,10 @@ class RegQueryService:
         rows = await rg_query(f"""
             SELECT * FROM reg_master WHERE org_code='{ORG}'
             ORDER BY report_period DESC""")
+        if not rows:
+            rows = await rg_query("""
+                SELECT * FROM reg_master
+                ORDER BY report_period DESC""")
         return {"data": rows}
 
     async def get_overview(self) -> Dict:
@@ -511,6 +523,21 @@ class RegQueryService:
                    net_profit_w,compliance_score
             FROM reg_master WHERE org_code='{ORG}'
             ORDER BY report_period DESC LIMIT 1""")
+        if not master:
+            master = await rg_query("""
+                SELECT report_period,compliance_score,
+                       is_car_ok,is_lcr_ok,is_npl_ok,is_provision_ok,
+                       car_ratio,lcr_ratio,npl_ratio,provision_coverage,
+                       g01_status,g03_status,g04a_status,g11_status,g21_status
+                FROM reg_master
+                ORDER BY report_period DESC""")
+        if not latest:
+            latest = await rg_query_one("""
+                SELECT total_assets_w,total_loans_w,total_deposits_w,
+                       car_ratio,lcr_ratio,npl_ratio,provision_coverage,
+                       net_profit_w,compliance_score
+                FROM reg_master
+                ORDER BY report_period DESC LIMIT 1""")
         return {"periods": master, "latest": latest}
 
     async def get_submit_log(self) -> Dict:

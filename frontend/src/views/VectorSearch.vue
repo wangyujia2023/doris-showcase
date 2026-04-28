@@ -48,7 +48,12 @@
             <img :src="userAvatarSrc(u)" class="mini-avatar" />
             <div class="mini-name">{{ u.user_name }}</div>
             <div class="mini-labels">
-              <el-tag v-for="lb in u.labels" :key="lb" size="small" effect="plain" style="font-size:10px;margin:1px">{{ labelText(lb) }}</el-tag>
+              <span
+                v-for="lb in u.labels"
+                :key="lb"
+                class="color-label mini-color-label"
+                :style="labelChipStyle(lb)"
+              >{{ labelText(lb) }}</span>
             </div>
           </div>
         </div>
@@ -59,7 +64,7 @@
           <div
             v-for="lb in labels" :key="lb.label_id"
             class="lchip"
-            :style="{ borderColor: lb.color, color: lb.color }"
+            :style="labelChipStyle(lb.label_name)"
           >
             <span class="lchip-name">{{ labelText(lb.label_name) }}</span>
             <span class="lchip-cnt">{{ lb.user_count }}</span>
@@ -139,7 +144,7 @@
                   v-for="lb in labels" :key="lb.label_id"
                   class="tag-opt"
                   :class="{ selected: labelFilters.includes(lb.label_name) }"
-                  :style="{ borderColor: labelFilters.includes(lb.label_name) ? lb.color : '#e4e7ed', color: labelFilters.includes(lb.label_name) ? lb.color : '#606266' }"
+                  :style="labelSelectorStyle(lb)"
                   @click="toggleLabel(lb.label_name)"
                 >{{ labelText(lb.label_name) }}</div>
               </div>
@@ -214,12 +219,12 @@
                 <div class="res-name">{{ r.user_name }}</div>
                 <div class="res-desc">{{ r.description }}</div>
                 <div style="margin-top:4px">
-                  <el-tag
+                  <span
                     v-for="lb in r.labels" :key="lb"
-                    size="small" effect="plain" round
-                    :type="labelFilters.includes(lb) ? 'warning' : ''"
-                    style="margin:2px 2px 0 0;font-size:11px"
-                  >{{ labelText(lb) }}</el-tag>
+                    class="color-label result-color-label"
+                    :class="{ matched: labelFilters.includes(lb) }"
+                    :style="labelChipStyle(lb)"
+                  >{{ labelText(lb) }}</span>
                 </div>
               </div>
               <div v-if="result.mode !== 'scalar'" class="res-score">
@@ -377,6 +382,45 @@ function userAvatarSrc(u) {
 }
 function labelText(name) {
   return dict.label('vector_tags', name, name)
+}
+const LABEL_PALETTE = ['#F59E0B', '#06B6D4', '#10B981', '#3B82F6', '#8B5CF6', '#F43F5E', '#14B8A6', '#EC4899', '#94A3B8', '#22C55E', '#A855F7', '#F97316', '#0EA5E9', '#84CC16', '#EF4444', '#6366F1', '#D946EF']
+function labelMeta(name) {
+  return labels.value.find(lb => lb.label_name === name || labelText(lb.label_name) === name) || {}
+}
+function labelColor(name) {
+  const meta = labelMeta(name)
+  if (meta.color) return meta.color
+  const source = String(name || '')
+  const idx = [...source].reduce((sum, ch) => sum + ch.charCodeAt(0), 0) % LABEL_PALETTE.length
+  return LABEL_PALETTE[idx]
+}
+function labelChipStyle(name) {
+  const color = labelColor(name)
+  return {
+    '--label-color': color,
+    color,
+    borderColor: color,
+    background: `linear-gradient(135deg, ${color}14 0%, #ffffff 100%)`,
+    boxShadow: `0 1px 4px ${color}22`,
+  }
+}
+function labelSelectorStyle(lb) {
+  const selected = labelFilters.value.includes(lb.label_name)
+  const color = lb.color || labelColor(lb.label_name)
+  return selected
+    ? {
+        '--label-color': color,
+        color,
+        borderColor: color,
+        background: `linear-gradient(135deg, ${color}18 0%, #ffffff 100%)`,
+        boxShadow: `0 2px 8px ${color}2a`,
+      }
+    : {
+        '--label-color': color,
+        color,
+        borderColor: color,
+        background: '#fff',
+      }
 }
 
 function scoreColor(sim) {
@@ -548,7 +592,7 @@ onMounted(loadData)
 </script>
 
 <style scoped>
-.vs-wrap { display: flex; flex-direction: column; gap: 16px; }
+.vs-wrap { display: flex; flex-direction: column; gap: 16px; width: 100%; max-width: 100%; overflow-x: hidden; }
 
 .hasp-banner {
   display: flex; align-items: center; justify-content: space-between; gap: 16px;
@@ -559,46 +603,60 @@ onMounted(loadData)
 .banner-desc  { font-size: 13px; color: #606266; line-height: 1.6; }
 .banner-desc code { background: #f0f0f0; padding: 1px 5px; border-radius: 3px; font-size: 12px; }
 
-.main-grid { display: grid; grid-template-columns: 240px 1fr; gap: 16px; align-items: start; }
+.main-grid { display: grid; grid-template-columns: minmax(220px, 260px) minmax(0, 1fr); gap: 16px; align-items: start; min-width: 0; }
 
 /* 左侧用户库 */
-.users-panel { max-height: calc(100vh - 200px); overflow-y: auto; padding: 12px; }
+.users-panel { max-height: calc(100vh - 200px); overflow-y: auto; overflow-x: hidden; padding: 12px; min-width: 0; }
 .panel-title { display: flex; align-items: center; font-size: 13px; font-weight: 600; color: #303133; margin-bottom: 8px; }
 .user-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .user-mini {
   padding: 8px; border-radius: 8px; border: 2px solid transparent;
   cursor: pointer; transition: all 0.2s; background: #fafafa; text-align: center;
+  min-width: 0;
 }
 .user-mini:hover { border-color: #c6e2ff; background: #f0f7ff; }
 .user-mini.selected { border-color: #409eff; background: #ecf5ff; }
 .mini-avatar { width: 44px; height: 44px; border-radius: 50%; background: #f0f0f0; }
-.mini-name { font-size: 12px; font-weight: 600; color: #303133; margin: 3px 0 2px; }
-.mini-labels { display: flex; flex-wrap: wrap; justify-content: center; gap: 2px; }
+.mini-name { font-size: 12px; font-weight: 600; color: #303133; margin: 3px 0 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mini-labels { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; }
 .empty-tip { text-align: center; padding: 20px 0; }
 
-.label-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.label-chips { display: flex; flex-wrap: wrap; gap: 8px; }
 .lchip {
   display: flex; align-items: center; gap: 4px;
-  padding: 3px 8px; border-radius: 12px; border: 1.5px solid;
-  font-size: 11px;
+  padding: 5px 12px; border-radius: 999px; border: 2px solid;
+  font-size: 13px; transition: transform 0.15s ease, box-shadow 0.15s ease;
+  color: var(--label-color) !important;
 }
-.lchip-name { font-weight: 600; }
-.lchip-cnt  { opacity: 0.6; font-size: 10px; }
+.lchip:hover { transform: translateY(-1px); }
+.lchip-name { font-weight: 600; color: var(--label-color) !important; }
+.lchip-cnt  { opacity: 0.6; font-size: 10px; color: var(--label-color) !important; }
+.color-label {
+  display: inline-flex; align-items: center; justify-content: center;
+  border: 1.5px solid; border-radius: 999px;
+  font-weight: 600; white-space: nowrap;
+  color: var(--label-color) !important;
+  border-color: var(--label-color) !important;
+}
+.mini-color-label { padding: 2px 7px; font-size: 10px; line-height: 16px; }
+.result-color-label { margin: 2px 4px 0 0; padding: 3px 9px; font-size: 11px; line-height: 18px; }
+.result-color-label.matched { border-width: 2px; }
 
 /* 右侧检索区 */
-.right-col { display: flex; flex-direction: column; gap: 16px; }
+.right-col { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
 
 .mode-tabs { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 16px; }
 .mode-tab {
   display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px;
   border-radius: 8px; border: 2px solid #e4e7ed; cursor: pointer;
   transition: all 0.2s; background: #fafafa;
+  min-width: 0;
 }
 .mode-tab:hover { border-color: #c6e2ff; background: #f0f7ff; }
 .mode-tab.active { border-color: #409eff; background: #ecf5ff; }
 .mode-icon  { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
 .mode-title { font-size: 13px; font-weight: 600; color: #303133; }
-.mode-desc  { font-size: 11px; color: #909399; margin-top: 2px; line-height: 1.4; }
+.mode-desc  { font-size: 11px; color: #909399; margin-top: 2px; line-height: 1.4; overflow-wrap: anywhere; }
 
 .input-area { display: flex; flex-direction: column; gap: 16px; }
 .input-block {}
@@ -608,7 +666,7 @@ onMounted(loadData)
 }
 .input-hint { font-size: 11px; color: #909399; font-weight: 400; }
 
-.photo-row { display: flex; gap: 12px; align-items: flex-start; }
+.photo-row { display: flex; gap: 12px; align-items: flex-start; min-width: 0; }
 .photo-drop {
   width: 110px; height: 110px; border: 2px dashed #dcdfe6; border-radius: 10px;
   cursor: pointer; display: flex; align-items: center; justify-content: center;
@@ -622,6 +680,7 @@ onMounted(loadData)
 .embed-preview {
   flex: 1; background: #f8f9fa; border-radius: 8px; padding: 10px 12px;
   border: 1px solid #f0f0f0; min-height: 90px; display: flex; flex-direction: column; justify-content: center;
+  min-width: 0; overflow: hidden;
 }
 .empty-embed { align-items: center; justify-content: center; font-size: 12px; color: #c0c4cc; }
 .embed-title { font-size: 11px; color: #909399; margin-bottom: 4px; }
@@ -629,24 +688,27 @@ onMounted(loadData)
 
 .tag-selector { display: flex; flex-wrap: wrap; gap: 8px; }
 .tag-opt {
-  padding: 5px 12px; border-radius: 16px; border: 1.5px solid #e4e7ed;
+  padding: 6px 13px; border-radius: 999px; border: 2px solid #e4e7ed;
   cursor: pointer; font-size: 12px; transition: all 0.15s; font-weight: 600;
+  max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  color: var(--label-color) !important;
+  border-color: var(--label-color) !important;
 }
 .tag-opt:hover { opacity: 0.8; transform: scale(1.02); }
-.tag-opt.selected { background: #f0f7ff; }
+.tag-opt.selected { transform: translateY(-1px); }
 
 .desc-keywords { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
 .kw-tag { background: #f0f9eb; color: #67c23a; border: 1px solid #b3e19d; border-radius: 10px; padding: 2px 8px; font-size: 11px; }
 
-.exec-row { display: flex; align-items: center; padding-top: 12px; border-top: 1px solid #f0f0f0; }
+.exec-row { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; padding-top: 12px; border-top: 1px solid #f0f0f0; }
 
 /* SQL */
-.sql-card { padding: 12px 16px; }
-.sql-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; cursor: pointer; }
+.sql-card { padding: 12px 16px; min-width: 0; }
+.sql-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 8px; cursor: pointer; min-width: 0; }
 .sql-code {
   background: #1e1e2e; color: #a8b3cf; padding: 14px 18px; border-radius: 8px;
   font-family: 'JetBrains Mono', Consolas, monospace; font-size: 12px;
-  line-height: 1.8; white-space: pre; overflow-x: auto; margin: 0;
+  line-height: 1.8; white-space: pre-wrap; overflow-x: auto; overflow-wrap: anywhere; margin: 0; max-width: 100%;
 }
 
 /* 结果 */
@@ -655,6 +717,7 @@ onMounted(loadData)
   display: flex; gap: 12px; align-items: center;
   padding: 12px 14px; border-radius: 8px; background: #fafafa;
   border: 1px solid #f0f0f0; transition: box-shadow 0.2s;
+  min-width: 0;
 }
 .result-item:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.08); background: #fff; }
 .rank-badge {
@@ -668,14 +731,31 @@ onMounted(loadData)
 .res-avatar { width: 46px; height: 46px; border-radius: 50%; flex-shrink: 0; background: #f0f0f0; }
 .res-info   { flex: 1; min-width: 0; }
 .res-name   { font-size: 14px; font-weight: 600; color: #1a1a1a; }
-.res-desc   { font-size: 12px; color: #909399; margin: 2px 0; }
+.res-desc   { font-size: 12px; color: #909399; margin: 2px 0; overflow-wrap: anywhere; }
 .res-score  { text-align: center; flex-shrink: 0; min-width: 72px; }
 .score-val  { font-size: 20px; font-weight: 700; }
 .score-label { font-size: 10px; color: #909399; }
 .dist-val   { font-size: 10px; color: #c0c4cc; margin-top: 2px; }
 
 /* 新增对话框 */
-.upload-body { display: flex; gap: 20px; }
+.upload-body { display: flex; gap: 20px; min-width: 0; }
 .upload-left { width: 200px; flex-shrink: 0; }
-.upload-right { flex: 1; }
+.upload-right { flex: 1; min-width: 0; }
+
+@media (max-width: 1280px) {
+  .main-grid { grid-template-columns: 220px minmax(0, 1fr); gap: 12px; }
+  .user-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 960px) {
+  .hasp-banner { flex-direction: column; align-items: flex-start; }
+  .main-grid { grid-template-columns: 1fr; }
+  .users-panel { max-height: none; }
+  .user-grid { grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); }
+  .mode-tabs { grid-template-columns: 1fr; }
+  .photo-row { flex-direction: column; }
+  .photo-drop { width: 100%; max-width: 180px; }
+  .result-item { align-items: flex-start; flex-wrap: wrap; }
+  .res-score { margin-left: 38px; }
+}
 </style>

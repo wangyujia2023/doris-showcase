@@ -134,6 +134,28 @@ class BehaviorService:
             ORDER BY cohort_date, day_diff
         """
         rows = await execute_query(sql)
+        if not rows:
+            fallback_sql = f"""
+                WITH cohort AS (
+                    SELECT user_id, MIN(event_date) AS cohort_date
+                    FROM user_behavior
+                    GROUP BY user_id
+                )
+                SELECT cohort_date, COUNT(DISTINCT user_id) AS cohort_size
+                FROM cohort
+                GROUP BY cohort_date
+                ORDER BY cohort_date
+            """
+            rows = [
+                {
+                    "cohort_date": r.get("cohort_date"),
+                    "day_diff": 0,
+                    "cohort_size": r.get("cohort_size"),
+                    "retained_users": 0,
+                    "retention_rate": 0,
+                }
+                for r in await execute_query(fallback_sql)
+            ]
 
         matrix: Dict[str, Dict[int, float]] = {}
         cohort_sizes: Dict[str, int] = {}

@@ -327,3 +327,22 @@ AI_EXTRACT('qwen_llm', content, ARRAY(...))
 | Metrics platform is accessible |  |
 | Data lineage page is accessible |  |
 | No critical errors in logs |  |
+
+
+## Operations Scripts
+
+```bash
+sh start.sh          # start existing runtime
+sh stop.sh           # stop backend and frontend ports
+sh restart.sh        # restart services
+sh logs.sh backend   # tail backend log
+sh logs.sh frontend  # tail frontend log
+sh healthcheck.sh    # verify key APIs
+```
+
+Database initialization supports validation and controlled rebuild:
+
+```bash
+sh init_database.sh validate
+DROP_DATABASES=true sh init_database.sh all
+```

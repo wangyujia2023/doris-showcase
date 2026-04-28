@@ -327,3 +327,22 @@ AI_EXTRACT('qwen_llm', content, ARRAY(...))
 | 指标平台可访问 |  |
 | 数据血缘可访问 |  |
 | 日志无明显报错 |  |
+
+
+## 运维脚本
+
+```bash
+sh start.sh          # 启动已有运行环境
+sh stop.sh           # 停止前后端端口
+sh restart.sh        # 重启服务
+sh logs.sh backend   # 查看后端日志
+sh logs.sh frontend  # 查看前端日志
+sh healthcheck.sh    # 检查关键 API
+```
+
+数据库初始化支持校验和受控重建：
+
+```bash
+sh init_database.sh validate
+DROP_DATABASES=true sh init_database.sh all
+```

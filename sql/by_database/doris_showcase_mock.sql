@@ -470,11 +470,26 @@ INSERT INTO `user_base` (`user_id`, `user_name`, `id_card_mask`, `auth_status`, 
 -- Table: user_behavior
 TRUNCATE TABLE `user_behavior`;
 INSERT INTO `user_behavior` (`event_id`, `user_id`, `event_date`, `event_time`, `event_type`, `event_category`, `channel`, `product_code`, `amount`, `result_code`, `session_id`, `device_type`, `ip_address`, `extra_props`) VALUES
-  (10001, 10001, '2025-04-01', '2025-04-01 09:01:00', 'Retail', 'Retail', 'Mobile App', 'C0001', 10.2500, 'C0001', 'user_beh_001', 'Retail', 'user_behavior_ip_address_1', 'user_behavior_extra_props_1'),
-  (10002, 10002, '2025-04-02', '2025-04-02 09:02:00', 'Wealth', 'Wealth', 'Branch', 'C0002', 20.5000, 'C0002', 'user_beh_002', 'Wealth', 'user_behavior_ip_address_2', 'user_behavior_extra_props_2'),
-  (10003, 10003, '2025-04-03', '2025-04-03 09:03:00', 'Credit', 'Credit', 'Web', 'C0003', 30.7500, 'C0003', 'user_beh_003', 'Credit', 'user_behavior_ip_address_3', 'user_behavior_extra_props_3'),
-  (10004, 10004, '2025-04-04', '2025-04-04 09:04:00', 'Risk', 'Risk', 'Mini Program', 'C0004', 41.0000, 'C0004', 'user_beh_004', 'Risk', 'user_behavior_ip_address_4', 'user_behavior_extra_props_4'),
-  (10005, 10005, '2025-04-05', '2025-04-05 09:05:00', 'Operation', 'Operation', 'API', 'C0005', 51.2500, 'C0005', 'user_beh_005', 'Operation', 'user_behavior_ip_address_5', 'user_behavior_extra_props_5');
+  (10001, 1001, '2025-04-01', '2025-04-01 09:00:00', 'REGISTER', 'ACCOUNT', 'APP', 'P001', 0.0000, 'SUCCESS', 'sess_1001_a', 'iOS', '10.10.1.11', '{"city":"Shanghai"}'),
+  (10002, 1001, '2025-04-01', '2025-04-01 09:08:00', 'LOGIN', 'ACCOUNT', 'APP', 'P001', 0.0000, 'SUCCESS', 'sess_1001_a', 'iOS', '10.10.1.11', '{"city":"Shanghai"}'),
+  (10003, 1001, '2025-04-01', '2025-04-01 09:18:00', 'BROWSE_PRODUCT', 'BROWSE', 'APP', 'FUND-A', 0.0000, 'SUCCESS', 'sess_1001_a', 'iOS', '10.10.1.11', '{"page":"fund_detail"}'),
+  (10004, 1001, '2025-04-01', '2025-04-01 09:35:00', 'APPLY', 'CONVERSION', 'APP', 'FUND-A', 30000.0000, 'SUCCESS', 'sess_1001_a', 'iOS', '10.10.1.11', '{"risk_level":"R3"}'),
+  (10005, 1001, '2025-04-01', '2025-04-01 09:50:00', 'TRANSACTION', 'TRANSACTION', 'APP', 'FUND-A', 30000.0000, 'SUCCESS', 'sess_1001_a', 'iOS', '10.10.1.11', '{"order_id":"ord_1001"}'),
+  (10006, 1001, '2025-04-02', '2025-04-02 09:03:00', 'LOGIN', 'ACCOUNT', 'APP', 'P001', 0.0000, 'SUCCESS', 'sess_1001_b', 'iOS', '10.10.1.11', '{"retention":"D1"}'),
+  (10007, 1001, '2025-04-08', '2025-04-08 10:10:00', 'LOGIN', 'ACCOUNT', 'APP', 'P001', 0.0000, 'SUCCESS', 'sess_1001_c', 'iOS', '10.10.1.11', '{"retention":"D7"}'),
+  (10008, 1002, '2025-04-01', '2025-04-01 10:00:00', 'REGISTER', 'ACCOUNT', 'WEB', 'P002', 0.0000, 'SUCCESS', 'sess_1002_a', 'PC', '10.10.1.12', '{"city":"Beijing"}'),
+  (10009, 1002, '2025-04-01', '2025-04-01 10:12:00', 'LOGIN', 'ACCOUNT', 'WEB', 'P002', 0.0000, 'SUCCESS', 'sess_1002_a', 'PC', '10.10.1.12', '{"city":"Beijing"}'),
+  (10010, 1002, '2025-04-01', '2025-04-01 10:28:00', 'BROWSE_PRODUCT', 'BROWSE', 'WEB', 'LOAN-A', 0.0000, 'SUCCESS', 'sess_1002_a', 'PC', '10.10.1.12', '{"page":"loan_detail"}'),
+  (10011, 1002, '2025-04-01', '2025-04-01 10:42:00', 'APPLY', 'CONVERSION', 'WEB', 'LOAN-A', 120000.0000, 'SUCCESS', 'sess_1002_a', 'PC', '10.10.1.12', '{"risk_level":"R2"}'),
+  (10012, 1002, '2025-04-02', '2025-04-02 10:15:00', 'LOGIN', 'ACCOUNT', 'WEB', 'P002', 0.0000, 'SUCCESS', 'sess_1002_b', 'PC', '10.10.1.12', '{"retention":"D1"}'),
+  (10013, 1003, '2025-04-02', '2025-04-02 08:30:00', 'REGISTER', 'ACCOUNT', 'APP', 'P003', 0.0000, 'SUCCESS', 'sess_1003_a', 'Android', '10.10.1.13', '{"city":"Shenzhen"}'),
+  (10014, 1003, '2025-04-02', '2025-04-02 08:39:00', 'LOGIN', 'ACCOUNT', 'APP', 'P003', 0.0000, 'SUCCESS', 'sess_1003_a', 'Android', '10.10.1.13', '{"city":"Shenzhen"}'),
+  (10015, 1003, '2025-04-02', '2025-04-02 08:50:00', 'BROWSE_PRODUCT', 'BROWSE', 'APP', 'INS-A', 0.0000, 'SUCCESS', 'sess_1003_a', 'Android', '10.10.1.13', '{"page":"insurance_detail"}'),
+  (10016, 1003, '2025-04-03', '2025-04-03 08:45:00', 'LOGIN', 'ACCOUNT', 'APP', 'P003', 0.0000, 'SUCCESS', 'sess_1003_b', 'Android', '10.10.1.13', '{"retention":"D1"}'),
+  (10017, 1004, '2025-04-03', '2025-04-03 11:00:00', 'REGISTER', 'ACCOUNT', 'MINI', 'P004', 0.0000, 'SUCCESS', 'sess_1004_a', 'Android', '10.10.1.14', '{"city":"Guangzhou"}'),
+  (10018, 1004, '2025-04-03', '2025-04-03 11:06:00', 'LOGIN', 'ACCOUNT', 'MINI', 'P004', 0.0000, 'SUCCESS', 'sess_1004_a', 'Android', '10.10.1.14', '{"city":"Guangzhou"}'),
+  (10019, 1004, '2025-04-03', '2025-04-03 11:18:00', 'BROWSE_PRODUCT', 'BROWSE', 'MINI', 'GOLD-A', 0.0000, 'SUCCESS', 'sess_1004_a', 'Android', '10.10.1.14', '{"page":"gold_detail"}'),
+  (10020, 1004, '2025-04-03', '2025-04-03 11:40:00', 'TRANSACTION', 'TRANSACTION', 'MINI', 'GOLD-A', 50000.0000, 'SUCCESS', 'sess_1004_a', 'Android', '10.10.1.14', '{"order_id":"ord_1004"}');
 
 -- Table: user_log_raw
 TRUNCATE TABLE `user_log_raw`;

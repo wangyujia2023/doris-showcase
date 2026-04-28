@@ -14,10 +14,11 @@ A full-stack Doris 4.0 demo platform for customer data, metrics analysis, vector
 ```text
 backend/              FastAPI backend services and routes
 frontend/             Vue frontend application
-docs/                 Architecture and feature documents
+docs/                 Architecture, deployment, and operations documents
+scripts/              Script implementations shared by root entry scripts
 sql/by_database/      Database schema and mock data, grouped by database
-deploy.sh             One-click dependency install, build, and startup script
-init_database.sh      One-click Doris schema and mock data initialization
+deploy.sh             Root wrapper for one-click dependency install, build, and startup
+init_database.sh      Root wrapper for Doris schema/mock initialization and validation
 .env.example          Environment configuration template
 requirements.txt      Backend Python dependencies
 ```
@@ -50,9 +51,12 @@ DORIS_AI_RESOURCE=gemini_llm
 LINEAGE_DATABASE=lineage_showcase
 
 UPLOAD_DIR=./uploads
+LOG_DIR=./logs
 
 OPENMETADATA_BASE_URL=http://10.26.20.3:8585/api
 OPENMETADATA_JWT_TOKEN=
+INIT_DATABASE_ON_DEPLOY=false
+DROP_DATABASES=false
 ```
 
 Notes:
@@ -61,7 +65,10 @@ Notes:
 - `BACKEND_PROXY_HOST` is the frontend proxy target host. Use `127.0.0.1`, not `0.0.0.0`.
 - `BACKEND_PORT` defaults to `27713`.
 - `FRONTEND_PORT` defaults to `5173`.
-- `UPLOAD_DIR` stores uploaded vector-search images. `deploy.sh` and `init_database.sh` create this directory automatically.
+- `UPLOAD_DIR` stores uploaded vector-search images. Scripts create this directory automatically.
+- `LOG_DIR` stores backend/frontend logs. Defaults to `./logs`.
+- `INIT_DATABASE_ON_DEPLOY=true` makes `deploy.sh` run `init_database.sh all` before startup.
+- `DROP_DATABASES=true` makes `init_database.sh` drop managed demo databases before recreating them.
 - `DORIS_AI_RESOURCE` sets `default_ai_resource` for every backend Doris session. It is required only for Doris AI Function pages.
 - OpenMetadata settings are required only for lineage synchronization to OpenMetadata.
 
@@ -91,7 +98,19 @@ sh init_database.sh regdb
 sh init_database.sh bjmetro
 ```
 
-The mock data files use English demo data where applicable.
+The mock data files use English demo data where applicable. Initialization validates key tables after import.
+
+Validate existing databases without importing data:
+
+```bash
+sh init_database.sh validate
+```
+
+Drop and recreate managed demo databases:
+
+```bash
+DROP_DATABASES=true sh init_database.sh all
+```
 
 ## Doris AI Function Resource
 
@@ -329,5 +348,7 @@ sh stop.sh            # stop backend and frontend ports
 sh restart.sh         # restart services
 sh logs.sh backend    # backend logs
 sh logs.sh frontend   # frontend logs
-sh healthcheck.sh     # verify backend, frontend proxy and dictionary API
+sh healthcheck.sh     # verify backend, frontend proxy and key APIs
 ```
+
+See also: `docs/OPERATIONS.md` for the delivery operations guide.

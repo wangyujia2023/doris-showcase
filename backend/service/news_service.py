@@ -275,6 +275,12 @@ WHERE {where}"""
             WHERE sentiment_done = 1
             QUALIFY ROW_NUMBER() OVER (PARTITION BY article_id ORDER BY publish_ts DESC) = 1
         """) or []
+        if not rows:
+            rows = await execute_query("""
+                SELECT article_id, sector_tag, 'neutral' AS ai_sentiment, 0 AS sentiment_score
+                FROM news_article
+                QUALIFY ROW_NUMBER() OVER (PARTITION BY article_id ORDER BY publish_ts DESC) = 1
+            """) or []
 
         sentiment_dist = {"positive": 0, "negative": 0, "neutral": 0, "mixed": 0}
         sector_sentiment = {}
@@ -351,6 +357,22 @@ WHERE {where}"""
             GROUP BY sector_tag
             ORDER BY avg_score DESC
         """) or []
+        if not rows:
+            rows = await execute_query("""
+                SELECT
+                    sector_tag,
+                    COUNT(DISTINCT article_id) AS article_count,
+                    0 AS avg_score,
+                    0 AS positive_cnt,
+                    0 AS negative_cnt,
+                    COUNT(DISTINCT article_id) AS neutral_cnt,
+                    0 AS mixed_cnt,
+                    MAX(publish_ts) AS latest_ts
+                FROM news_article
+                WHERE sector_tag IS NOT NULL
+                GROUP BY sector_tag
+                ORDER BY article_count DESC
+            """) or []
         for r in rows:
             total = r.get("article_count") or 1
             r["positive_ratio"] = round((r.get("positive_cnt") or 0) / total * 100, 1)
