@@ -72,7 +72,6 @@ class Settings:
         self.BEHAVIOR_SCAN_DAYS: int = _env_int("BEHAVIOR_SCAN_DAYS", "120")
         self.OPENMETADATA_BASE_URL: str = os.getenv("OPENMETADATA_BASE_URL", "http://10.26.20.3:8585/api")
         self.OPENMETADATA_JWT_TOKEN: str = os.getenv("OPENMETADATA_JWT_TOKEN", "")
-        self.OPENMETADATA_TABLE_FQN_PREFIX: str = os.getenv("OPENMETADATA_TABLE_FQN_PREFIX", "")
         self.RETAIL_LINEAGE_DB: str = os.getenv("RETAIL_LINEAGE_DB", "retail_lineage")
 
         # 数据安全（脱敏）

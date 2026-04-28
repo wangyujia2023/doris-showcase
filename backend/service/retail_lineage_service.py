@@ -318,25 +318,11 @@ class RetailLineageService:
         except (urllib.error.URLError, ValueError) as e:
             return False, str(e)
 
-    def _resolve_fqn(self, table_name: str) -> str:
-        prefix = settings.OPENMETADATA_TABLE_FQN_PREFIX.strip(".")
-        if not prefix:
-            return table_name
-        if table_name.startswith(prefix):
-            return table_name
-        return f"{prefix}.{table_name}"
-
     def _candidate_fqns(self, table_name: str) -> List[str]:
         raw = table_name.strip(".")
         candidates = []
         if raw:
             candidates.append(raw)
-
-        prefix = settings.OPENMETADATA_TABLE_FQN_PREFIX.strip(".")
-        if prefix:
-            candidate = f"{prefix}.{raw}"
-            if candidate not in candidates:
-                candidates.append(candidate)
 
         default_prefix = "Doris.default.retail_lineage"
         candidate = f"{default_prefix}.{raw}"

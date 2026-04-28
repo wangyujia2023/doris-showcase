@@ -19,7 +19,6 @@ cp .env.example .env
 - `RETAIL_LINEAGE_DB`
 - `OPENMETADATA_BASE_URL`
 - `OPENMETADATA_JWT_TOKEN`
-- `OPENMETADATA_TABLE_FQN_PREFIX`
 
 ## 统一配置文件
 
@@ -114,7 +113,6 @@ bash start_all.sh
 RETAIL_LINEAGE_DB=retail_lineage
 OPENMETADATA_BASE_URL=http://ip:8585/api
 OPENMETADATA_JWT_TOKEN=...
-OPENMETADATA_TABLE_FQN_PREFIX=
 ```
 
 ### 端口统一
