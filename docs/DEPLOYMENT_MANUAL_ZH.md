@@ -10,16 +10,13 @@
 | 前端 | `frontend/` | Vue 3 + Vite 前端 |
 | 一键脚本 | `deploy.sh` | 初始化依赖、构建前端、启动前后端 |
 | 配置模板 | `.env.example` | 环境变量模板 |
-| 核心建表 | `sql/doris_ddl.sql` | `bank_cdp` 主库核心表 |
-| 核心数据 | `sql/init_data.sql` | `bank_cdp` 主库 mock 数据 |
-| 首页数据 | `sql/init_dashboard_data.sql` | 首页/经营大盘 mock 数据 |
-| 血缘建表 | `sql/init_retail_lineage.sql` | `retail_lineage` 血缘元数据表 |
-| 血缘数据 | `sql/init_retail_lineage_mock.sql` | 血缘 mock 资产和关系 |
-| 真实 ETL 示例 | `sql/init_retail_lineage_product_real_etl.sql` | 服饰零售商品域 ETL 与 insert into select |
-| 复杂 ETL 示例 | `sql/init_retail_lineage_complex_etl.sql` | 多表 join、窗口函数、条件计算 ETL |
-| 血缘同步日志 | `sql/init_retail_lineage_sync_log.sql` | OpenMetadata 同步记录表 |
-| 地铁建表 | `backend/sql/bjmetro_init.sql` | `bjmetro` 模块表结构 |
-| 监管建表 | `backend/sql/regulatory_init.sql` | `regdb` 模块表结构 |
+| SQL 交付目录 | `sql/by_database/` | 按数据库整理后的建表和 mock 数据 |
+| 主库建表 | `sql/by_database/bank_cdp_schema.sql` | `bank_cdp` 建表 |
+| 主库数据 | `sql/by_database/bank_cdp_mock.sql` | `bank_cdp` mock 数据 |
+| 血缘建表 | `sql/by_database/retail_lineage_schema.sql` | `retail_lineage` 建表 |
+| 血缘数据 | `sql/by_database/retail_lineage_mock.sql` | `retail_lineage` mock 数据和 ETL 示例 |
+| 监管库 | `sql/by_database/regdb_schema.sql` / `regdb_mock.sql` | `regdb` 建表和占位 mock |
+| 地铁库 | `sql/by_database/bjmetro_schema.sql` / `bjmetro_mock.sql` | `bjmetro` 建表和占位 mock |
 
 ## 2. 环境要求
 
@@ -118,53 +115,43 @@ mysql -h <DORIS_FE_HOST> -P19030 -uroot
 ### 5.1 初始化主业务库 `bank_cdp`
 
 ```bash
-mysql -h <DORIS_FE_HOST> -P19030 -uroot -p < sql/doris_ddl.sql
-mysql -h <DORIS_FE_HOST> -P19030 -uroot -p < sql/init_data.sql
-mysql -h <DORIS_FE_HOST> -P19030 -uroot -p bank_cdp < sql/init_dashboard_data.sql
+mysql -h <DORIS_FE_HOST> -P19030 -uroot -p < sql/by_database/bank_cdp_schema.sql
+mysql -h <DORIS_FE_HOST> -P19030 -uroot -p < sql/by_database/bank_cdp_mock.sql
 ```
 
 说明：
 
 | 文件 | 内容 |
 | --- | --- |
-| `sql/doris_ddl.sql` | `CREATE DATABASE bank_cdp` 和核心表 DDL |
-| `sql/init_data.sql` | `user_wide`、`user_tag`、`user_behavior`、日志与标签字典 mock 数据 |
-| `sql/init_dashboard_data.sql` | 经营大盘图表与指标 mock 数据 |
+| `sql/by_database/bank_cdp_schema.sql` | `CREATE DATABASE bank_cdp`、核心表、物化视图、首页大盘表 |
+| `sql/by_database/bank_cdp_mock.sql` | `user_wide`、`user_tag`、`user_behavior`、日志、标签字典、首页大盘 mock 数据 |
 
 ### 5.2 初始化血缘库 `retail_lineage`
 
 ```bash
-mysql -h <DORIS_FE_HOST> -P19030 -uroot -p < sql/init_retail_lineage.sql
-mysql -h <DORIS_FE_HOST> -P19030 -uroot -p < sql/init_retail_lineage_mock.sql
-mysql -h <DORIS_FE_HOST> -P19030 -uroot -p < sql/init_retail_lineage_etl_mock.sql
-mysql -h <DORIS_FE_HOST> -P19030 -uroot -p < sql/init_retail_lineage_product_real_etl.sql
-mysql -h <DORIS_FE_HOST> -P19030 -uroot -p < sql/init_retail_lineage_complex_etl.sql
-mysql -h <DORIS_FE_HOST> -P19030 -uroot -p < sql/init_retail_lineage_sync_log.sql
+mysql -h <DORIS_FE_HOST> -P19030 -uroot -p < sql/by_database/retail_lineage_schema.sql
+mysql -h <DORIS_FE_HOST> -P19030 -uroot -p < sql/by_database/retail_lineage_mock.sql
 ```
 
 说明：
 
 | 文件 | 内容 |
 | --- | --- |
-| `sql/init_retail_lineage.sql` | 血缘基础表：`lineage_asset`、`lineage_edge`、`lineage_snapshot` 等 |
-| `sql/init_retail_lineage_mock.sql` | 基础血缘资产和边 mock 数据 |
-| `sql/init_retail_lineage_etl_mock.sql` | ETL 任务、输入输出表、任务血缘 |
-| `sql/init_retail_lineage_product_real_etl.sql` | PIM/ERP/POS 到 DWD/DWS/ADS 的真实风格 ETL |
-| `sql/init_retail_lineage_complex_etl.sql` | 多表 join、窗口函数、条件计算的复杂 ETL |
-| `sql/init_retail_lineage_sync_log.sql` | 页面同步 OpenMetadata 的结果日志 |
+| `sql/by_database/retail_lineage_schema.sql` | 血缘基础表、同步日志表、ETL 任务表、服饰零售物理表 |
+| `sql/by_database/retail_lineage_mock.sql` | 血缘资产、血缘边、ETL 任务映射、真实风格 insert into select 示例、复杂 ETL 示例 |
 
 ### 5.3 可选：初始化监管库 `regdb`
 
 ```bash
-mysql -h <DORIS_FE_HOST> -P19030 -uroot -p -e "CREATE DATABASE IF NOT EXISTS regdb;"
-mysql -h <DORIS_FE_HOST> -P19030 -uroot -p < backend/sql/regulatory_init.sql
+mysql -h <DORIS_FE_HOST> -P19030 -uroot -p < sql/by_database/regdb_schema.sql
+mysql -h <DORIS_FE_HOST> -P19030 -uroot -p < sql/by_database/regdb_mock.sql
 ```
 
 ### 5.4 可选：初始化北京地铁库 `bjmetro`
 
 ```bash
-mysql -h <DORIS_FE_HOST> -P19030 -uroot -p -e "CREATE DATABASE IF NOT EXISTS bjmetro;"
-mysql -h <DORIS_FE_HOST> -P19030 -uroot -p < backend/sql/bjmetro_init.sql
+mysql -h <DORIS_FE_HOST> -P19030 -uroot -p < sql/by_database/bjmetro_schema.sql
+mysql -h <DORIS_FE_HOST> -P19030 -uroot -p < sql/by_database/bjmetro_mock.sql
 ```
 
 ## 6. 一键初始化并启动
@@ -322,4 +309,3 @@ AI_EXTRACT('qwen_llm', content, ARRAY(...))
 | 指标平台可访问 |  |
 | 数据血缘可访问 |  |
 | 日志无明显报错 |  |
-

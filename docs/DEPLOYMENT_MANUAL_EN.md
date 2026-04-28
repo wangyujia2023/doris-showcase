@@ -10,16 +10,13 @@ This document is intended for handing the project over to another team for indep
 | Frontend | `frontend/` | Vue 3 + Vite frontend |
 | One-click script | `deploy.sh` | Install dependencies, build frontend, start backend and frontend |
 | Config template | `.env.example` | Environment variable template |
-| Core DDL | `sql/doris_ddl.sql` | Core tables for `bank_cdp` |
-| Core data | `sql/init_data.sql` | Mock data for `bank_cdp` |
-| Dashboard data | `sql/init_dashboard_data.sql` | Mock data for dashboard and management overview |
-| Lineage DDL | `sql/init_retail_lineage.sql` | Metadata tables for `retail_lineage` |
-| Lineage data | `sql/init_retail_lineage_mock.sql` | Mock lineage assets and edges |
-| Real ETL sample | `sql/init_retail_lineage_product_real_etl.sql` | Fashion retail product-domain ETL and insert-select SQL |
-| Complex ETL sample | `sql/init_retail_lineage_complex_etl.sql` | Multi-table join, window function and conditional ETL SQL |
-| Lineage sync log | `sql/init_retail_lineage_sync_log.sql` | OpenMetadata sync result log table |
-| Metro DDL | `backend/sql/bjmetro_init.sql` | Tables for the `bjmetro` module |
-| Regulatory DDL | `backend/sql/regulatory_init.sql` | Tables for the `regdb` module |
+| SQL delivery directory | `sql/by_database/` | Database-oriented schema and mock SQL files |
+| Main DB schema | `sql/by_database/bank_cdp_schema.sql` | Schema for `bank_cdp` |
+| Main DB data | `sql/by_database/bank_cdp_mock.sql` | Mock data for `bank_cdp` |
+| Lineage schema | `sql/by_database/retail_lineage_schema.sql` | Schema for `retail_lineage` |
+| Lineage data | `sql/by_database/retail_lineage_mock.sql` | Mock data and ETL examples for `retail_lineage` |
+| Regulatory DB | `sql/by_database/regdb_schema.sql` / `regdb_mock.sql` | Schema and placeholder mock for `regdb` |
+| Metro DB | `sql/by_database/bjmetro_schema.sql` / `bjmetro_mock.sql` | Schema and placeholder mock for `bjmetro` |
 
 ## 2. Requirements
 
@@ -118,53 +115,43 @@ mysql -h <DORIS_FE_HOST> -P19030 -uroot
 ### 5.1 Initialize Main Business Database `bank_cdp`
 
 ```bash
-mysql -h <DORIS_FE_HOST> -P19030 -uroot -p < sql/doris_ddl.sql
-mysql -h <DORIS_FE_HOST> -P19030 -uroot -p < sql/init_data.sql
-mysql -h <DORIS_FE_HOST> -P19030 -uroot -p bank_cdp < sql/init_dashboard_data.sql
+mysql -h <DORIS_FE_HOST> -P19030 -uroot -p < sql/by_database/bank_cdp_schema.sql
+mysql -h <DORIS_FE_HOST> -P19030 -uroot -p < sql/by_database/bank_cdp_mock.sql
 ```
 
 Description:
 
 | File | Content |
 | --- | --- |
-| `sql/doris_ddl.sql` | `CREATE DATABASE bank_cdp` and core table DDL |
-| `sql/init_data.sql` | Mock data for `user_wide`, `user_tag`, `user_behavior`, logs and tag dictionary |
-| `sql/init_dashboard_data.sql` | Mock data for dashboard charts and KPIs |
+| `sql/by_database/bank_cdp_schema.sql` | `CREATE DATABASE bank_cdp`, core tables, materialized views and dashboard tables |
+| `sql/by_database/bank_cdp_mock.sql` | Mock data for `user_wide`, `user_tag`, `user_behavior`, logs, tag dictionary and dashboard |
 
 ### 5.2 Initialize Lineage Database `retail_lineage`
 
 ```bash
-mysql -h <DORIS_FE_HOST> -P19030 -uroot -p < sql/init_retail_lineage.sql
-mysql -h <DORIS_FE_HOST> -P19030 -uroot -p < sql/init_retail_lineage_mock.sql
-mysql -h <DORIS_FE_HOST> -P19030 -uroot -p < sql/init_retail_lineage_etl_mock.sql
-mysql -h <DORIS_FE_HOST> -P19030 -uroot -p < sql/init_retail_lineage_product_real_etl.sql
-mysql -h <DORIS_FE_HOST> -P19030 -uroot -p < sql/init_retail_lineage_complex_etl.sql
-mysql -h <DORIS_FE_HOST> -P19030 -uroot -p < sql/init_retail_lineage_sync_log.sql
+mysql -h <DORIS_FE_HOST> -P19030 -uroot -p < sql/by_database/retail_lineage_schema.sql
+mysql -h <DORIS_FE_HOST> -P19030 -uroot -p < sql/by_database/retail_lineage_mock.sql
 ```
 
 Description:
 
 | File | Content |
 | --- | --- |
-| `sql/init_retail_lineage.sql` | Base lineage tables: `lineage_asset`, `lineage_edge`, `lineage_snapshot`, etc. |
-| `sql/init_retail_lineage_mock.sql` | Mock lineage assets and edges |
-| `sql/init_retail_lineage_etl_mock.sql` | ETL tasks, inputs, outputs and task lineage |
-| `sql/init_retail_lineage_product_real_etl.sql` | Realistic PIM/ERP/POS to DWD/DWS/ADS ETL |
-| `sql/init_retail_lineage_complex_etl.sql` | Complex ETL with multi-table join, window functions and derived fields |
-| `sql/init_retail_lineage_sync_log.sql` | Sync result logs for OpenMetadata |
+| `sql/by_database/retail_lineage_schema.sql` | Base lineage tables, sync log table, ETL task tables and retail physical tables |
+| `sql/by_database/retail_lineage_mock.sql` | Lineage assets, edges, ETL mappings, realistic insert-select jobs and complex ETL examples |
 
 ### 5.3 Optional: Initialize Regulatory Database `regdb`
 
 ```bash
-mysql -h <DORIS_FE_HOST> -P19030 -uroot -p -e "CREATE DATABASE IF NOT EXISTS regdb;"
-mysql -h <DORIS_FE_HOST> -P19030 -uroot -p < backend/sql/regulatory_init.sql
+mysql -h <DORIS_FE_HOST> -P19030 -uroot -p < sql/by_database/regdb_schema.sql
+mysql -h <DORIS_FE_HOST> -P19030 -uroot -p < sql/by_database/regdb_mock.sql
 ```
 
 ### 5.4 Optional: Initialize Beijing Metro Database `bjmetro`
 
 ```bash
-mysql -h <DORIS_FE_HOST> -P19030 -uroot -p -e "CREATE DATABASE IF NOT EXISTS bjmetro;"
-mysql -h <DORIS_FE_HOST> -P19030 -uroot -p < backend/sql/bjmetro_init.sql
+mysql -h <DORIS_FE_HOST> -P19030 -uroot -p < sql/by_database/bjmetro_schema.sql
+mysql -h <DORIS_FE_HOST> -P19030 -uroot -p < sql/by_database/bjmetro_mock.sql
 ```
 
 ## 6. One-click Initialization and Startup
@@ -322,4 +309,3 @@ AI_EXTRACT('qwen_llm', content, ARRAY(...))
 | Metrics platform is accessible |  |
 | Data lineage page is accessible |  |
 | No critical errors in logs |  |
-
