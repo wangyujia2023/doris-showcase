@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>图片向量检索 · Doris Showcase</title>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body,#root{height:100%;overflow:hidden}
+body{
+  background:#060C18;
+  color:#E8F0FB;
+  font-family:'Helvetica Neue',-apple-system,'PingFang SC','Microsoft YaHei UI',sans-serif;
+  font-size:13px;line-height:1.5;
+}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(37,99,235,0.18);border-radius:2px}
+button,input,select,textarea{font-family:inherit;font-size:inherit}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+@keyframes scanline{0%{transform:translateY(-100%)}100%{transform:translateY(400%)}}
+@keyframes barGrow{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+@keyframes tagPop{from{opacity:0;transform:scale(0.88)}to{opacity:1;transform:scale(1)}}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const{useState,useRef,useCallback}=React;
+
+// ── Tokens ────────────────────────────────────────────
+const C={
+  bg:'#F0F4FA',s1:'#FFFFFF',s2:'#F5F7FB',s3:'#EAEFF7',s4:'#DDE5F2',
+  border:'rgba(59,130,246,0.15)',bh:'rgba(59,130,246,0.35)',
+  acc:'#2563EB',accL:'#3B82F6',accG:'rgba(37,99,235,0.12)',
+  t1:'#0F1C35',t2:'#4A6080',t3:'#8FA3BE',
+  ok:'#059669',warn:'#D97706',err:'#DC2626',
+  purple:'#7C3AED',cyan:'#0891B2',rose:'#E11D48',
+  amber:'#B45309',lime:'#16A34A',teal:'#0D9488',
+};
+
+// ── Nav data ──────────────────────────────────────────
+const NAV=[
+  {group:null,  items:[{label:'首页大盘',icon:'🏠'}]},
+  {group:'用户画像',items:[{label:'宽表查询',icon:'🔍'},{label:'用户分析',icon:'👤'},{label:'AI 日志标签',icon:'🏷'}]},
+  {group:'H3AP 搜索',items:[{label:'图片向量检索',icon:'🖼',active:true},{label:'主客数据分析',icon:'📊'}]},
+  {group:'数据能力',items:[{label:'监管报送一表通',icon:'📋'},{label:'银行报表',icon:'📄'},{label:'指标平台',icon:'📐'},{label:'日志可观测性',icon:'📡'},{label:'日志标签分析',icon:'🔖'},{label:'链路追踪',icon:'🔗'},{label:'离开发点查',icon:'📍'}]},
+  {group:'智能指标',items:[{label:'数字孪生沙盘',icon:'🧊'},{label:'地铁运营分析',icon:'🚇'}]},
+  {group:'证券交易',items:[{label:'证券实时数仓',icon:'📈'}]},
+  {group:'基金运营',items:[{label:'基金投研沙盘',icon:'💹'}]},
+];
+
+// ── Tag data ──────────────────────────────────────────
+const TAG_COLORS=[C.acc,C.purple,C.ok,C.cyan,C.rose,C.amber,C.teal,C.lime];
+const ALL_TAGS=[
+  {label:'高净值客户',color:C.acc},{label:'基金投资者',color:C.amber},
+  {label:'手机银行活跃',color:C.ok},{label:'代发工资客户',color:C.purple},
+  {label:'信用卡活跃',color:C.cyan},{label:'理财意向客户',color:C.rose},
+  {label:'交叉销售候选',color:C.teal},{label:'小微企业主',color:C.amber},
+  {label:'贷款风险关注',color:C.err},{label:'网点偏好',color:C.lime},
+  {label:'家庭金融',color:C.purple},{label:'保险潜客',color:C.acc},
+  {label:'房贷客户',color:C.cyan},{label:'年轻白领',color:C.rose},
+  {label:'养老规划',color:C.ok},{label:'沉睡APP用户',color:C.t3},
+  {label:'流失风险',color:C.err},
+];
+
+const USER_TAGS=[
+  {label:'手机银行活跃',color:C.ok},
+  {label:'家庭金融',color:C.purple},
+];
+
+// ── Tiny SVG icons ────────────────────────────────────
+const ICON_PATHS={
+  upload: 'M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4 M17 8l-5-5-5 5 M12 3v13',
+  image:  'M21 19V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2z M8.5 10a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z M21 15l-5-5L5 21',
+  tag:    'M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z M7 7h.01',
+  text:   'M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z',
+  search: 'M21 21l-4.35-4.35 M11 19A8 8 0 1 0 11 3a8 8 0 0 0 0 16z',
+  trash:  'M3 6h18 M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6 M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2',
+  refresh:'M23 4v6h-6 M1 20v-6h6 M3.51 9a9 9 0 0 1 14.85-3.36L23 10 M1 14l4.64 4.36A9 9 0 0 0 20.49 15',
+  plus:   'M12 5v14 M5 12h14',
+  close:  'M18 6L6 18 M6 6l12 12',
+  slider: 'M4 6h16 M8 6a2 2 0 0 0 4 0 2 2 0 0 0-4 0 M4 12h16 M16 12a2 2 0 0 0 4 0 2 2 0 0 0-4 0 M4 18h16 M8 18a2 2 0 0 0 4 0 2 2 0 0 0-4 0',
+  globe:  'M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z M2 12h20 M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z',
+};
+
+const Ic=({name,size=14,color=C.t2})=>(
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <path d={ICON_PATHS[name]||''}/>
+  </svg>
+);
+
+// ── Vector embedding mini-viz ─────────────────────────
+const VecViz=({dims=[8]})=>{
+  const vals=[0.82,0.41,0.67,0.23,0.91,0.55,0.38,0.74];
+  const labels=['外貌','年龄','穿着','场景','情绪','背景','姿态','光线'];
+  return(
+    <div style={{display:'flex',flexDirection:'column',gap:6}}>
+      <div style={{display:'flex',alignItems:'flex-end',gap:5,height:64}}>
+        {vals.map((v,i)=>{
+          const col=TAG_COLORS[i%TAG_COLORS.length];
+          return(
+            <div key={i} style={{flex:1,display:'flex',flexDirection:'column',alignItems:'center',gap:3,height:'100%',justifyContent:'flex-end'}}>
+              <div style={{
+                width:'100%',borderRadius:'3px 3px 0 0',
+                height:`${v*100}%`,
+                background:`linear-gradient(to top,${col},${col}aa)`,
+                boxShadow:`0 0 10px ${col}44`,
+                transformOrigin:'bottom',
+                animation:`barGrow 0.6s ${i*0.06}s cubic-bezier(.22,1,.36,1) both`,
+              }}/>
+            </div>
+          );
+        })}
+      </div>
+      <div style={{display:'flex',gap:5}}>
+        {labels.map((l,i)=><div key={i} style={{flex:1,fontSize:8.5,color:C.t3,textAlign:'center',letterSpacing:'-0.02em'}}>{l}</div>)}
+      </div>
+      <div style={{fontSize:10,color:C.t3,textAlign:'center',marginTop:2}}>生成向量（{vals.length} 维）</div>
+    </div>
+  );
+};
+
+// ── Tag chip ──────────────────────────────────────────
+const TagChip=({label,color,selected,onToggle,showClose})=>(
+  <button onClick={()=>onToggle&&onToggle(label)} style={{
+    padding:'4px 10px',borderRadius:20,cursor:'pointer',
+    background:selected?`${color}22`:'transparent',
+    border:`1px solid ${selected?color:color+'55'}`,
+    color:selected?color:`${color}aa`,
+    fontSize:11,fontWeight:selected?600:400,
+    display:'inline-flex',alignItems:'center',gap:5,
+    transition:'all 0.15s',
+    animation:'tagPop 0.2s ease both',
+    whiteSpace:'nowrap',flexShrink:0,
+  }}>
+    {label}
+    {showClose&&selected&&<span style={{fontSize:9,opacity:0.7}}>✕</span>}
+  </button>
+);
+
+// ── Mode card ─────────────────────────────────────────
+const ModeCard=({icon,title,sub,active,onClick,color=C.acc})=>(
+  <button onClick={onClick} style={{
+    flex:1,padding:'14px 16px',borderRadius:10,cursor:'pointer',textAlign:'left',
+    background:active?`${color}14`:C.s2,
+    border:`1.5px solid ${active?color:C.border}`,
+    boxShadow:active?`0 0 22px ${color}22`:'none',
+    transition:'all 0.18s',
+  }}>
+    <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:5}}>
+      <span style={{fontSize:16}}>{icon}</span>
+      <span style={{fontSize:12,fontWeight:700,color:active?color:C.t2}}>{title}</span>
+    </div>
+    <div style={{fontSize:10.5,color:active?`${color}bb`:C.t3,lineHeight:1.5}}>{sub}</div>
+  </button>
+);
+
+// ── Sidebar ───────────────────────────────────────────
+const Sidebar=()=>(
+  <div style={{
+    width:192,background:C.s1,borderRight:`1px solid ${C.border}`,
+    display:'flex',flexDirection:'column',overflow:'hidden',flexShrink:0,
+  }}>
+    {/* Logo */}
+    <div style={{height:52,display:'flex',alignItems:'center',gap:9,padding:'0 16px',borderBottom:`1px solid ${C.border}`,flexShrink:0}}>
+      <div style={{width:28,height:28,borderRadius:8,background:`linear-gradient(135deg,${C.acc},${C.purple})`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:13,fontWeight:800,color:'white',flexShrink:0}}>D</div>
+      <span style={{fontSize:13,fontWeight:700,color:C.t1,letterSpacing:'-0.01em'}}>Doris Showcase</span>
+    </div>
+    {/* Nav */}
+    <div style={{flex:1,overflowY:'auto',padding:'8px 0'}}>
+      {NAV.map((section,si)=>(
+        <div key={si}>
+          {section.group&&(
+            <div style={{padding:'10px 14px 4px',fontSize:9.5,color:C.t3,fontWeight:600,letterSpacing:'0.07em',textTransform:'uppercase'}}>{section.group}</div>
+          )}
+          {section.items.map((item,ii)=>(
+            <button key={ii} style={{
+              width:'100%',display:'flex',alignItems:'center',gap:8,
+              padding:'8px 14px',background:item.active?`${C.acc}18`:'transparent',
+              border:'none',borderLeft:`2px solid ${item.active?C.acc:'transparent'}`,
+              cursor:'pointer',color:item.active?C.accL:C.t2,
+              fontSize:12,
+            }}>
+              <span style={{fontSize:13}}>{item.icon}</span>
+              <span style={{fontWeight:item.active?600:400}}>{item.label}</span>
+            </button>
+          ))}
+        </div>
+      ))}
+    </div>
+    {/* Footer */}
+    <div style={{borderTop:`1px solid ${C.border}`,padding:'10px 14px',display:'flex',alignItems:'center',gap:7}}>
+      <div style={{width:7,height:7,borderRadius:'50%',background:C.ok,boxShadow:`0 0 7px ${C.ok}`}}/>
+      <span style={{fontSize:10.5,color:C.t3}}>Doris 4.0 已连接</span>
+    </div>
+  </div>
+);
+
+// ── Main App ──────────────────────────────────────────
+const App=()=>{
+  const[mode,setMode]=useState('hybrid');// vector|scalar|hybrid
+  const[selTags,setSelTags]=useState(['高净值客户','手机银行活跃','家庭金融']);
+  const[topK,setTopK]=useState(5);
+  const[dragging,setDragging]=useState(false);
+  const[hasImg,setHasImg]=useState(true);// mock: show sample avatar
+  const[descText,setDescText]=useState('');
+  const[searching,setSearching]=useState(false);
+
+  const toggleTag=useCallback((label)=>{
+    setSelTags(ts=>ts.includes(label)?ts.filter(t=>t!==label):[...ts,label]);
+  },[]);
+
+  const doSearch=()=>{
+    setSearching(true);
+    setTimeout(()=>setSearching(false),1800);
+  };
+
+  const modeColor={vector:C.acc,scalar:C.amber,hybrid:C.purple}[mode];
+
+  return(
+    <div style={{height:'100vh',display:'flex',overflow:'hidden',background:C.bg}}>
+      <Sidebar/>
+
+      {/* Main */}
+      <div style={{flex:1,display:'flex',flexDirection:'column',overflow:'hidden'}}>
+
+        {/* ── Top bar ── */}
+        <div style={{
+          height:52,display:'flex',alignItems:'center',justifyContent:'space-between',
+          padding:'0 24px',borderBottom:`1px solid ${C.border}`,
+          background:`linear-gradient(90deg,${C.bg},${C.s1})`,
+          flexShrink:0,
+        }}>
+          <div style={{display:'flex',alignItems:'center',gap:10}}>
+            <span style={{fontSize:15,fontWeight:700,color:C.t1,letterSpacing:'-0.02em'}}>图片向量检索</span>
+            <div style={{padding:'2px 9px',background:`${C.cyan}18`,border:`1px solid ${C.cyan}44`,borderRadius:5,fontSize:10,color:C.cyan,fontWeight:700,letterSpacing:'0.06em'}}>H3AP</div>
+          </div>
+          <div style={{display:'flex',alignItems:'center',gap:12}}>
+            <div style={{display:'flex',alignItems:'center',gap:6,padding:'5px 12px',background:C.s2,border:`1px solid ${C.border}`,borderRadius:7,cursor:'pointer'}}>
+              <Ic name="globe" size={12} color={C.t2}/>
+              <span style={{fontSize:11,color:C.t2}}>中文</span>
+            </div>
+            <div style={{fontSize:11,color:C.t3,padding:'5px 12px',background:C.s2,border:`1px solid ${C.border}`,borderRadius:7,cursor:'pointer'}}>数据分析师</div>
+          </div>
+        </div>
+
+        {/* ── Sub header ── */}
+        <div style={{
+          padding:'14px 24px',borderBottom:`1px solid ${C.border}`,
+          background:C.s1,flexShrink:0,
+          display:'flex',alignItems:'center',justifyContent:'space-between',
+        }}>
+          <div>
+            <div style={{fontSize:13,fontWeight:600,color:C.t1,marginBottom:3}}>图片向量检索</div>
+            <div style={{fontSize:11,color:C.t3}}>图片向量 + 标签标量 + 文本描述的混合搜索</div>
+          </div>
+          <div style={{display:'flex',gap:9}}>
+            <button style={{
+              display:'flex',alignItems:'center',gap:6,padding:'7px 14px',
+              background:'transparent',border:`1px solid ${C.err}55`,borderRadius:8,
+              color:C.err,fontSize:11,cursor:'pointer',transition:'all 0.15s',
+            }}
+              onMouseEnter={e=>e.currentTarget.style.background=`${C.err}14`}
+              onMouseLeave={e=>e.currentTarget.style.background='transparent'}
+            >
+              <Ic name="trash" size={12} color={C.err}/>清空用户
+            </button>
+            <button style={{
+              display:'flex',alignItems:'center',gap:6,padding:'7px 14px',
+              background:'transparent',border:`1px solid ${C.border}`,borderRadius:8,
+              color:C.t2,fontSize:11,cursor:'pointer',transition:'all 0.15s',
+            }}
+              onMouseEnter={e=>e.currentTarget.style.borderColor=C.acc}
+              onMouseLeave={e=>e.currentTarget.style.borderColor=C.border}
+            >
+              <Ic name="refresh" size={12} color={C.t2}/>初始化向量库
+            </button>
+          </div>
+        </div>
+
+        {/* ── Body ── */}
+        <div style={{flex:1,overflow:'hidden',display:'flex',gap:0}}>
+
+          {/* ── Left panel: User ── */}
+          <div style={{
+            width:220,borderRight:`1px solid ${C.border}`,
+            display:'flex',flexDirection:'column',overflow:'hidden',flexShrink:0,
+            background:C.s1,
+          }}>
+            {/* User card */}
+            <div style={{padding:'20px 16px 16px',borderBottom:`1px solid ${C.border}`,flexShrink:0}}>
+              <div style={{display:'flex',flexDirection:'column',alignItems:'center',gap:10}}>
+                {/* Avatar */}
+                <div style={{position:'relative'}}>
+                  <div style={{
+                    width:72,height:72,borderRadius:'50%',overflow:'hidden',
+                    border:`2px solid ${C.acc}44`,
+                    boxShadow:`0 0 22px ${C.acc}33, 0 4px 16px rgba(0,0,0,0.5)`,
+                    background:C.s3,display:'flex',alignItems:'center',justifyContent:'center',
+                    fontSize:28,
+                  }}>👤</div>
+                  <div style={{
+                    position:'absolute',bottom:2,right:2,
+                    width:14,height:14,borderRadius:'50%',
+                    background:C.ok,border:`2px solid ${C.s1}`,
+                    boxShadow:`0 0 8px ${C.ok}`,
+                  }}/>
+                </div>
+                <div style={{textAlign:'center'}}>
+                  <div style={{fontSize:14,fontWeight:700,color:C.t1,letterSpacing:'-0.01em'}}>Phoenix</div>
+                  <div style={{fontSize:10,color:C.t3,marginTop:2}}>ID: USR-10847362</div>
+                </div>
+                <div style={{display:'flex',gap:6,flexWrap:'wrap',justifyContent:'center'}}>
+                  {USER_TAGS.map(t=>(
+                    <TagChip key={t.label} label={t.label} color={t.color} selected/>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Tag library */}
+            <div style={{flex:1,overflowY:'auto',padding:'14px 12px'}}>
+              <div style={{
+                fontSize:10,color:C.t3,fontWeight:600,letterSpacing:'0.06em',
+                textTransform:'uppercase',marginBottom:10,
+                display:'flex',alignItems:'center',gap:6,
+              }}>
+                <Ic name="tag" size={10} color={C.t3}/>标签库
+              </div>
+              <div style={{display:'flex',flexWrap:'wrap',gap:5}}>
+                {ALL_TAGS.map(t=>(
+                  <TagChip key={t.label} label={t.label} color={t.color}
+                    selected={selTags.includes(t.label)}
+                    onToggle={toggleTag} showClose/>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* ── Right panel ── */}
+          <div style={{flex:1,overflowY:'auto',padding:'20px 24px',display:'flex',flexDirection:'column',gap:18}}>
+
+            {/* Mode selector */}
+            <div style={{display:'flex',gap:10}}>
+              <ModeCard icon="🖼" title="图片向量搜索"
+                sub={`上传照片 → cosine_distance 近似最近邻`}
+                active={mode==='vector'} onClick={()=>setMode('vector')} color={C.acc}/>
+              <ModeCard icon="🏷" title="标量标签搜索"
+                sub={`选择标签 → WHERE JSON 精确过滤`}
+                active={mode==='scalar'} onClick={()=>setMode('scalar')} color={C.amber}/>
+              <ModeCard icon="✨" title="混合检索"
+                sub={`图片向量 + 标签过滤 + 描述文本补充`}
+                active={mode==='hybrid'} onClick={()=>setMode('hybrid')} color={C.purple}/>
+            </div>
+
+            {/* Query image */}
+            {(mode==='vector'||mode==='hybrid')&&(
+              <div style={{
+                background:C.s1,border:`1px solid ${C.border}`,borderRadius:12,padding:18,
+                animation:'fadeUp 0.3s ease both',
+              }}>
+                <div style={{
+                  fontSize:11,color:C.t3,fontWeight:600,letterSpacing:'0.05em',
+                  textTransform:'uppercase',marginBottom:14,
+                  display:'flex',alignItems:'center',gap:6,
+                }}>
+                  <Ic name="image" size={11} color={C.t3}/>查询图片
+                  <span style={{color:C.t3,fontWeight:400,textTransform:'none',fontSize:10}}>支持上传或从用户库选择</span>
+                </div>
+                <div style={{display:'flex',gap:20,alignItems:'flex-start'}}>
+                  {/* Upload zone */}
+                  <div
+                    onDragOver={e=>{e.preventDefault();setDragging(true);}}
+                    onDragLeave={()=>setDragging(false)}
+                    onDrop={e=>{e.preventDefault();setDragging(false);setHasImg(true);}}
+                    style={{
+                      width:130,height:130,borderRadius:10,
+                      border:`2px dashed ${dragging?modeColor:hasImg?modeColor+'66':C.border}`,
+                      background:hasImg?`${modeColor}0a`:dragging?`${modeColor}0f`:C.s2,
+                      display:'flex',alignItems:'center',justifyContent:'center',
+                      cursor:'pointer',transition:'all 0.2s',flexShrink:0,
+                      position:'relative',overflow:'hidden',
+                      boxShadow:hasImg?`0 0 24px ${modeColor}1a`:'none',
+                    }}>
+                    {hasImg?(
+                      <>
+                        {/* Mock avatar */}
+                        <div style={{fontSize:64,lineHeight:1}}>👤</div>
+                        {/* scan line effect */}
+                        <div style={{
+                          position:'absolute',top:0,left:0,right:0,height:2,
+                          background:`linear-gradient(90deg,transparent,${modeColor},transparent)`,
+                          animation:'scanline 2.4s linear infinite',
+                          opacity:0.6,
+                        }}/>
+                        <button onClick={()=>setHasImg(false)} style={{
+                          position:'absolute',top:6,right:6,
+                          width:20,height:20,borderRadius:'50%',
+                          background:'rgba(0,0,0,0.6)',border:'none',cursor:'pointer',
+                          display:'flex',alignItems:'center',justifyContent:'center',
+                        }}>
+                          <Ic name="close" size={10} color="white"/>
+                        </button>
+                      </>
+                    ):(
+                      <div style={{textAlign:'center',padding:8}}>
+                        <Ic name="upload" size={24} color={C.t3}/>
+                        <div style={{fontSize:10,color:C.t3,marginTop:8,lineHeight:1.5}}>拖拽上传<br/>或点击选择</div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Vector viz */}
+                  {hasImg&&(
+                    <div style={{flex:1,animation:'fadeUp 0.4s 0.1s ease both',opacity:0}}>
+                      <VecViz/>
+                      <div style={{
+                        marginTop:12,display:'flex',alignItems:'center',gap:8,
+                        padding:'8px 12px',background:C.s2,borderRadius:8,
+                        border:`1px solid ${modeColor}22`,
+                      }}>
+                        <div style={{width:6,height:6,borderRadius:'50%',background:modeColor,flexShrink:0,boxShadow:`0 0 7px ${modeColor}`}}/>
+                        <span style={{fontSize:10,color:C.t2}}>向量已生成，模型: </span>
+                        <span style={{fontSize:10,color:modeColor,fontWeight:600,fontFamily:'monospace'}}>CLIP-ViT-L/14</span>
+                        <button onClick={()=>setHasImg(false)} style={{
+                          marginLeft:'auto',display:'flex',alignItems:'center',gap:4,
+                          background:'transparent',border:'none',cursor:'pointer',color:C.t3,fontSize:10,
+                        }}>
+                          <Ic name="upload" size={10} color={C.t3}/>来自上传
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Tag filter */}
+            {(mode==='scalar'||mode==='hybrid')&&(
+              <div style={{
+                background:C.s1,border:`1px solid ${C.border}`,borderRadius:12,padding:18,
+                animation:'fadeUp 0.35s 0.05s ease both',
+              }}>
+                <div style={{
+                  fontSize:11,color:C.t3,fontWeight:600,letterSpacing:'0.05em',
+                  textTransform:'uppercase',marginBottom:12,
+                  display:'flex',alignItems:'center',gap:6,
+                }}>
+                  <Ic name="tag" size={11} color={C.t3}/>标签过滤
+                  <span style={{color:C.t3,fontWeight:400,textTransform:'none',fontSize:10}}>支持多标签 AND 过滤</span>
+                  {selTags.length>0&&(
+                    <span style={{marginLeft:'auto',fontSize:10,color:modeColor,fontWeight:600}}>已选 {selTags.length} 个</span>
+                  )}
+                </div>
+                <div style={{display:'flex',flexWrap:'wrap',gap:6}}>
+                  {ALL_TAGS.map(t=>(
+                    <TagChip key={t.label} label={t.label} color={t.color}
+                      selected={selTags.includes(t.label)}
+                      onToggle={toggleTag} showClose/>
+                  ))}
+                </div>
+                {selTags.length>0&&(
+                  <div style={{marginTop:12,padding:'8px 12px',background:C.s2,borderRadius:8,border:`1px solid ${C.border}`}}>
+                    <div style={{fontSize:10,color:C.t3,marginBottom:5,fontFamily:'monospace'}}>{'// 生成过滤条件'}</div>
+                    <div style={{fontSize:11,color:C.cyan,fontFamily:'monospace',lineHeight:1.7}}>
+                      WHERE JSON_CONTAINS(tags, '{selTags.map(t=>`"${t}"`).join(', ')}')
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Text description */}
+            {(mode==='hybrid')&&(
+              <div style={{
+                background:C.s1,border:`1px solid ${C.border}`,borderRadius:12,padding:18,
+                animation:'fadeUp 0.35s 0.1s ease both',
+              }}>
+                <div style={{
+                  fontSize:11,color:C.t3,fontWeight:600,letterSpacing:'0.05em',
+                  textTransform:'uppercase',marginBottom:12,
+                  display:'flex',alignItems:'center',gap:6,
+                }}>
+                  <Ic name="text" size={11} color={C.t3}/>文本描述
+                  <span style={{color:C.t3,fontWeight:400,textTransform:'none',fontSize:10}}>用于混合检索文本补充</span>
+                </div>
+                <textarea
+                  value={descText}
+                  onChange={e=>setDescText(e.target.value)}
+                  placeholder="输入对图片的文字描述，例：中年男性，戴眼镜，西装，理财偏好..."
+                  style={{
+                    width:'100%',height:76,
+                    background:C.s2,border:`1px solid ${C.border}`,borderRadius:8,
+                    color:C.t1,fontSize:12,padding:'10px 12px',outline:'none',resize:'none',
+                    lineHeight:1.7,caretColor:C.purple,
+                    transition:'border-color 0.15s',
+                  }}
+                  onFocus={e=>e.target.style.borderColor=C.purple}
+                  onBlur={e=>e.target.style.borderColor=C.border}
+                />
+              </div>
+            )}
+
+            {/* Bottom action row */}
+            <div style={{
+              display:'flex',alignItems:'center',gap:16,
+              padding:'16px 18px',
+              background:C.s1,borderRadius:12,border:`1px solid ${C.border}`,
+              flexShrink:0,
+            }}>
+              {/* Top-K slider */}
+              <div style={{display:'flex',alignItems:'center',gap:10,flex:1}}>
+                <span style={{fontSize:11,color:C.t3,whiteSpace:'nowrap',fontWeight:600}}>Top-K</span>
+                <input type="range" min={1} max={50} value={topK} onChange={e=>setTopK(Number(e.target.value))}
+                  style={{flex:1,accentColor:modeColor,height:4,cursor:'pointer'}}/>
+                <div style={{
+                  width:36,height:28,borderRadius:7,
+                  background:`${modeColor}18`,border:`1px solid ${modeColor}44`,
+                  display:'flex',alignItems:'center',justifyContent:'center',
+                  fontSize:13,fontWeight:700,color:modeColor,flexShrink:0,
+                }}>{topK}</div>
+              </div>
+
+              {/* Divider */}
+              <div style={{width:1,height:28,background:C.border}}/>
+
+              {/* Search button */}
+              <button onClick={doSearch} style={{
+                display:'flex',alignItems:'center',gap:8,
+                padding:'9px 22px',borderRadius:9,
+                background:searching?C.s3:`linear-gradient(135deg,${modeColor},${modeColor}cc)`,
+                border:`1px solid ${searching?C.border:modeColor}`,
+                color:'white',fontSize:12,fontWeight:700,cursor:'pointer',
+                boxShadow:searching?'none':`0 0 24px ${modeColor}44`,
+                transition:'all 0.2s',letterSpacing:'0.01em',
+                minWidth:110,justifyContent:'center',
+              }}>
+                {searching?(
+                  <>
+                    <div style={{width:13,height:13,borderRadius:'50%',border:'2px solid rgba(255,255,255,0.3)',borderTopColor:'white',animation:'spin 0.8s linear infinite'}}/>
+                    检索中...
+                  </>
+                ):(
+                  <>
+                    <Ic name="search" size={13} color="white"/>
+                    {{vector:'向量检索',scalar:'标签检索',hybrid:'混合检索'}[mode]}
+                  </>
+                )}
+              </button>
+
+              {/* Clear */}
+              <button onClick={()=>{setSelTags([]);setDescText('');}} style={{
+                padding:'9px 16px',borderRadius:9,
+                background:'transparent',border:`1px solid ${C.border}`,
+                color:C.t3,fontSize:11,cursor:'pointer',transition:'all 0.15s',
+                display:'flex',alignItems:'center',gap:5,
+              }}
+                onMouseEnter={e=>e.currentTarget.style.borderColor=C.err}
+                onMouseLeave={e=>e.currentTarget.style.borderColor=C.border}
+              >
+                <Ic name="trash" size={11} color={C.t3}/>common.clear
+              </button>
+            </div>
+
+          </div>{/* right panel end */}
+        </div>{/* body end */}
+      </div>{/* main end */}
+    </div>
+  );
+};
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>

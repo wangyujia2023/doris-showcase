@@ -228,6 +228,9 @@ import VChart from 'vue-echarts'
 import { securitiesApi } from '@/api'
 import CollapseCard from '@/components/common/CollapseCard.vue'
 import { t, locale } from '@/i18n'
+import { registerEchartsBasic } from '@/plugins/registerEchartsBasic'
+
+registerEchartsBasic()
 
 const archOpen = ref(false)
 const ctrlOpen = ref(true)

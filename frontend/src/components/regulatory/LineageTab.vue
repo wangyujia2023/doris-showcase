@@ -15,8 +15,13 @@
 
 <script setup>
 import { onMounted } from 'vue'
-import * as echarts from 'echarts'
+import { init, use } from 'echarts/core'
+import { GraphChart } from 'echarts/charts'
+import { TooltipComponent } from 'echarts/components'
+import { CanvasRenderer } from 'echarts/renderers'
 import { t } from '@/i18n'
+
+use([GraphChart, TooltipComponent, CanvasRenderer])
 
 const legend = [
   { label:'Source', color:'#409eff' },
@@ -27,7 +32,7 @@ const legend = [
 ]
 
 onMounted(() => {
-  const c = echarts.init(document.getElementById('lineage-chart'))
+  const c = init(document.getElementById('lineage-chart'))
 
   // 节点定义：[id, name, x%, y%, layer, desc]
   const nodesDef = [

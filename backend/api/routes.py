@@ -1,6 +1,7 @@
 """银行CDP平台 - FastAPI 路由聚合"""
 from fastapi import APIRouter
 
+from backend.api.alias_routes import router as alias_router
 from backend.api.benchmark_routes import router as benchmark_router
 from backend.api.cdp_routes import router as cdp_router
 from backend.api.dictionary_routes import router as dictionary_router
@@ -17,6 +18,7 @@ from backend.api.vector_routes import router as vector_router
 
 router = APIRouter()
 router.include_router(core_router)
+router.include_router(alias_router)
 router.include_router(cdp_router)
 router.include_router(dictionary_router)
 router.include_router(vector_router)

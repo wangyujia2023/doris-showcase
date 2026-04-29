@@ -88,7 +88,7 @@
               <el-card shadow="hover" style="width:220px;display:inline-block;vertical-align:top;cursor:pointer">
                 <div style="font-size:13px;font-weight:600">{{ pkg.name }}</div>
                 <div style="font-size:11px;color:#909399;margin:3px 0">{{ pkg.desc || '—' }}</div>
-                <div style="font-size:12px;color:#409eff">{{ pkg.crowd_size.toLocaleString() }} 人</div>
+                <div style="font-size:12px;color:#409eff">{{ pkg.crowd_size.toLocaleString() }} {{ t('ut.peopleUnit') }}</div>
                 <div style="font-size:11px;color:#c0c4cc;margin-top:4px">{{ pkg.created_at }}</div>
                 <el-button size="small" type="danger" text @click.stop="deleteCrowd(pkg.crowd_id)" style="position:absolute;top:6px;right:6px">{{ t('common.delete') }}</el-button>
               </el-card>
@@ -137,7 +137,7 @@
     <div v-if="activeTab === 'portrait'" class="card" style="border-top-left-radius:0">
       <el-tabs v-model="portraitTab" type="border-card">
         <!-- TGI -->
-        <el-tab-pane label="TGI 指数分析" name="tgi">
+        <el-tab-pane :label="t('ut.tgiTab')" name="tgi">
           <div style="margin:10px 0;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
             <span style="font-size:13px">{{ t('ut.targetTags') }}：</span>
             <el-select v-model="tgiTagIds" multiple collapse-tags collapse-tags-tooltip :placeholder="t('ut.optionalAll')" style="width:320px">
@@ -145,21 +145,21 @@
                 <el-option v-for="tg in grp.tags" :key="tg.tag_id" :label="tagLabel(tg.tag_id)" :value="tg.tag_id" />
               </el-option-group>
             </el-select>
-            <el-button type="primary" :loading="tgiLoading" @click="runTgi">分析</el-button>
+            <el-button type="primary" :loading="tgiLoading" @click="runTgi">{{ t('ut.analyze') }}</el-button>
           </div>
           <div v-if="tgiData.length">
-            <el-select v-model="tgiCat" placeholder="按分类筛选" clearable size="small" style="margin-bottom:10px;width:160px">
+            <el-select v-model="tgiCat" :placeholder="t('ut.filterByCategory')" clearable size="small" style="margin-bottom:10px;width:160px">
               <el-option v-for="c in tgiCats" :key="c" :label="groupLabel(c)" :value="c" />
             </el-select>
             <v-chart :option="tgiOption" style="height:420px" autoresize />
             <div style="font-size:12px;color:#909399;margin-top:6px">
-              TGI = (目标人群占比 / 全体基准占比) × 100，＞100 代表该标签在目标人群中超指数分布
+              {{ t('ut.tgiFormula') }}
             </div>
           </div>
         </el-tab-pane>
 
         <!-- 交叉分析 -->
-        <el-tab-pane label="交叉分析" name="cross">
+        <el-tab-pane :label="t('ut.crossTab')" name="cross">
           <div style="margin:10px 0;display:flex;gap:12px;align-items:center">
             <el-select v-model="crossCat1" :placeholder="t('ut.categoryA')" style="width:150px">
               <el-option v-for="c in allCats" :key="c" :label="groupLabel(c)" :value="c" />
@@ -168,7 +168,7 @@
             <el-select v-model="crossCat2" :placeholder="t('ut.categoryB')" style="width:150px">
               <el-option v-for="c in allCats" :key="c" :label="groupLabel(c)" :value="c" />
             </el-select>
-            <el-button type="primary" :loading="crossLoading" @click="runCross">交叉分析</el-button>
+            <el-button type="primary" :loading="crossLoading" @click="runCross">{{ t('ut.crossTab') }}</el-button>
           </div>
           <div v-if="crossData">
             <div style="overflow-x:auto">
@@ -185,18 +185,18 @@
                     <td
                       v-for="cell in row.cells" :key="cell"
                       :style="{ background: crossColor(cell.pct, crossMaxPct) }"
-                      :title="`${cell.count} 人 / ${cell.pct}%`"
+                      :title="`${cell.count} ${t('ut.peopleUnit')} / ${cell.pct}%`"
                     >{{ cell.pct }}%</td>
                   </tr>
                 </tbody>
               </table>
             </div>
-            <div style="font-size:12px;color:#909399;margin-top:6px">总用户 {{ crossData.total.toLocaleString() }}，颜色深度代表共现比例</div>
+            <div style="font-size:12px;color:#909399;margin-top:6px">{{ t('ut.crossHint').replace('{0}', crossData.total.toLocaleString()) }}</div>
           </div>
         </el-tab-pane>
 
         <!-- 地域分布 -->
-        <el-tab-pane label="地域分布" name="geo">
+        <el-tab-pane :label="t('ut.geoTab')" name="geo">
           <div style="margin:10px 0;display:flex;gap:8px;align-items:center">
             <span style="font-size:13px">{{ t('ut.filterTags') }}：</span>
             <el-select v-model="geoTagIds" multiple collapse-tags :placeholder="t('ut.optionalAll')" style="width:280px">
@@ -204,7 +204,7 @@
                 <el-option v-for="tg in grp.tags" :key="tg.tag_id" :label="tagLabel(tg.tag_id)" :value="tg.tag_id" />
               </el-option-group>
             </el-select>
-            <el-button type="primary" :loading="geoLoading" @click="runGeo">查询</el-button>
+            <el-button type="primary" :loading="geoLoading" @click="runGeo">{{ t('common.query') }}</el-button>
           </div>
           <div v-if="geoData">
             <el-row :gutter="16">
@@ -213,8 +213,8 @@
               </el-col>
               <el-col :span="12">
                 <el-table :data="geoData.province_list.slice(0,15)" border size="small" max-height="360">
-                  <el-table-column prop="province" label="省份" />
-                  <el-table-column label="用户数">
+                  <el-table-column prop="province" :label="t('ut.province')" />
+                  <el-table-column :label="t('ut.userCount')">
                     <template #default="{row}">
                       <el-progress :percentage="Math.round(row.cnt/geoData.province_list[0].cnt*100)" :stroke-width="8" :format="()=>row.cnt.toLocaleString()" />
                     </template>
@@ -231,40 +231,40 @@
     <div v-if="activeTab === 'map'" class="card" style="border-top-left-radius:0">
       <el-row :gutter="20">
         <el-col :span="14">
-          <div style="font-size:13px;font-weight:600;margin-bottom:10px">省份圈选（点击选择投放地域）</div>
+          <div style="font-size:13px;font-weight:600;margin-bottom:10px">{{ t('ut.provinceSelectTitle') }}</div>
           <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px">
             <div
               v-for="p in provinces" :key="p"
               @click="toggleProvince(p)"
               :class="['province-chip', selectedProvinces.includes(p) ? 'selected' : '']"
-            >{{ p }}</div>
+            >{{ displayProvince(p) }}</div>
           </div>
           <div style="margin-bottom:12px">
-            <el-tag v-if="!selectedProvinces.length" type="info" size="small">未选择省份</el-tag>
-            <el-tag v-for="p in selectedProvinces" :key="p" closable @close="selectedProvinces = selectedProvinces.filter(x=>x!==p)" style="margin:2px">{{ p }}</el-tag>
+            <el-tag v-if="!selectedProvinces.length" type="info" size="small">{{ t('ut.noProvince') }}</el-tag>
+            <el-tag v-for="p in selectedProvinces" :key="p" closable @close="selectedProvinces = selectedProvinces.filter(x=>x!==p)" style="margin:2px">{{ displayProvince(p) }}</el-tag>
           </div>
           <el-button type="primary" :loading="mapLoading" :disabled="!selectedProvinces.length" @click="runTargeting">
-            估算投放覆盖
+            {{ t('ut.estimateDelivery') }}
           </el-button>
 
           <div v-if="targetingData" style="margin-top:16px">
             <el-row :gutter="12" style="margin-bottom:12px">
               <el-col :span="8">
                 <div class="stat-card">
-                  <div class="stat-label">覆盖用户</div>
+                  <div class="stat-label">{{ t('ut.coveredUsers') }}</div>
                   <div class="stat-value" style="font-size:22px">{{ targetingData.total.toLocaleString() }}</div>
                 </div>
               </el-col>
             </el-row>
             <el-table :data="targetingData.detail" border size="small">
-              <el-table-column prop="province" label="省份" width="100" />
-              <el-table-column label="用户数" prop="cnt">
+              <el-table-column prop="province" :label="t('ut.province')" width="100" />
+              <el-table-column :label="t('ut.userCount')" prop="cnt">
                 <template #default="{row}">{{ (row.cnt||0).toLocaleString() }}</template>
               </el-table-column>
-              <el-table-column label="平均AUM" prop="avg_aum">
+              <el-table-column :label="t('ut.avgAum')" prop="avg_aum">
                 <template #default="{row}">¥{{ Number(row.avg_aum||0).toLocaleString() }}</template>
               </el-table-column>
-              <el-table-column label="异常用户" prop="anomaly_cnt">
+              <el-table-column :label="t('ut.anomalyUsers')" prop="anomaly_cnt">
                 <template #default="{row}">
                   <el-tag :type="row.anomaly_cnt>0?'danger':'success'" size="small">{{ row.anomaly_cnt||0 }}</el-tag>
                 </template>
@@ -275,30 +275,30 @@
 
         <el-col :span="10">
           <div style="background:#f5f7fa;border-radius:6px;padding:16px">
-            <div style="font-size:13px;font-weight:600;margin-bottom:12px">投放策略配置</div>
+            <div style="font-size:13px;font-weight:600;margin-bottom:12px">{{ t('ut.strategyConfig') }}</div>
             <el-form label-width="90px" size="small">
-              <el-form-item label="投放渠道">
+              <el-form-item :label="t('ut.deliveryChannel')">
                 <el-checkbox-group v-model="strategy.channels">
-                  <el-checkbox value="APP">APP 推送</el-checkbox>
-                  <el-checkbox value="SMS">短信</el-checkbox>
-                  <el-checkbox value="EMAIL">邮件</el-checkbox>
-                  <el-checkbox value="WECHAT">微信</el-checkbox>
+                  <el-checkbox value="APP">{{ t('ut.channelApp') }}</el-checkbox>
+                  <el-checkbox value="SMS">{{ t('ut.channelSms') }}</el-checkbox>
+                  <el-checkbox value="EMAIL">{{ t('ut.channelEmail') }}</el-checkbox>
+                  <el-checkbox value="WECHAT">{{ t('ut.channelWechat') }}</el-checkbox>
                 </el-checkbox-group>
               </el-form-item>
-              <el-form-item label="投放时段">
-                <el-time-picker v-model="strategy.timeStart" placeholder="开始" style="width:100px" format="HH:mm" />
-                <span style="margin:0 6px">—</span>
-                <el-time-picker v-model="strategy.timeEnd" placeholder="结束" style="width:100px" format="HH:mm" />
+              <el-form-item :label="t('ut.deliveryTime')">
+                <el-time-picker v-model="strategy.timeStart" :placeholder="t('common.start')" style="width:100px" format="HH:mm" />
+                <span style="margin:0 6px">-</span>
+                <el-time-picker v-model="strategy.timeEnd" :placeholder="t('common.end')" style="width:100px" format="HH:mm" />
               </el-form-item>
-              <el-form-item label="频次上限">
+              <el-form-item :label="t('ut.frequencyCap')">
                 <el-input-number v-model="strategy.freqCap" :min="1" :max="10" />
-                <span style="margin-left:6px;font-size:12px;color:#909399">次/天</span>
+                <span style="margin-left:6px;font-size:12px;color:#909399">{{ t('ut.timesPerDay') }}</span>
               </el-form-item>
-              <el-form-item label="活动主题">
-                <el-input v-model="strategy.theme" placeholder="如：理财产品推荐" />
+              <el-form-item :label="t('ut.campaignTheme')">
+                <el-input v-model="strategy.theme" :placeholder="t('ut.themePlaceholder')" />
               </el-form-item>
               <el-form-item>
-                <el-button type="primary" @click="genStrategy">生成投放方案</el-button>
+                <el-button type="primary" @click="genStrategy">{{ t('ut.generateStrategy') }}</el-button>
               </el-form-item>
             </el-form>
             <div v-if="strategyPlan" style="margin-top:8px;padding:10px;background:#fff;border-radius:4px;font-size:12px;line-height:1.8;color:#303133">
@@ -313,21 +313,21 @@
     <div v-if="activeTab === 'taganalysis'" class="card" style="border-top-left-radius:0">
       <el-tabs v-model="taTab" type="border-card">
         <!-- 标签权重 -->
-        <el-tab-pane label="标签权重分析" name="weight">
+        <el-tab-pane :label="t('ut.weightTab')" name="weight">
           <div style="margin:10px 0;display:flex;gap:8px;align-items:center">
             <el-select v-model="weightTagIds" multiple collapse-tags :placeholder="t('ut.targetTags')" style="width:320px">
               <el-option-group v-for="grp in tagMeta" :key="grp.category" :label="groupLabel(grp.category)">
                 <el-option v-for="tg in grp.tags" :key="tg.tag_id" :label="tagLabel(tg.tag_id)" :value="tg.tag_id" />
               </el-option-group>
             </el-select>
-            <el-button type="primary" :loading="weightLoading" @click="runWeight">分析</el-button>
+            <el-button type="primary" :loading="weightLoading" @click="runWeight">{{ t('ut.analyze') }}</el-button>
           </div>
           <div v-if="weightData">
             <el-row :gutter="16">
               <el-col v-for="cat in weightData.categories.slice(0,6)" :key="cat.category" :span="12" style="margin-bottom:16px">
                 <div style="font-size:12px;font-weight:600;margin-bottom:6px">
                   {{ groupLabel(cat.category) }}
-                  <el-tag size="small" style="margin-left:6px">均值TGI {{ cat.avg_tgi }}</el-tag>
+                  <el-tag size="small" style="margin-left:6px">{{ t('ut.avgTgi') }} {{ cat.avg_tgi }}</el-tag>
                 </div>
                 <div v-for="item in cat.tags.slice(0,5)" :key="item.tag_id" style="display:flex;align-items:center;gap:8px;margin-bottom:3px;font-size:12px">
                   <span style="width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ tagText(item.label) }}</span>
@@ -345,21 +345,21 @@
         </el-tab-pane>
 
         <!-- 异常检测 -->
-        <el-tab-pane label="异常用户检测" name="anomaly">
+        <el-tab-pane :label="t('ut.anomalyTab')" name="anomaly">
           <div style="margin:10px 0">
-            <el-button type="warning" :loading="anomalyLoading" @click="runAnomaly">分析异常用户画像</el-button>
+            <el-button type="warning" :loading="anomalyLoading" @click="runAnomaly">{{ t('ut.analyzeAnomaly') }}</el-button>
           </div>
           <div v-if="anomalyData">
             <el-row :gutter="12" style="margin-bottom:16px">
               <el-col :span="6">
                 <div class="stat-card">
-                  <div class="stat-label">异常用户数</div>
+                  <div class="stat-label">{{ t('ut.anomalyUsers') }}</div>
                   <div class="stat-value" style="font-size:22px;color:#f56c6c">{{ anomalyData.anomaly_count.toLocaleString() }}</div>
                 </div>
               </el-col>
               <el-col :span="6">
                 <div class="stat-card">
-                  <div class="stat-label">总用户数</div>
+                  <div class="stat-label">{{ t('ut.totalUsers') }}</div>
                   <div class="stat-value" style="font-size:22px">{{ anomalyData.total_users.toLocaleString() }}</div>
                 </div>
               </el-col>
@@ -371,17 +371,17 @@
               <el-table-column :label="t('ut.category')" width="80">
                 <template #default="{row}">{{ groupLabel(row.category) }}</template>
               </el-table-column>
-              <el-table-column label="全体占比">
+              <el-table-column :label="t('ut.basePct')">
                 <template #default="{row}">
                   <el-progress :percentage="Math.min(row.base_pct,100)" :stroke-width="8" :format="()=>row.base_pct+'%'" />
                 </template>
               </el-table-column>
-              <el-table-column label="异常用户占比">
+              <el-table-column :label="t('ut.anomalyPct')">
                 <template #default="{row}">
                   <el-progress :percentage="Math.min(row.anom_pct,100)" :stroke-width="8" :color="'#f56c6c'" :format="()=>row.anom_pct+'%'" />
                 </template>
               </el-table-column>
-              <el-table-column label="TGI" width="90">
+              <el-table-column :label="t('ut.tgi')" width="90">
                 <template #default="{row}">
                   <el-tag :type="row.tgi>120?'danger':row.tgi>80?'warning':'info'" size="small">{{ row.tgi }}</el-tag>
                 </template>
@@ -397,7 +397,7 @@
       <el-row :gutter="16">
         <el-col :span="16">
           <div style="font-size:13px;font-weight:600;margin-bottom:10px">
-            选择标签（多选为 AND 交集）
+            {{ t('ut.wideSelectHint') }}
           </div>
           <div v-for="grp in tagMeta" :key="grp.category" style="margin-bottom:12px">
             <div style="font-size:12px;color:#909399;margin-bottom:6px">{{ groupLabel(grp.category) }}</div>
@@ -411,15 +411,15 @@
         </el-col>
         <el-col :span="8">
           <div style="padding:12px;background:#f5f7fa;border-radius:6px">
-            <div style="font-size:13px;font-weight:600;margin-bottom:10px">已选标签</div>
+            <div style="font-size:13px;font-weight:600;margin-bottom:10px">{{ t('ut.selectedTags') }}</div>
             <el-tag
               v-for="tid in selectedTagIds" :key="tid" closable
               @close="selectedTagIds = selectedTagIds.filter(x => x !== tid)"
               style="margin:3px"
             >{{ tagLabel(tid) }}</el-tag>
-            <div v-if="!selectedTagIds.length" style="color:#c0c4cc;font-size:12px">未选择（查全部）</div>
+            <div v-if="!selectedTagIds.length" style="color:#c0c4cc;font-size:12px">{{ t('ut.noSelectionAll') }}</div>
             <el-divider />
-            <el-button type="primary" style="width:100%" :loading="wideLoading" @click="queryWide()">查询</el-button>
+            <el-button type="primary" style="width:100%" :loading="wideLoading" @click="queryWide()">{{ t('common.query') }}</el-button>
           </div>
           <div style="margin-top:16px">
             <div style="font-size:13px;font-weight:600;margin-bottom:8px">{{ t('ut.hitTop15') }}</div>
@@ -427,22 +427,22 @@
               <span style="width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ tagText(item.label) }}</span>
               <el-progress :percentage="distPercent(item.count)" :stroke-width="10" style="flex:1" :format="() => item.count.toLocaleString()" />
             </div>
-            <el-button size="small" plain @click="loadDistribution" style="margin-top:6px">刷新分布</el-button>
+            <el-button size="small" plain @click="loadDistribution" style="margin-top:6px">{{ t('ut.refreshDistribution') }}</el-button>
           </div>
         </el-col>
       </el-row>
       <div v-if="wideResult" style="margin-top:16px">
         <div style="margin-bottom:8px;font-size:13px;color:#606266">
-          共 <b>{{ wideResult.total.toLocaleString() }}</b> 条，第 {{ wideResult.page }} 页
+          {{ t('ut.wideTotalPrefix') }} <b>{{ wideResult.total.toLocaleString() }}</b> {{ t('ut.wideTotalSuffix').replace('{0}', wideResult.page) }}
         </div>
         <el-table :data="wideResult.rows" border size="small" style="width:100%">
-          <el-table-column prop="customer_id" label="用户ID" width="100" />
-          <el-table-column label="标签" min-width="300">
+          <el-table-column prop="customer_id" :label="t('ut.userId')" width="100" />
+          <el-table-column :label="t('ut.tag')" min-width="300">
             <template #default="{row}">
               <el-tag v-for="tag in row.active_tags" :key="tag" size="small" type="success" style="margin:2px">{{ tagText(tag) }}</el-tag>
             </template>
           </el-table-column>
-          <el-table-column prop="update_time" label="更新时间" width="160" />
+          <el-table-column prop="update_time" :label="t('ut.updateTime')" width="160" />
         </el-table>
         <el-pagination
           v-if="wideResult.total > wideResult.page_size"
@@ -462,69 +462,69 @@
     <!-- ═══════════════════ 行为分析 ═══════════════════ -->
     <div v-if="activeTab === 'behavior'" class="card" style="border-top-left-radius:0">
       <el-tabs v-model="behaviorTab" type="border-card">
-        <el-tab-pane label="漏斗分析 window_funnel()" name="funnel">
+        <el-tab-pane :label="t('ut.funnelTab')" name="funnel">
           <el-form inline style="margin-top:8px">
-            <el-form-item label="窗口(秒)">
+            <el-form-item :label="t('ut.windowSec')">
               <el-input-number v-model="funnelWindow" :min="3600" :max="2592000" :step="86400" style="width:130px" />
             </el-form-item>
-            <el-form-item label="人群过滤">
-              <el-select v-model="funnelFilterTags" multiple collapse-tags placeholder="（可选）" style="width:200px">
+            <el-form-item :label="t('ut.crowdFilter')">
+              <el-select v-model="funnelFilterTags" multiple collapse-tags :placeholder="t('ut.optional')" style="width:200px">
                 <el-option-group v-for="grp in tagMeta" :key="grp.category" :label="groupLabel(grp.category)">
                   <el-option v-for="tg in grp.tags" :key="tg.tag_id" :label="tagLabel(tg.tag_id)" :value="tg.tag_id" />
                 </el-option-group>
               </el-select>
             </el-form-item>
             <el-form-item>
-              <el-button type="primary" :loading="funnelLoading" @click="runFunnel">分析</el-button>
+            <el-button type="primary" :loading="funnelLoading" @click="runFunnel">{{ t('ut.analyze') }}</el-button>
             </el-form-item>
           </el-form>
           <div style="margin-bottom:12px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
-            <span style="font-size:13px">漏斗步骤：</span>
+            <span style="font-size:13px">{{ t('ut.funnelSteps') }}:</span>
             <el-tag v-for="(s, i) in funnelSteps" :key="i" closable type="primary" @close="funnelSteps.splice(i,1)" size="small">{{ i+1 }}. {{ s }}</el-tag>
-            <el-select v-model="newStep" placeholder="添加步骤" size="small" style="width:160px" @change="addStep">
+            <el-select v-model="newStep" :placeholder="t('ut.addStep')" size="small" style="width:160px" @change="addStep">
               <el-option v-for="e in eventTypes" :key="e" :label="e" :value="e" />
             </el-select>
           </div>
           <div v-if="funnelData">
             <v-chart :option="funnelOption" style="height:300px" autoresize />
             <el-table :data="funnelData.steps" border size="small" style="margin-top:10px">
-              <el-table-column prop="step" label="步骤" width="60" />
-              <el-table-column prop="step_name" label="事件" />
-              <el-table-column prop="user_count" label="用户数">
+              <el-table-column prop="step" :label="t('ut.step')" width="60" />
+              <el-table-column prop="step_name" :label="t('ut.event')" />
+              <el-table-column prop="user_count" :label="t('ut.userCount')">
                 <template #default="{row}">{{ (row.user_count||0).toLocaleString() }}</template>
               </el-table-column>
-              <el-table-column prop="conversion_rate" label="环节转化率">
+              <el-table-column prop="conversion_rate" :label="t('ut.stepConversion')">
                 <template #default="{row}"><el-progress :percentage="row.conversion_rate||0" :stroke-width="8" /></template>
               </el-table-column>
-              <el-table-column prop="overall_rate" label="总转化率">
+              <el-table-column prop="overall_rate" :label="t('ut.overallConversion')">
                 <template #default="{row}"><el-tag size="small">{{ row.overall_rate }}%</el-tag></template>
               </el-table-column>
             </el-table>
           </div>
         </el-tab-pane>
 
-        <el-tab-pane label="留存分析 retention()" name="retention">
+        <el-tab-pane :label="t('ut.retentionTab')" name="retention">
           <el-form inline style="margin-top:8px">
-            <el-form-item label="起始事件">
+            <el-form-item :label="t('ut.startEvent')">
               <el-select v-model="retCohort" style="width:130px">
                 <el-option v-for="e in eventTypes" :key="e" :label="e" :value="e" />
               </el-select>
             </el-form-item>
-            <el-form-item label="回访事件">
+            <el-form-item :label="t('ut.returnEvent')">
               <el-select v-model="retReturn" style="width:130px">
                 <el-option v-for="e in eventTypes" :key="e" :label="e" :value="e" />
               </el-select>
             </el-form-item>
             <el-form-item>
-              <el-button type="primary" :loading="retLoading" @click="runRetention">分析</el-button>
+              <el-button type="primary" :loading="retLoading" @click="runRetention">{{ t('ut.analyze') }}</el-button>
             </el-form-item>
           </el-form>
           <div v-if="retentionData" style="overflow-x:auto;margin-top:12px">
             <table class="retention-matrix">
               <thead>
                 <tr>
-                  <th>队列日期</th><th>初始用户</th>
-                  <th v-for="d in retentionData.retention_days" :key="d">第{{ d }}天</th>
+                  <th>{{ t('ut.cohortDate') }}</th><th>{{ t('ut.initialUsers') }}</th>
+                  <th v-for="d in retentionData.retention_days" :key="d">{{ t('ut.dayN').replace('{0}', d) }}</th>
                 </tr>
               </thead>
               <tbody>
@@ -540,8 +540,8 @@
           </div>
         </el-tab-pane>
 
-        <el-tab-pane label="行为路径分析" name="path">
-          <el-button type="primary" :loading="pathLoading" @click="runPath" style="margin-top:8px">分析 Top 10 路径</el-button>
+        <el-tab-pane :label="t('ut.pathTab')" name="path">
+          <el-button type="primary" :loading="pathLoading" @click="runPath" style="margin-top:8px">{{ t('ut.analyzeTopPath') }}</el-button>
           <div v-if="pathData" style="margin-top:16px">
             <v-chart :option="pathOption" style="height:360px" autoresize />
           </div>
@@ -553,24 +553,24 @@
     <div v-if="activeTab === 'etl'" class="card" style="border-top-left-radius:0">
       <el-row :gutter="20">
         <el-col :span="10">
-          <div class="card-title">宽表 → 高表 ETL</div>
+          <div class="card-title">{{ t('ut.etlTitle') }}</div>
           <p style="font-size:13px;color:#606266;line-height:1.8">
-            将 <code>doris_showcase.user_tag_wide</code> 各 TINYINT 标签列<br/>
-            通过 <b>BITMAP_UNION(TO_BITMAP(customer_id))</b><br/>
-            写入 <code>doris_showcase.t_customer_tags</code>（高表）
+            {{ t('ut.etlDesc1') }} <code>doris_showcase.user_tag_wide</code><br/>
+            {{ t('ut.etlDesc2') }} <b>BITMAP_UNION(TO_BITMAP(customer_id))</b><br/>
+            {{ t('ut.etlDesc3') }} <code>doris_showcase.t_customer_tags</code>
           </p>
-          <el-button type="primary" :loading="etlLoading" @click="runEtl" style="margin-top:8px">执行 ETL 同步</el-button>
+          <el-button type="primary" :loading="etlLoading" @click="runEtl" style="margin-top:8px">{{ t('ut.runEtl') }}</el-button>
           <div v-if="etlResult" style="margin-top:12px">
             <el-alert
-              :title="etlResult.success ? `同步完成：高表共 ${etlResult.tag_rows} 行` : `ETL 失败：${etlResult.message}`"
+              :title="etlResult.success ? t('ut.etlSuccess').replace('{0}', etlResult.tag_rows) : t('ut.etlFail').replace('{0}', etlResult.message)"
               :type="etlResult.success ? 'success' : 'error'"
               show-icon :closable="false"
             />
           </div>
         </el-col>
         <el-col :span="14">
-          <div class="card-title">高表标签 Bitmap 用户数</div>
-          <el-button size="small" plain @click="loadEtlOverview" style="margin-bottom:10px">刷新</el-button>
+          <div class="card-title">{{ t('ut.bitmapUserCountTitle') }}</div>
+          <el-button size="small" plain @click="loadEtlOverview" style="margin-bottom:10px">{{ t('common.refresh') }}</el-button>
           <el-table :data="etlOverview" border size="small" max-height="420">
             <el-table-column prop="tag_id" label="tag_id" width="75" />
             <el-table-column prop="tag_name" :label="t('ut.colTagName')" width="170" />
@@ -591,480 +591,24 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
-import { useRoute } from 'vue-router'
-import { use } from 'echarts/core'
-import { FunnelChart, BarChart } from 'echarts/charts'
-import { GridComponent, TooltipComponent, LegendComponent } from 'echarts/components'
-import { CanvasRenderer } from 'echarts/renderers'
 import VChart from 'vue-echarts'
-import axios from 'axios'
-import { ElMessage } from 'element-plus'
-import { t, locale } from '@/i18n'
+import { useUserTagAnalysis } from '@/composables/useUserTagAnalysis'
+import { t } from '@/i18n'
 
-use([FunnelChart, BarChart, GridComponent, TooltipComponent, LegendComponent, CanvasRenderer])
-
-const BASE = '/api'
-const apiClient = axios.create({ baseURL: BASE, timeout: 30000 })
-apiClient.interceptors.response.use(
-  res => res,
-  err => {
-    ElMessage.error(err.response?.data?.detail || err.message || '请求超时或服务异常')
-    return Promise.reject(err)
-  }
-)
-const route = useRoute()
-const activeTab = ref(route.query.tab || route.meta?.defaultTab || 'crowd')
-
-// ── 标签元数据 ──
-const tagMeta = ref([])
-const allCats = computed(() => tagMeta.value.map(g => g.category))
-
-async function loadTagMeta() {
-  const { data } = await apiClient.get('/cdp/wide/tag-meta')
-  tagMeta.value = data
-}
-function groupLabel(cat) {
-  const key = String(cat || '').trim()
-  const val = t(`segment.tagGroups.${key}`)
-  return val === `segment.tagGroups.${key}` ? key : val
-}
-function tagText(name) {
-  const key = String(name || '').trim()
-  const val = t(`segment.tagLabels.${key}`)
-  return val === `segment.tagLabels.${key}` ? key : val
-}
-function tagLabel(tid) {
-  for (const grp of tagMeta.value) {
-    const tg = grp.tags.find(x => x.tag_id === tid)
-    if (tg) return tagText(tg.label)
-  }
-  return String(tid)
-}
-
-// ══════════════════════════════════════════
-// 人群包构建
-// ══════════════════════════════════════════
-const includeTagIds  = ref([])
-const excludeTagIds  = ref([])
-const bitmapLoading  = ref(false)
-const crowdSize      = ref(null)
-const crowdName      = ref('')
-const crowdDesc      = ref('')
-const crowdList      = ref([])
-const compareIds     = ref([])
-const compareLoading = ref(false)
-const compareResult  = ref(null)
-
-function tagClass(tid) {
-  if (includeTagIds.value.includes(tid)) return 'chip-include'
-  if (excludeTagIds.value.includes(tid)) return 'chip-exclude'
-  return 'chip-default'
-}
-function toggleInclude(tid) {
-  excludeTagIds.value = excludeTagIds.value.filter(x => x !== tid)
-  if (includeTagIds.value.includes(tid)) {
-    includeTagIds.value = includeTagIds.value.filter(x => x !== tid)
-  } else {
-    includeTagIds.value.push(tid)
-  }
-  crowdSize.value = null
-}
-function toggleExclude(tid) {
-  includeTagIds.value = includeTagIds.value.filter(x => x !== tid)
-  if (excludeTagIds.value.includes(tid)) {
-    excludeTagIds.value = excludeTagIds.value.filter(x => x !== tid)
-  } else {
-    excludeTagIds.value.push(tid)
-  }
-  crowdSize.value = null
-}
-
-async function computeBitmapCrowd() {
-  bitmapLoading.value = true
-  try {
-    const { data } = await apiClient.post('/cdp/bitmap/compute', {
-      include_tag_ids: includeTagIds.value,
-      exclude_tag_ids: excludeTagIds.value,
-    })
-    crowdSize.value = data.crowd_size
-  } finally {
-    bitmapLoading.value = false
-  }
-}
-
-async function saveCrowd() {
-  const { data } = await apiClient.post('/cdp/crowd/save', {
-    name: crowdName.value,
-    desc: crowdDesc.value,
-    include_tag_ids: includeTagIds.value,
-    exclude_tag_ids: excludeTagIds.value,
-    crowd_size: crowdSize.value,
-  })
-  crowdList.value.unshift(data)
-  crowdName.value = ''
-  crowdDesc.value = ''
-}
-
-async function deleteCrowd(id) {
-  await apiClient.delete(`/cdp/crowd/${id}`)
-  crowdList.value = crowdList.value.filter(p => p.crowd_id !== id)
-  compareIds.value = compareIds.value.filter(x => x !== id)
-}
-
-async function loadCrowdList() {
-  const { data } = await apiClient.get('/cdp/crowd/list')
-  crowdList.value = data
-}
-
-async function runCompare() {
-  if (compareIds.value.length !== 2) return
-  compareLoading.value = true
-  try {
-    const { data } = await apiClient.post('/cdp/crowd/compare', {
-      id_a: compareIds.value[0],
-      id_b: compareIds.value[1],
-    })
-    compareResult.value = data
-  } finally {
-    compareLoading.value = false
-  }
-}
-
-// ══════════════════════════════════════════
-// 人群画像
-// ══════════════════════════════════════════
-const portraitTab = ref('tgi')
-
-// TGI
-const tgiTagIds  = ref([])
-const tgiLoading = ref(false)
-const tgiData    = ref([])
-const tgiCat     = ref('')
-const tgiCats    = computed(() => [...new Set(tgiData.value.map(x => x.category))])
-
-async function runTgi() {
-  tgiLoading.value = true
-  try {
-    const { data } = await apiClient.post('/cdp/portrait/tgi', { include_tag_ids: tgiTagIds.value })
-    tgiData.value = data
-  } finally {
-    tgiLoading.value = false
-  }
-}
-
-const tgiOption = computed(() => {
-  let rows = tgiData.value
-  if (tgiCat.value) rows = rows.filter(x => x.category === tgiCat.value)
-  rows = rows.slice(0, 20).reverse()
-  return {
-    tooltip: { trigger: 'axis', formatter: params => {
-      const d = params[0]
-      return `${d.name}<br/>TGI: <b>${d.value}</b><br/>目标: ${rows[d.dataIndex]?.seg_pct}% / 基准: ${rows[d.dataIndex]?.base_pct}%`
-    }},
-    grid: { left: '28%', right: '10%', top: '4%', bottom: '4%' },
-    xAxis: { type: 'value', axisLabel: { fontSize: 11 } },
-    yAxis: { type: 'category', data: rows.map(r => tagText(r.label)), axisLabel: { fontSize: 11 } },
-    series: [{
-      type: 'bar',
-      data: rows.map(r => ({
-        value: r.tgi,
-        itemStyle: { color: r.tgi >= 120 ? '#67c23a' : r.tgi >= 80 ? '#409eff' : '#f56c6c' }
-      })),
-      markLine: { data: [{ xAxis: 100, lineStyle: { color: '#e6a23c', type: 'dashed' } }] },
-      label: { show: true, position: 'right', fontSize: 11 },
-    }],
-  }
-})
-
-// 交叉分析
-const crossCat1   = ref('')
-const crossCat2   = ref('')
-const crossLoading = ref(false)
-const crossData   = ref(null)
-const crossMaxPct = computed(() => crossData.value
-  ? Math.max(...crossData.value.matrix.flatMap(r => r.cells.map(c => c.pct)), 1)
-  : 1
-)
-function crossColor(pct, max) {
-  const r = Math.min(pct / max, 1)
-  return `rgba(64,158,255,${0.1 + r * 0.7})`
-}
-
-async function runCross() {
-  crossLoading.value = true
-  try {
-    const { data } = await apiClient.post('/cdp/portrait/cross', { cat1: crossCat1.value, cat2: crossCat2.value })
-    crossData.value = data
-  } finally {
-    crossLoading.value = false
-  }
-}
-
-// 地域分布
-const geoTagIds  = ref([])
-const geoLoading = ref(false)
-const geoData    = ref(null)
-
-async function runGeo() {
-  geoLoading.value = true
-  try {
-    const { data } = await apiClient.post('/cdp/portrait/geo', { include_tag_ids: geoTagIds.value })
-    geoData.value = data
-  } finally {
-    geoLoading.value = false
-  }
-}
-
-const geoProvinceOption = computed(() => {
-  if (!geoData.value) return {}
-  const rows = [...geoData.value.province_list].slice(0, 15).reverse()
-  return {
-    tooltip: { trigger: 'axis' },
-    grid: { left: '22%', right: '10%', top: '4%', bottom: '4%' },
-    xAxis: { type: 'value' },
-    yAxis: { type: 'category', data: rows.map(r => r.province), axisLabel: { fontSize: 11 } },
-    series: [{ type: 'bar', data: rows.map(r => r.cnt), label: { show: true, position: 'right', fontSize: 11 } }],
-  }
-})
-
-// ══════════════════════════════════════════
-// 地图投放
-// ══════════════════════════════════════════
-const provinces = [
-  '北京', '上海', '天津', '重庆',
-  '广东', '浙江', '江苏', '山东', '河南', '四川', '湖北', '湖南',
-  '福建', '安徽', '河北', '陕西', '云南', '辽宁', '江西', '广西',
-  '黑龙江', '内蒙古', '山西', '贵州', '新疆', '吉林', '西藏', '甘肃',
-  '海南', '宁夏', '青海',
-]
-const selectedProvinces = ref([])
-const mapLoading        = ref(false)
-const targetingData     = ref(null)
-const strategy = ref({ channels: ['APP', 'SMS'], timeStart: null, timeEnd: null, freqCap: 3, theme: '' })
-const strategyPlan      = ref(null)
-
-function toggleProvince(p) {
-  if (selectedProvinces.value.includes(p)) {
-    selectedProvinces.value = selectedProvinces.value.filter(x => x !== p)
-  } else {
-    selectedProvinces.value.push(p)
-  }
-  targetingData.value = null
-}
-
-async function runTargeting() {
-  mapLoading.value = true
-  try {
-    const { data } = await apiClient.post('/cdp/portrait/targeting', { provinces: selectedProvinces.value })
-    targetingData.value = data
-  } finally {
-    mapLoading.value = false
-  }
-}
-
-function genStrategy() {
-  const s = strategy.value
-  strategyPlan.value = [
-    `📍 投放地域：${selectedProvinces.value.join('、') || '未选择'}`,
-    `📡 投放渠道：${s.channels.join(' + ')}`,
-    `🕐 投放时段：${formatTime(s.timeStart)} — ${formatTime(s.timeEnd)}`,
-    `🔁 频次上限：${s.freqCap} 次/天`,
-    `🎯 活动主题：${s.theme || '—'}`,
-    `👥 预计覆盖：${targetingData.value ? targetingData.value.total.toLocaleString() + ' 人' : '请先估算'}`,
-  ]
-}
-
-function formatTime(d) {
-  if (!d) return '--:--'
-  const t = new Date(d)
-  return `${String(t.getHours()).padStart(2,'0')}:${String(t.getMinutes()).padStart(2,'0')}`
-}
-
-// ══════════════════════════════════════════
-// 标签分析
-// ══════════════════════════════════════════
-const taTab        = ref('weight')
-const weightTagIds = ref([])
-const weightLoading = ref(false)
-const weightData   = ref(null)
-const anomalyLoading = ref(false)
-const anomalyData  = ref(null)
-
-async function runWeight() {
-  weightLoading.value = true
-  try {
-    const { data } = await apiClient.post('/cdp/tag/weight', { include_tag_ids: weightTagIds.value })
-    weightData.value = data
-  } finally {
-    weightLoading.value = false
-  }
-}
-
-async function runAnomaly() {
-  anomalyLoading.value = true
-  try {
-    const { data } = await apiClient.get('/cdp/tag/anomaly')
-    anomalyData.value = data
-  } finally {
-    anomalyLoading.value = false
-  }
-}
-
-// ══════════════════════════════════════════
-// 宽表查询
-// ══════════════════════════════════════════
-const selectedTagIds = ref([])
-const wideLoading    = ref(false)
-const wideResult     = ref(null)
-const widePage       = ref(1)
-const distribution   = ref([])
-const distMax        = computed(() => Math.max(...distribution.value.map(d => d.count), 1))
-const distPercent    = cnt => Math.round(cnt * 100 / distMax.value)
-
-async function queryWide(page = 1) {
-  if (typeof page !== 'number') page = 1
-  wideLoading.value = true
-  widePage.value = page
-  try {
-    const { data } = await apiClient.post('/cdp/wide/query', { tag_ids: selectedTagIds.value, page, page_size: 20 })
-    wideResult.value = data
-  } finally {
-    wideLoading.value = false
-  }
-}
-async function loadDistribution() {
-  const { data } = await apiClient.get('/cdp/wide/distribution')
-  distribution.value = data
-}
-function onWidePage(p) { queryWide(p) }
-
-// ══════════════════════════════════════════
-// ETL
-// ══════════════════════════════════════════
-const etlLoading  = ref(false)
-const etlResult   = ref(null)
-const etlOverview = ref([])
-
-async function runEtl() {
-  etlLoading.value = true
-  try {
-    const { data } = await apiClient.post('/cdp/etl/sync')
-    etlResult.value = data
-    await loadEtlOverview()
-  } finally {
-    etlLoading.value = false
-  }
-}
-async function loadEtlOverview() {
-  const { data } = await apiClient.get('/cdp/etl/overview')
-  etlOverview.value = data
-}
-
-// ══════════════════════════════════════════
-// 行为分析
-// ══════════════════════════════════════════
-const behaviorTab    = ref('funnel')
-const eventTypes     = ['REGISTER', 'LOGIN', 'BROWSE_PRODUCT', 'APPLY', 'TRANSACTION', 'TRANSFER', 'REPAY']
-const funnelSteps    = ref(['REGISTER', 'LOGIN', 'BROWSE_PRODUCT', 'APPLY', 'TRANSACTION'])
-const funnelWindow   = ref(86400)
-const funnelFilterTags = ref([])
-const newStep        = ref('')
-const funnelLoading  = ref(false)
-const funnelData     = ref(null)
-
-function addStep(v) {
-  if (v && !funnelSteps.value.includes(v)) funnelSteps.value.push(v)
-  newStep.value = ''
-}
-async function runFunnel() {
-  funnelLoading.value = true
-  try {
-    const { data } = await apiClient.post('/cdp/behavior/funnel', {
-      steps: funnelSteps.value,
-      window_seconds: funnelWindow.value,
-      filter_tag_ids: funnelFilterTags.value.length ? funnelFilterTags.value : null,
-    })
-    funnelData.value = data
-  } finally {
-    funnelLoading.value = false
-  }
-}
-const funnelOption = computed(() => {
-  if (!funnelData.value) return {}
-  return {
-    tooltip: { trigger: 'item' },
-    series: [{
-      type: 'funnel', sort: 'none',
-      label: { position: 'inside', formatter: '{b}: {c}人' },
-      data: funnelData.value.steps.map(s => ({ name: s.step_name, value: s.user_count })),
-    }],
-  }
-})
-
-const retCohort     = ref('REGISTER')
-const retReturn     = ref('LOGIN')
-const retLoading    = ref(false)
-const retentionData = ref(null)
-
-async function runRetention() {
-  retLoading.value = true
-  try {
-    const { data } = await apiClient.post('/cdp/behavior/retention', {
-      cohort_event: retCohort.value, return_event: retReturn.value,
-    })
-    retentionData.value = data
-  } finally {
-    retLoading.value = false
-  }
-}
-function heatColor(rate) {
-  if (!rate) return '#f5f7fa'
-  const r = Math.min(rate, 100) / 100
-  const g = Math.round(200 - r * 100)
-  const b = Math.round(240 - r * 80)
-  return `rgba(64,${g},${b},${0.3 + r * 0.5})`
-}
-
-const pathLoading = ref(false)
-const pathData    = ref(null)
-
-async function runPath() {
-  pathLoading.value = true
-  try {
-    const { data } = await apiClient.get('/cdp/behavior/path?top_n=10')
-    pathData.value = data
-  } finally {
-    pathLoading.value = false
-  }
-}
-const pathOption = computed(() => {
-  if (!pathData.value) return {}
-  const rows = [...pathData.value].sort((a, b) => a.freq - b.freq)
-  return {
-    tooltip: { trigger: 'axis' },
-    grid: { left: '30%', right: '8%' },
-    xAxis: { type: 'value' },
-    yAxis: { type: 'category', data: rows.map(r => r.path) },
-    series: [{ type: 'bar', data: rows.map(r => r.freq), label: { show: true, position: 'right' } }],
-  }
-})
-
-onMounted(async () => {
-  await Promise.allSettled([
-    loadTagMeta(),
-    loadDistribution(),
-    loadEtlOverview(),
-    loadCrowdList(),
-  ])
-})
-
-watch(
-  () => route.query.tab,
-  tab => {
-    if (tab) activeTab.value = String(tab)
-  }
-)
+const {
+  activeTab, tagMeta, allCats, groupLabel, tagText, tagLabel,
+  includeTagIds, excludeTagIds, bitmapLoading, crowdSize, crowdName, crowdDesc, crowdList, compareIds, compareLoading, compareResult,
+  tagClass, toggleInclude, toggleExclude, computeBitmapCrowd, saveCrowd, deleteCrowd, runCompare,
+  portraitTab, tgiTagIds, tgiLoading, tgiData, tgiCat, tgiCats, runTgi, tgiOption,
+  crossCat1, crossCat2, crossLoading, crossData, crossMaxPct, crossColor, runCross,
+  geoTagIds, geoLoading, geoData, runGeo, geoProvinceOption,
+  provinces, selectedProvinces, mapLoading, targetingData, strategy, strategyPlan, toggleProvince, runTargeting, genStrategy, displayProvince,
+  taTab, weightTagIds, weightLoading, weightData, anomalyLoading, anomalyData, runWeight, runAnomaly,
+  selectedTagIds, wideLoading, wideResult, widePage, distribution, distPercent, queryWide, loadDistribution, onWidePage,
+  etlLoading, etlResult, etlOverview, runEtl, loadEtlOverview,
+  behaviorTab, eventTypes, funnelSteps, funnelWindow, funnelFilterTags, newStep, funnelLoading, funnelData, addStep, runFunnel, funnelOption,
+  retCohort, retReturn, retLoading, retentionData, runRetention, heatColor, pathLoading, pathData, runPath, pathOption,
+} = useUserTagAnalysis()
 </script>
 
 <style scoped>

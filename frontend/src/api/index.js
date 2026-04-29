@@ -1,5 +1,6 @@
 // API facade. Keep imports stable: existing pages can continue using `@/api`.
 export { behaviorApi } from './modules/behavior'
+export { cdpApi } from './modules/cdp'
 export { benchmarkApi } from './modules/benchmark'
 export { bjMetroApi } from './modules/bj-metro'
 export { dashboardApi } from './modules/dashboard'

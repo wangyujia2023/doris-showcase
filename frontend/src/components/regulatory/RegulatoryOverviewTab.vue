@@ -73,9 +73,14 @@
 
 <script setup>
 import { ref, onMounted, watch } from 'vue'
-import * as echarts from 'echarts'
+import { init, use } from 'echarts/core'
+import { LineChart } from 'echarts/charts'
+import { GridComponent, LegendComponent, TooltipComponent } from 'echarts/components'
+import { CanvasRenderer } from 'echarts/renderers'
 import { regulatoryApi } from '@/api'
 import { t, locale } from '@/i18n'
+
+use([LineChart, GridComponent, LegendComponent, TooltipComponent, CanvasRenderer])
 
 const props = defineProps({ period: String })
 
@@ -148,7 +153,7 @@ const load = async () => {
 const renderTrend = (xData, cars, lcrs, npls) => {
   const el = document.getElementById('reg-trend-chart')
   if (!el) return
-  const c = echarts.init(el)
+  const c = init(el)
   c.setOption({
     tooltip: { trigger:'axis' },
     legend: { data:[t('regulatory.kpiCarPct'),'LCR%',t('regulatory.kpiNplPct')], top:0, textStyle:{fontSize:11} },

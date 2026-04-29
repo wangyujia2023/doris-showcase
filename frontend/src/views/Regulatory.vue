@@ -23,7 +23,7 @@
     </div>
 
     <div class="tab-body">
-      <OverviewTab  v-if="activeTab==='overview'" :period="period" ref="overviewRef"/>
+      <RegulatoryOverviewTab  v-if="activeTab==='overview'" :period="period" ref="overviewRef"/>
       <LineageTab   v-if="activeTab==='lineage'" />
       <MasterTab    v-if="activeTab==='master'"  ref="masterRef"/>
       <QualityTab   v-if="activeTab==='quality'" :period="period"/>
@@ -35,7 +35,7 @@
 import { ref, onMounted, computed } from 'vue'
 import { ElMessage } from 'element-plus'
 import { regulatoryApi } from '@/api'
-import OverviewTab from '@/components/regulatory/OverviewTab.vue'
+import RegulatoryOverviewTab from '@/components/regulatory/RegulatoryOverviewTab.vue'
 import LineageTab  from '@/components/regulatory/LineageTab.vue'
 import MasterTab   from '@/components/regulatory/MasterTab.vue'
 import QualityTab  from '@/components/regulatory/QualityTab.vue'

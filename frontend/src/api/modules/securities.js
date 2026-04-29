@@ -2,16 +2,16 @@ import { http, httpBench, httpFast, httpLong } from '../http'
 
 // ── 证券实时数仓 ────────────────────────────────────────────────
 export const securitiesApi = {
-  init:       () => http.post('/sec/init'),
-  generate:   () => http.post('/sec/generate'),
-  batch:      (steps) => http.post(`/sec/batch?steps=${steps}`),
-  reset:      () => http.post('/sec/reset'),
-  overview:   () => http.get('/sec/overview'),
-  trend:      () => http.get('/sec/trend'),
-  trades:     (limit = 60) => http.get('/sec/trades', { params: { limit } }),
-  accounts:   () => http.get('/sec/accounts'),
-  positions:  () => http.get('/sec/positions'),
-  sectorHeat: () => http.get('/sec/sector-heat'),
-  riskAlerts: () => http.get('/sec/risk-alerts'),
-  branches:   () => http.get('/sec/branches'),
+  init:       () => http.post('/securities/init'),
+  generate:   () => http.post('/securities/generate'),
+  batch:      (steps) => http.post(`/securities/batch?steps=${steps}`),
+  reset:      () => http.post('/securities/reset'),
+  overview:   () => http.get('/securities/overview'),
+  trend:      () => http.get('/securities/trend'),
+  trades:     (limit = 60) => http.get('/securities/trades', { params: { limit } }),
+  accounts:   () => http.get('/securities/accounts'),
+  positions:  () => http.get('/securities/positions'),
+  sectorHeat: () => http.get('/securities/securitiestor-heat'),
+  riskAlerts: () => http.get('/securities/risk-alerts'),
+  branches:   () => http.get('/securities/branches'),
 }

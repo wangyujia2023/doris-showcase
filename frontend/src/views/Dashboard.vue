@@ -115,6 +115,9 @@ import { ref, computed, onMounted } from 'vue'
 import VChart from 'vue-echarts'
 import { dashboardApi, userApi, managementApi } from '@/api'
 import { t } from '@/i18n'
+import { registerEchartsBasic } from '@/plugins/registerEchartsBasic'
+
+registerEchartsBasic()
 
 const homeData = ref({ user_stat: {}, log_stat: {}, segment_stat: {}, asset_level_dist: [], log_trend: [] })
 const anomalyUsers = ref([])

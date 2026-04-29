@@ -8,11 +8,26 @@
             <el-descriptions-item :label="t('sysconfig.labelHost')">{{ cfg.doris_host }}</el-descriptions-item>
             <el-descriptions-item :label="t('sysconfig.labelPort')">{{ cfg.doris_port }}</el-descriptions-item>
             <el-descriptions-item :label="t('sysconfig.labelDb')">{{ cfg.doris_database }}</el-descriptions-item>
+            <el-descriptions-item :label="t('sysconfig.labelLineageDb')">{{ cfg.lineage_database }}</el-descriptions-item>
+            <el-descriptions-item :label="t('sysconfig.labelBackendPort')">{{ cfg.backend_port }}</el-descriptions-item>
+            <el-descriptions-item :label="t('sysconfig.labelFrontendPort')">{{ cfg.frontend_port }}</el-descriptions-item>
             <el-descriptions-item :label="t('sysconfig.labelHasp')">
               <el-tag :type="cfg.hasp_enabled ? 'success' : 'danger'">
                 {{ cfg.hasp_enabled ? t('sysconfig.haspEnabled') : t('sysconfig.haspDisabled') }}
               </el-tag>
             </el-descriptions-item>
+            <el-descriptions-item :label="t('sysconfig.labelAiResource')">
+              <el-tag :type="cfg.ai_resource_configured ? 'success' : 'warning'">
+                {{ cfg.ai_resource_configured ? cfg.ai_resource : t('sysconfig.notConfigured') }}
+              </el-tag>
+            </el-descriptions-item>
+            <el-descriptions-item :label="t('sysconfig.labelOpenMetadata')">
+              <el-tag :type="cfg.openmetadata_configured ? 'success' : 'warning'">
+                {{ cfg.openmetadata_configured ? t('sysconfig.configured') : t('sysconfig.notConfigured') }}
+              </el-tag>
+              <span style="margin-left:8px;color:#909399">{{ cfg.openmetadata_base_url }}</span>
+            </el-descriptions-item>
+            <el-descriptions-item :label="t('sysconfig.labelUploadDir')">{{ cfg.upload_dir }}</el-descriptions-item>
             <el-descriptions-item :label="t('sysconfig.labelConn')">
               <el-tag :type="dorisStatus === 'ok' ? 'success' : 'danger'">
                 {{ dorisStatus === 'ok' ? t('sysconfig.connOk') : t('sysconfig.connFail') }}

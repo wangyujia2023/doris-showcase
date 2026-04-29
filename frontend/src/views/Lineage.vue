@@ -1,151 +1,31 @@
 <template>
   <div>
-    <div class="card flow-card">
-      <el-collapse v-model="flowPanel" accordion>
-        <el-collapse-item name="flow">
-          <template #title>
-            <div class="flow-title">
-              <span>{{ t('lineage.flowTitle') }}</span>
-              <span class="flow-hint">{{ t('lineage.flowHint') }}</span>
-            </div>
-          </template>
-          <div class="flow-diagram">
-            <div class="flow-lane doris" style="grid-column:1">{{ t('lineage.flowLaneDoris') }}</div>
-            <div class="flow-lane app" style="grid-column:3">{{ t('lineage.flowLaneImport') }}</div>
-            <div class="flow-lane om" style="grid-column:5">{{ t('lineage.flowLaneOM') }}</div>
-            <div class="flow-lane app" style="grid-column:7">{{ t('lineage.flowLaneQuery') }}</div>
-
-            <div class="flow-node doris" style="grid-column:1">
-              <div class="flow-step-no">{{ t('lineage.flowStep1No') }}</div>
-              <div class="flow-step-title">{{ t('lineage.flowStep1Title') }}</div>
-              <div class="flow-step-desc">{{ t('lineage.flowStep1Desc') }}</div>
-            </div>
-            <div class="flow-arrow" style="grid-column:2">→</div>
-            <div class="flow-node app" style="grid-column:3">
-              <div class="flow-step-no">{{ t('lineage.flowStep2No') }}</div>
-              <div class="flow-step-title">{{ t('lineage.flowStep2Title') }}</div>
-              <div class="flow-step-desc">{{ t('lineage.flowStep2Desc') }}</div>
-            </div>
-            <div class="flow-arrow" style="grid-column:4">→</div>
-            <div class="flow-node om" style="grid-column:5">
-              <div class="flow-step-no">{{ t('lineage.flowStep3No') }}</div>
-              <div class="flow-step-title">{{ t('lineage.flowStep3Title') }}</div>
-              <div class="flow-step-desc">{{ t('lineage.flowStep3Desc') }}</div>
-            </div>
-            <div class="flow-arrow" style="grid-column:6">→</div>
-            <div class="flow-node app" style="grid-column:7">
-              <div class="flow-step-no">{{ t('lineage.flowStep4No') }}</div>
-              <div class="flow-step-title">{{ t('lineage.flowStep4Title') }}</div>
-              <div class="flow-step-desc">{{ t('lineage.flowStep4Desc') }}</div>
-            </div>
-          </div>
-        </el-collapse-item>
-      </el-collapse>
-    </div>
+    <LineageFlowPanel />
 
     <!-- Tab 切换 -->
     <el-tabs v-model="activeTab" type="card" style="margin-bottom:0">
         <el-tab-pane :label="t('lineage.tabImportRecords')" name="sync">
-          <div class="card" style="border-top-left-radius:0">
-            <el-form inline>
-              <el-form-item :label="t('lineage.labelStartDate')">
-                <el-date-picker v-model="startDate" type="date" value-format="YYYY-MM-DD" :placeholder="t('lineage.labelStartDate')" />
-              </el-form-item>
-              <el-form-item :label="t('lineage.labelEndDate')">
-                <el-date-picker v-model="endDate" type="date" value-format="YYYY-MM-DD" :placeholder="t('lineage.labelEndDate')" />
-              </el-form-item>
-              <el-form-item :label="t('lineage.labelLimit')">
-                <el-input v-model="auditLimit" type="number" min="0" max="5000" :placeholder="t('lineage.limitHint')" style="width:120px" />
-              </el-form-item>
-              <el-form-item>
-                <el-button type="primary" :loading="syncing" @click="syncFromAudit">{{ t('lineage.btnSync') }}</el-button>
-              </el-form-item>
-            </el-form>
-
-            <div style="margin-top:12px">
-              <div style="font-size:13px;font-weight:600;margin-bottom:10px">{{ t('lineage.syncResultTitle') }} {{ t('lineage.syncResultCount').replace('{0}', syncRows.length) }}</div>
-              <el-table :data="syncRows" size="small" border max-height="360" :empty-text="t('lineage.syncEmptyText')" class="lineage-compact-table">
-            <el-table-column prop="time" :label="t('lineage.syncTableCol.time')" width="180" />
-            <el-table-column prop="stmt_type" :label="t('lineage.syncTableCol.type')" width="110" />
-            <el-table-column prop="user" :label="t('lineage.syncTableCol.user')" width="120" />
-            <el-table-column prop="target" :label="t('lineage.syncTableCol.target')" min-width="180" />
-            <el-table-column :label="t('lineage.syncTableCol.sources')" min-width="240">
-              <template #default="{ row }">
-                <span>{{ row.sources?.join(', ') }}</span>
-              </template>
-            </el-table-column>
-            <el-table-column prop="success" :label="t('lineage.syncTableCol.status')" width="100">
-              <template #default="{ row }">
-                <el-tag :type="row.success ? 'success' : 'danger'">
-                  {{ row.success ? t('lineage.syncStatusSuccess') : t('lineage.syncStatusFail') }}
-                </el-tag>
-              </template>
-            </el-table-column>
-            <el-table-column :label="t('lineage.syncTableCol.expressions')" min-width="260" show-overflow-tooltip>
-              <template #default="{ row }">
-                <span>{{ formatExpressionSummary(row.expressions) }}</span>
-              </template>
-            </el-table-column>
-            <el-table-column prop="error" :label="t('lineage.syncTableCol.error')" min-width="200" show-overflow-tooltip />
-              </el-table>
-            </div>
-
-            <!-- 同步历史 -->
-            <div style="margin-top:20px">
-              <div style="font-size:13px;font-weight:600;margin-bottom:10px">{{ t('lineage.syncHistoryTitle') }}</div>
-              <el-table :data="syncLogs" size="small" border max-height="280" class="lineage-compact-table">
-                <el-table-column prop="sync_time" :label="t('lineage.historyTableCol.time')" width="180" />
-                <el-table-column prop="start_date" :label="t('lineage.historyTableCol.startDate')" width="120" />
-                <el-table-column prop="end_date" :label="t('lineage.historyTableCol.endDate')" width="120" />
-                <el-table-column prop="scanned" :label="t('lineage.historyTableCol.scanned')" width="90" />
-                <el-table-column prop="synced" :label="t('lineage.historyTableCol.synced')" width="90">
-                  <template #default="{ row }">
-                    <span style="color:#67c23a;font-weight:600">{{ row.synced }}</span>
-                  </template>
-                </el-table-column>
-                <el-table-column prop="failed" :label="t('lineage.historyTableCol.failed')" width="90">
-                  <template #default="{ row }">
-                    <span style="color:#f56c6c;font-weight:600">{{ row.failed }}</span>
-                  </template>
-                </el-table-column>
-                <el-table-column prop="success" :label="t('lineage.historyTableCol.status')" width="100">
-                  <template #default="{ row }">
-                    <el-tag :type="row.success ? 'success' : 'warning'">
-                      {{ row.success ? t('lineage.historyStatusDone') : t('lineage.historyStatusPartial') }}
-                    </el-tag>
-                  </template>
-                </el-table-column>
-              </el-table>
-            </div>
-          </div>
+          <LineageSyncPanel
+            v-model:start-date="startDate"
+            v-model:end-date="endDate"
+            v-model:audit-limit="auditLimit"
+            :syncing="syncing"
+            :sync-rows="syncRows"
+            :sync-logs="syncLogs"
+            @sync="syncFromAudit"
+          />
         </el-tab-pane>
 
         <el-tab-pane :label="t('lineage.tabQueryLineage')" name="query">
           <div class="card" style="border-top-left-radius:0;padding:0">
             <div class="query-grid">
-              <div class="table-list-card">
-                <div style="font-size:13px;font-weight:600;margin-bottom:12px;padding:20px 20px 0">{{ t('lineage.tableListTitle') }} ({{ tables.length }})</div>
-                <div style="padding:0 20px">
-                  <div style="margin-bottom:12px">
-              <el-input v-model="tableKeyword" :placeholder="t('lineage.searchPlaceholder')" clearable @input="loadTables" />
-                  </div>
-                  <el-scrollbar style="height:640px">
-                    <div style="padding:0 20px">
-                      <div
-                        v-for="t in tables"
-                        :key="t.asset_id"
-                        class="table-item"
-                        :class="{ active: selectedTable === t.asset_id }"
-                        @click="chooseTable(t.asset_id)"
-                      >
-                        <div class="table-name">{{ t.asset_id }}</div>
-                        <div class="table-sub">{{ t.asset_name }}</div>
-                        <div class="table-meta">{{ t.domain_id }} · {{ t.layer_name }}</div>
-                      </div>
-                    </div>
-                  </el-scrollbar>
-                </div>
-              </div>
+              <LineageTableList
+                v-model:keyword="tableKeyword"
+                :tables="tables"
+                :selected-table="selectedTable"
+                @search="loadTables"
+                @choose="chooseTable"
+              />
 
               <div class="detail-col">
                 <!-- 当前表信息 -->
@@ -387,10 +267,15 @@
 </template>
 
 <script setup>
-import { computed, onMounted, onBeforeUnmount, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import { lineageApi } from '@/api'
 import { t, locale } from '@/i18n'
+import { useLineageGraph } from '@/composables/useLineageGraph'
+import LineageFlowPanel from '@/components/lineage/LineageFlowPanel.vue'
+import LineageSyncPanel from '@/components/lineage/LineageSyncPanel.vue'
+import LineageTableList from '@/components/lineage/LineageTableList.vue'
+import { createFieldSpanMethod, formatLineageEdge } from '@/composables/useLineageFormat'
 
 const activeTab = ref('sync')
 const syncing = ref(false)
@@ -411,33 +296,13 @@ const upstreamList = ref([])
 const downstreamList = ref([])
 const impactRows = ref([])
 const nodeNameMap = ref({})
-const flowPanel = ref([])
 const lineageViewMode = ref('table')
 const fieldDirectionTab = ref('upstream')
 let loadSeq = 0
 let tableTimer = null
-const graphBox = { width: 2200, height: 980 }
-const graphViewport = ref({ scale: 1, x: 0, y: 0 })
-const graphDrag = ref({ active: false, startX: 0, startY: 0, baseX: 0, baseY: 0 })
 
 const tableStats = ref({ row_count: null, update_frequency: '' })
 const tableQuality = ref({ score: 87, freshness: 95, completeness: 85 })
-
-const fmt = (v) => v == null ? '-' : Number(v).toLocaleString()
-const shortText = (v, n = 34) => {
-  const s = String(v || '')
-  if (!s) return ''
-  return s.length > n ? `${s.slice(0, n - 1)}…` : s
-}
-const formatExpressionSummary = (items) => {
-  if (!items?.length) return '-'
-  return items.map(item => `${item.target_field || '-'} = ${item.expression || '-'}`).join(' ; ')
-}
-
-const qualityTooltip = `质量评分 = 新鲜度×40% + 完整度×40% + 覆盖度×20%
-• 新鲜度：衡量数据更新及时性 (0-100分)
-• 完整度：衡量数据完整程度 (0-100分)
-• 覆盖度：衡量被下游使用广度 (0-100分)`
 
 const getImpactType = (level) => {
   if (level === 'high') return 'danger'
@@ -447,7 +312,7 @@ const getImpactType = (level) => {
 
 const getImpactLabel = (level) => {
   const labels = { high: t('lineage.impactRiskHigh'), medium: t('lineage.impactRiskMedium'), low: t('lineage.impactRiskLow') }
-  return labels[level] || '未知'
+  return labels[level] || '-'
 }
 
 const getImpactStyle = (level) => {
@@ -498,81 +363,6 @@ async function loadTables(keyword = tableKeyword.value) {
   }
 }
 
-const getEntityName = (entity) => {
-  if (!entity) return ''
-  if (typeof entity === 'string') {
-    const mapped = nodeNameMap.value[entity]
-    if (mapped) return mapped
-    if (/^[0-9a-fA-F-]{36}$/.test(entity)) return ''
-    if (entity.includes('.')) return entity.split('.').pop() || ''
-    return entity
-  }
-  if (entity.name) return entity.name
-  if (entity.displayName) return entity.displayName
-  if (entity.fullyQualifiedName) {
-    const parts = entity.fullyQualifiedName.split('.')
-    return parts[parts.length - 1] || entity.fullyQualifiedName
-  }
-  if (entity.id) {
-    const mapped = nodeNameMap.value[entity.id]
-    if (mapped) return mapped
-    if (/^[0-9a-fA-F-]{36}$/.test(entity.id)) return ''
-    return entity.id
-  }
-  return ''
-}
-
-function spanMethod({ row, rowIndex, column, columnIndex }) {
-  // 获取当前数据，用于合并单元格
-  const data = fieldDirectionTab.value === 'upstream' ? fieldUpstreamRows.value : fieldDownstreamRows.value
-
-  // 第0列（来源表）和第3列（目标表）进行合并
-  if (columnIndex === 0 || columnIndex === 3) {
-    // 从当前行开始，往后找相同的表名
-    if (rowIndex === 0) {
-      // 第一行，需要计算连续相同的行数
-      let rowspan = 1
-      const currentTable = row[columnIndex === 0 ? 'source_table' : 'target_table']
-      for (let i = rowIndex + 1; i < data.length; i++) {
-        if (data[i][columnIndex === 0 ? 'source_table' : 'target_table'] === currentTable) {
-          rowspan++
-        } else {
-          break
-        }
-      }
-      return { rowspan, colspan: 1 }
-    } else {
-      // 检查是否应该隐藏这一行（被合并了）
-      const currentTable = row[columnIndex === 0 ? 'source_table' : 'target_table']
-      const prevRow = data[rowIndex - 1]
-      const prevTable = prevRow[columnIndex === 0 ? 'source_table' : 'target_table']
-      if (currentTable === prevTable) {
-        return { rowspan: 0, colspan: 0 }
-      }
-      // 否则计算rowspan
-      let rowspan = 1
-      for (let i = rowIndex + 1; i < data.length; i++) {
-        if (data[i][columnIndex === 0 ? 'source_table' : 'target_table'] === currentTable) {
-          rowspan++
-        } else {
-          break
-        }
-      }
-      return { rowspan, colspan: 1 }
-    }
-  }
-}
-
-function edgeText(edge) {
-  if (!edge) return ''
-  const from = getEntityName(edge.fromEntity)
-  const to = getEntityName(edge.toEntity)
-  if (from && to) return `${from} → ${to}`
-  if (from) return `${from}`
-  if (to) return `${to}`
-  return ''
-}
-
 async function chooseTable(tableId) {
   selectedTable.value = tableId
   selectedTableInfo.value = await lineageApi.asset(tableId)
@@ -603,167 +393,22 @@ async function chooseTable(tableId) {
   }
 }
 
-const upstreamEdgesView = computed(() => (upstreamList.value || []).map(edgeText).filter(Boolean))
-const downstreamEdgesView = computed(() => (downstreamList.value || []).map(edgeText).filter(Boolean))
 const fieldUpstreamRows = computed(() => fieldLineage.value?.upstream_fields || [])
 const fieldDownstreamRows = computed(() => fieldLineage.value?.downstream_fields || [])
+const edgeText = (edge) => formatLineageEdge(edge, nodeNameMap)
+const upstreamEdgesView = computed(() => (upstreamList.value || []).map(edgeText).filter(Boolean))
+const downstreamEdgesView = computed(() => (downstreamList.value || []).map(edgeText).filter(Boolean))
+const spanMethod = createFieldSpanMethod({ fieldDirectionTab, fieldUpstreamRows, fieldDownstreamRows })
 
-// SVG 血缘关系图
-const graphNodes = computed(() => {
-  const current = omLineage.value?.entity || {}
-  const nodeMap = new Map()
-  const incoming = new Map()
-  const outgoing = new Map()
-
-  const addNode = (node) => {
-    if (!node?.id) return
-    nodeMap.set(node.id, {
-      id: node.id,
-      title: node.displayName || node.name || node.fullyQualifiedName?.split('.')?.pop() || node.id,
-      sub: shortText(node.fullyQualifiedName || '', 30),
-      kind: 'up',
-    })
-  }
-  addNode(current)
-  ;(omLineage.value?.nodes || []).forEach(addNode)
-
-  const addEdge = (from, to) => {
-    if (!from || !to) return
-    if (!incoming.has(to)) incoming.set(to, new Set())
-    if (!outgoing.has(from)) outgoing.set(from, new Set())
-    incoming.get(to).add(from)
-    outgoing.get(from).add(to)
-  }
-  ;(upstreamList.value || []).forEach(e => addEdge(e.fromEntity, e.toEntity))
-  ;(downstreamList.value || []).forEach(e => addEdge(e.fromEntity, e.toEntity))
-
-  const levelOf = new Map([[current.id || selectedTable.value, 0]])
-  const q = [current.id || selectedTable.value]
-  while (q.length) {
-    const id = q.shift()
-    const level = levelOf.get(id) || 0
-    ;(incoming.get(id) || []).forEach((src) => {
-      if (!levelOf.has(src)) { levelOf.set(src, level - 1); q.push(src) }
-    })
-    ;(outgoing.get(id) || []).forEach((dst) => {
-      if (!levelOf.has(dst)) { levelOf.set(dst, level + 1); q.push(dst) }
-    })
-  }
-
-  const byLevel = new Map()
-  for (const [id, info] of nodeMap.entries()) {
-    const lv = levelOf.get(id)
-    if (lv === undefined) continue
-    if (!byLevel.has(lv)) byLevel.set(lv, [])
-    byLevel.get(lv).push({ ...info, id })
-  }
-
-  const levels = [...byLevel.keys()].sort((a, b) => a - b)
-  const nodes = []
-  const width = graphBox.width
-  const centerX = width / 2
-  const centerY = graphBox.height / 2
-  const levelX = (lv) => {
-    if (lv === 0) return centerX
-    const side = lv < 0 ? -1 : 1
-    const depth = Math.abs(lv)
-    return centerX + side * (260 + (depth - 1) * 360)
-  }
-  const levelY = (lv) => {
-    if (lv === 0) return centerY
-    const depth = Math.abs(lv)
-    const band = Math.ceil(depth / 2)
-    const offset = band * 170
-    const direction = depth % 2 === 1 ? -1 : 1
-    return centerY + direction * offset
-  }
-  levels.forEach((lv) => {
-    const items = byLevel.get(lv) || []
-    const gap = lv === 0 ? 0 : Math.min(180, Math.max(120, 360 / Math.max(items.length || 1, 1)))
-    const startY = lv === 0 ? centerY : levelY(lv) - ((items.length - 1) * gap) / 2
-    items.forEach((item, idx) => {
-      const titleLen = (item.title || '').length
-      const baseW = lv === 0 ? 300 : 260
-      nodes.push({
-        key: item.id,
-        title: item.title,
-        sub: item.sub,
-        kind: lv === 0 ? 'center' : (lv < 0 ? 'up' : 'down'),
-        x: levelX(lv),
-        y: startY + idx * gap,
-        w: Math.max(baseW, Math.min(380, 170 + titleLen * 10)),
-        h: lv === 0 ? 96 : 78,
-      })
-    })
-  })
-  return nodes
-})
-
-const graphLinks = computed(() => {
-  const pos = new Map(graphNodes.value.map(n => [n.key, n]))
-  const lines = []
-  const addEdgeLine = (from, to, stroke) => {
-    const a = pos.get(from)
-    const b = pos.get(to)
-    if (!a || !b) return
-    const fromRight = b.x >= a.x
-    const sx = a.x + (fromRight ? a.w / 2 : -a.w / 2)
-    const sy = a.y
-    const ex = b.x - (fromRight ? b.w / 2 : -b.w / 2)
-    const ey = b.y
-    const midX = (sx + ex) / 2
-    const bend = Math.max(80, Math.min(220, Math.abs(ex - sx) / 2))
-    const d = `M ${sx} ${sy} C ${sx + bend} ${sy}, ${midX - bend} ${ey}, ${ex} ${ey}`
-    lines.push({ stroke, d })
-  }
-  ;(upstreamList.value || []).forEach(e => addEdgeLine(e.fromEntity, e.toEntity, 'url(#lineUp)'))
-  ;(downstreamList.value || []).forEach(e => addEdgeLine(e.fromEntity, e.toEntity, 'url(#lineDown)'))
-  return lines
-})
-
-const onGraphWheel = (e) => {
-  e.preventDefault()
-  const delta = e.deltaY > 0 ? -0.08 : 0.08
-  const scale = Math.min(1.8, Math.max(0.6, graphViewport.value.scale + delta))
-  graphViewport.value = { ...graphViewport.value, scale }
-}
-
-const onGraphDown = (e) => {
-  graphDrag.value = {
-    active: true,
-    startX: e.clientX,
-    startY: e.clientY,
-    baseX: graphViewport.value.x,
-    baseY: graphViewport.value.y
-  }
-}
-
-const onGraphMove = (e) => {
-  if (!graphDrag.value.active) return
-  graphViewport.value = {
-    ...graphViewport.value,
-    x: graphDrag.value.baseX + (e.clientX - graphDrag.value.startX),
-    y: graphDrag.value.baseY + (e.clientY - graphDrag.value.startY)
-  }
-}
-
-const onGraphUp = () => {
-  graphDrag.value.active = false
-}
-
-const resetGraph = () => {
-  graphViewport.value = { scale: 1, x: 0, y: 0 }
-}
-
-onMounted(() => {
-  window.addEventListener('mousemove', onGraphMove)
-  window.addEventListener('mouseup', onGraphUp)
-})
-
-onBeforeUnmount(() => {
-  window.removeEventListener('mousemove', onGraphMove)
-  window.removeEventListener('mouseup', onGraphUp)
-})
+const {
+  graphBox,
+  graphViewport,
+  graphNodes,
+  graphLinks,
+  onGraphWheel,
+  onGraphDown,
+  resetGraph,
+} = useLineageGraph({ selectedTable, omLineage, upstreamList, downstreamList })
 
 async function syncFromAudit() {
   syncing.value = true
@@ -811,159 +456,6 @@ watch(tableKeyword, () => {
   margin: 0;
   font-size: 13px;
   color: #6b7280;
-}
-
-.flow-card {
-  margin-bottom: 16px;
-}
-
-.flow-title {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-size: 13px;
-  font-weight: 600;
-  color: #1f2937;
-}
-
-.flow-hint {
-  font-size: 12px;
-  color: #6b7280;
-  font-weight: 400;
-}
-
-.flow-diagram {
-  display: grid;
-  grid-template-columns: repeat(7, minmax(0, 1fr));
-  gap: 12px;
-  align-items: stretch;
-  margin-top: 16px;
-}
-
-.flow-lane {
-  grid-row: 1;
-  font-size: 12px;
-  font-weight: 700;
-  text-align: center;
-  padding: 10px 12px;
-  border-radius: 8px;
-  border: 2px solid;
-  color: #fff;
-  background: linear-gradient(135deg);
-}
-
-.flow-lane.doris {
-  border-color: #faad14;
-  background: linear-gradient(135deg, #ffd666 0%, #faad14 100%);
-  color: #5c4a1a;
-}
-
-.flow-lane.app {
-  border-color: #1890ff;
-  background: linear-gradient(135deg, #69b1ff 0%, #1890ff 100%);
-  color: #fff;
-}
-
-.flow-lane.om {
-  border-color: #52c41a;
-  background: linear-gradient(135deg, #95de64 0%, #52c41a 100%);
-  color: #274e2b;
-}
-
-.flow-node {
-  grid-row: 2;
-  padding: 16px;
-  border-radius: 12px;
-  border: 2px solid;
-  background: linear-gradient(135deg);
-  color: #fff;
-  min-height: 100px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  transition: all 0.3s ease;
-}
-
-.flow-node:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
-}
-
-.flow-node.doris {
-  border-color: #faad14;
-  background: linear-gradient(135deg, #fffbe6 0%, #fff7e6 100%);
-  color: #1f2937;
-}
-
-.flow-node.app {
-  border-color: #1890ff;
-  background: linear-gradient(135deg, #e6f7ff 0%, #f0f5ff 100%);
-  color: #0050b3;
-}
-
-.flow-node.om {
-  border-color: #52c41a;
-  background: linear-gradient(135deg, #f6ffed 0%, #f9ffef 100%);
-  color: #274e2b;
-}
-
-.flow-step-no {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  border-radius: 999px;
-  font-size: 12px;
-  font-weight: 700;
-  margin-bottom: 10px;
-}
-
-.flow-node.doris .flow-step-no {
-  background: rgba(250, 173, 20, 0.15);
-  border: 2px solid #faad14;
-  color: #d48806;
-}
-
-.flow-node.app .flow-step-no {
-  background: rgba(24, 144, 255, 0.15);
-  border: 2px solid #1890ff;
-  color: #0050b3;
-}
-
-.flow-node.om .flow-step-no {
-  background: rgba(82, 196, 26, 0.15);
-  border: 2px solid #52c41a;
-  color: #274e2b;
-}
-
-.flow-step-title {
-  font-size: 14px;
-  font-weight: 700;
-  margin-bottom: 6px;
-}
-
-.flow-step-desc {
-  font-size: 12px;
-  line-height: 1.5;
-}
-
-.flow-node.doris .flow-step-desc { color: #595959; }
-.flow-node.app .flow-step-desc { color: #1f2937; }
-.flow-node.om .flow-step-desc { color: #1f2937; }
-
-.flow-arrow {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 20px;
-  font-weight: 700;
-  align-self: center;
-  color: #1890ff;
-  animation: flow-arrow-blink 2s ease-in-out infinite;
-}
-
-@keyframes flow-arrow-blink {
-  0%, 100% { opacity: 1; transform: translateX(0); }
-  50% { opacity: 0.6; transform: translateX(4px); }
 }
 
 /* ===== 卡片和通用 ===== */

@@ -138,6 +138,9 @@ import { ref, computed, onMounted } from 'vue'
 import VChart from 'vue-echarts'
 import { behaviorApi } from '@/api'
 import { t, locale } from '@/i18n'
+import { registerEchartsBasic } from '@/plugins/registerEchartsBasic'
+
+registerEchartsBasic()
 
 const activeTab = ref('funnel')
 const channels  = ['APP', 'H5', '网点', '网银', '小程序']

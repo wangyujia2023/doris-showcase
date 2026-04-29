@@ -235,7 +235,15 @@ async def get_config():
         "doris_host": settings.DORIS_HOST,
         "doris_port": settings.DORIS_PORT,
         "doris_database": settings.DORIS_DATABASE,
+        "lineage_database": settings.LINEAGE_DATABASE,
+        "backend_port": settings.BACKEND_PORT,
+        "frontend_port": settings.FRONTEND_PORT,
         "hasp_enabled": settings.DORIS_HASP_ENABLED,
+        "ai_resource_configured": bool(settings.DORIS_AI_RESOURCE),
+        "ai_resource": settings.DORIS_AI_RESOURCE or "",
+        "openmetadata_configured": bool(settings.OPENMETADATA_BASE_URL and settings.OPENMETADATA_JWT_TOKEN),
+        "openmetadata_base_url": settings.OPENMETADATA_BASE_URL,
+        "upload_dir": settings.UPLOAD_DIR,
     }
 
 

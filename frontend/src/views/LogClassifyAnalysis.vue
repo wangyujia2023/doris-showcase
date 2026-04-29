@@ -344,6 +344,9 @@ import { BarChart, PieChart } from 'echarts/charts'
 import VChart from 'vue-echarts'
 import { tagAnalysisApi } from '@/api'
 import { t, locale } from '@/i18n'
+import { registerEchartsBasic } from '@/plugins/registerEchartsBasic'
+
+registerEchartsBasic()
 
 
 const showcaseSQL = `-- Doris AI_CLASSIFY 打标签（一键执行，无需离线建模）

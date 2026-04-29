@@ -119,6 +119,9 @@ import { ref, computed, onMounted } from 'vue'
 import VChart from 'vue-echarts'
 import { managementApi } from '@/api'
 import { t, locale } from '@/i18n'
+import { registerEchartsBasic } from '@/plugins/registerEchartsBasic'
+
+registerEchartsBasic()
 
 const biz = ref({})
 const aum = ref([])

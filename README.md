@@ -349,6 +349,9 @@ sh restart.sh         # restart services
 sh logs.sh backend    # backend logs
 sh logs.sh frontend   # frontend logs
 sh healthcheck.sh     # verify backend, frontend proxy and key APIs
+FULL_SMOKE=true sh healthcheck.sh  # verify all main feature APIs return data
 ```
 
-See also: `docs/OPERATIONS.md` for the delivery operations guide.
+See also:
+- `docs/API.md` for API contract and frontend request rules.
+- `docs/OPERATIONS.md` for the delivery operations guide.

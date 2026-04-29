@@ -1,5 +1,5 @@
 import { onBeforeUnmount } from 'vue'
-import * as echarts from 'echarts'
+import { init } from 'echarts/core'
 
 export function useDomChart() {
   const charts = new Map()
@@ -9,7 +9,7 @@ export function useDomChart() {
     if (!el) return null
     let chart = charts.get(el)
     if (!chart) {
-      chart = echarts.init(el)
+      chart = init(el)
       charts.set(el, chart)
     }
     chart.setOption(option, true)
