@@ -5,6 +5,13 @@ PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 ENV_FILE="$PROJECT_DIR/.env"
 EXAMPLE_FILE="$PROJECT_DIR/.env.example"
 
+project_path() {
+  case "$1" in
+    /*) printf "%s" "$1" ;;
+    *) printf "%s/%s" "$PROJECT_DIR" "$1" ;;
+  esac
+}
+
 load_env() {
   if [ -f "$ENV_FILE" ]; then
     set -a
@@ -26,10 +33,10 @@ load_env() {
   LINEAGE_DATABASE="${LINEAGE_DATABASE:-lineage_showcase}"
   PYTHON_BIN="${PYTHON_BIN:-python3}"
   NPM_BIN="${NPM_BIN:-npm}"
-  LOG_DIR="${LOG_DIR:-$PROJECT_DIR/logs}"
-  BACKEND_LOG="${BACKEND_LOG:-$LOG_DIR/backend.log}"
-  FRONTEND_LOG="${FRONTEND_LOG:-$LOG_DIR/frontend.log}"
-  UPLOAD_DIR="${UPLOAD_DIR:-$PROJECT_DIR/uploads}"
+  LOG_DIR="$(project_path "${LOG_DIR:-logs}")"
+  BACKEND_LOG="$(project_path "${BACKEND_LOG:-$LOG_DIR/backend.log}")"
+  FRONTEND_LOG="$(project_path "${FRONTEND_LOG:-$LOG_DIR/frontend.log}")"
+  UPLOAD_DIR="$(project_path "${UPLOAD_DIR:-uploads}")"
   INIT_DATABASE_ON_DEPLOY="${INIT_DATABASE_ON_DEPLOY:-false}"
   DROP_DATABASES="${DROP_DATABASES:-false}"
 }
