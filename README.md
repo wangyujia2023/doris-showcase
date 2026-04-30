@@ -1,4 +1,4 @@
-# Doris 4.0 Demo Platform
+# Doris 4.0 Showcase Platform
 
 A full-stack Doris 4.0 demo platform for customer data, metrics analysis, vector image search, data lineage, regulatory reporting, fund research, securities realtime warehouse, manufacturing, and metro operation scenarios.
 
@@ -6,7 +6,7 @@ A full-stack Doris 4.0 demo platform for customer data, metrics analysis, vector
 
 - Backend: FastAPI + Python 3
 - Frontend: Vue 3 + Vite + Element Plus + ECharts
-- Database: Apache Doris / SelectDB compatible MySQL protocol
+- Database: Apache Doris / SelectDB / VeolDB compatible MySQL protocol
 - Optional metadata integration: OpenMetadata
 
 ## Repository Layout
@@ -18,7 +18,7 @@ docs/                 Architecture, deployment, and operations documents
 scripts/              Script implementations shared by root entry scripts
 sql/by_database/      Database schema and mock data, grouped by database
 deploy.sh             Root wrapper for one-click dependency install, build, and startup
-init_database.sh      Root wrapper for Doris schema/mock initialization and validation
+scripts/init_database.sh  Doris schema/mock initialization and validation
 .env.example          Environment configuration template
 requirements.txt      Backend Python dependencies
 ```
@@ -67,8 +67,8 @@ Notes:
 - `FRONTEND_PORT` defaults to `5173`.
 - `UPLOAD_DIR` stores uploaded vector-search images. Scripts create this directory automatically.
 - `LOG_DIR` stores backend/frontend logs. Defaults to `./logs`.
-- `INIT_DATABASE_ON_DEPLOY=true` makes `deploy.sh` run `init_database.sh all` before startup.
-- `DROP_DATABASES=true` makes `init_database.sh` drop managed demo databases before recreating them.
+- `INIT_DATABASE_ON_DEPLOY=true` makes `deploy.sh` run `scripts/init_database.sh all` before startup.
+- `DROP_DATABASES=true` makes `scripts/init_database.sh` drop managed demo databases before recreating them.
 - `DORIS_AI_RESOURCE` sets `default_ai_resource` for every backend Doris session. It is required only for Doris AI Function pages.
 - OpenMetadata settings are required only for lineage synchronization to OpenMetadata.
 
@@ -86,16 +86,16 @@ Databases:
 Initialize all databases:
 
 ```bash
-sh init_database.sh
+sh scripts/init_database.sh
 ```
 
 Initialize one database:
 
 ```bash
-sh init_database.sh core
-sh init_database.sh lineage
-sh init_database.sh regdb
-sh init_database.sh bjmetro
+sh scripts/init_database.sh core
+sh scripts/init_database.sh lineage
+sh scripts/init_database.sh regdb
+sh scripts/init_database.sh bjmetro
 ```
 
 The mock data files use English demo data where applicable. Initialization validates key tables after import.
@@ -103,13 +103,13 @@ The mock data files use English demo data where applicable. Initialization valid
 Validate existing databases without importing data:
 
 ```bash
-sh init_database.sh validate
+sh scripts/init_database.sh validate
 ```
 
 Drop and recreate managed demo databases:
 
 ```bash
-DROP_DATABASES=true sh init_database.sh all
+DROP_DATABASES=true sh scripts/init_database.sh all
 ```
 
 ## Doris AI Function Resource
@@ -223,7 +223,7 @@ sh deploy.sh
 If database schema or mock data changed, run:
 
 ```bash
-sh init_database.sh
+sh scripts/init_database.sh
 sh deploy.sh
 ```
 
@@ -334,7 +334,7 @@ git clone https://github.com/wangyujia2023/doris-showcase.git
 cd doris-showcase
 cp .env.example .env
 # edit .env if needed
-sh init_database.sh
+sh scripts/init_database.sh
 sh deploy.sh
 ```
 
@@ -344,12 +344,12 @@ sh deploy.sh
 ```bash
 sh deploy.sh          # initialize runtime, install dependencies, build frontend, start services
 sh start.sh           # start existing runtime
-sh stop.sh            # stop backend and frontend ports
-sh restart.sh         # restart services
-sh logs.sh backend    # backend logs
-sh logs.sh frontend   # frontend logs
-sh healthcheck.sh     # verify backend, frontend proxy and key APIs
-FULL_SMOKE=true sh healthcheck.sh  # verify all main feature APIs return data
+sh scripts/stop.sh            # stop backend and frontend ports
+sh scripts/restart.sh         # restart services
+sh scripts/logs.sh backend    # backend logs
+sh scripts/logs.sh frontend   # frontend logs
+sh scripts/healthcheck.sh     # verify backend, frontend proxy and key APIs
+FULL_SMOKE=true sh scripts/healthcheck.sh  # verify all main feature APIs return data
 ```
 
 See also:
