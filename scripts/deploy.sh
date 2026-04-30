@@ -43,7 +43,7 @@ cd "$PROJECT_DIR"
 if [ "$INIT_DATABASE_ON_DEPLOY" = "true" ]; then
   bash "$PROJECT_DIR/scripts/init_database.sh" all
 else
-  echo "Skip database initialization. Run: sh init_database.sh all"
+  echo "Skip database initialization. Run: sh scripts/init_database.sh all"
 fi
 
 bash "$PROJECT_DIR/scripts/start.sh"

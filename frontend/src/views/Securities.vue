@@ -472,9 +472,17 @@ onMounted(loadAll)
 <style scoped>
 .sec-wrap { display: flex; flex-direction: column; gap: 16px; }
 .collapse-card, .tabs-card, .filter-card { padding: 0; overflow: hidden; }
-.collapse-hd {
-  display: flex; align-items: center; gap: 8px; padding: 18px 18px; min-height: 76px; cursor: pointer;
-  border-bottom: 1px solid #f0f0f0; font-size: 13px; color: #303133;
+.collapse-hd,
+:deep(.collapse-hd) {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 20px 22px;
+  min-height: 84px;
+  cursor: pointer;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 13px;
+  color: #303133;
 }
 .ch-title { font-size: 14px; font-weight: 600; color: #1a1a1a; }
 .ch-tog { margin-left: auto; font-size: 12px; color: #c0c4cc; flex-shrink: 0; }

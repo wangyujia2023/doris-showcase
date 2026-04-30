@@ -153,7 +153,7 @@
                       <el-tab-pane :label="t('lineage.fieldTabDownstream').replace('{0}', fieldDownstreamRows.length)" name="downstream" />
                     </el-tabs>
 
-                    <div style="border:1px solid #f0f0f0;border-radius:8px;padding:10px;background:#f9f9f9">
+                    <div class="field-lineage-panel">
                       <div style="font-size:12px;font-weight:600;margin-bottom:10px">
                         {{ fieldDirectionTab === 'upstream' ? t('lineage.fieldUpstreamLabel') : t('lineage.fieldDownstreamLabel') }}
                       </div>
@@ -162,15 +162,17 @@
                         v-if="fieldDirectionTab === 'upstream'"
                         :data="fieldUpstreamRows"
                         size="small"
-                        max-height="380"
+                        max-height="620"
                         :empty-text="t('lineage.fieldEmptyUp')"
                         class="lineage-merged-table"
-                        :span-method="spanMethod"
                       >
-                        <el-table-column prop="source_table" :label="t('lineage.fieldColSourceTable')" width="160" show-overflow-tooltip />
-                        <el-table-column :label="t('lineage.fieldColSourceField')" min-width="180">
+                        <el-table-column prop="source_table" :label="t('lineage.fieldColSourceTable')" min-width="180" />
+                        <el-table-column :label="t('lineage.fieldColSourceField')" min-width="260">
                           <template #default="{ row }">
-                            <div class="field-badge upstream">{{ (row.source_fields || []).join(', ') || '-' }}</div>
+                            <div class="field-chip-group">
+                              <span v-for="field in (row.source_fields || [])" :key="`up-${row.target_field}-${field}`" class="field-badge upstream">{{ field }}</span>
+                              <span v-if="!(row.source_fields || []).length" class="field-badge upstream">-</span>
+                            </div>
                           </template>
                         </el-table-column>
                         <el-table-column label="" width="50" align="center">
@@ -178,15 +180,15 @@
                             <div class="flow-arrow-icon upstream">→</div>
                           </template>
                         </el-table-column>
-                        <el-table-column prop="target_table" :label="t('lineage.fieldColTargetTable')" width="160" show-overflow-tooltip />
-                        <el-table-column :label="t('lineage.fieldColTargetField')" min-width="140">
+                        <el-table-column prop="target_table" :label="t('lineage.fieldColTargetTable')" min-width="180" />
+                        <el-table-column :label="t('lineage.fieldColTargetField')" min-width="160">
                           <template #default="{ row }">
                             <span class="target-field">{{ row.target_field || '-' }}</span>
                           </template>
                         </el-table-column>
-                        <el-table-column :label="t('lineage.fieldColExpression')" min-width="240" show-overflow-tooltip>
+                        <el-table-column :label="t('lineage.fieldColExpression')" min-width="360">
                           <template #default="{ row }">
-                            <span>{{ row.expression || '-' }}</span>
+                            <span class="expr-text">{{ row.expression || '-' }}</span>
                           </template>
                         </el-table-column>
                       </el-table>
@@ -195,15 +197,17 @@
                         v-else
                         :data="fieldDownstreamRows"
                         size="small"
-                        max-height="380"
+                        max-height="620"
                         :empty-text="t('lineage.fieldEmptyDown')"
                         class="lineage-merged-table"
-                        :span-method="spanMethod"
                       >
-                        <el-table-column prop="source_table" :label="t('lineage.fieldColSourceTable')" width="160" show-overflow-tooltip />
-                        <el-table-column :label="t('lineage.fieldColSourceField')" min-width="180">
+                        <el-table-column prop="source_table" :label="t('lineage.fieldColSourceTable')" min-width="180" />
+                        <el-table-column :label="t('lineage.fieldColSourceField')" min-width="260">
                           <template #default="{ row }">
-                            <div class="field-badge downstream">{{ (row.source_fields || []).join(', ') || '-' }}</div>
+                            <div class="field-chip-group">
+                              <span v-for="field in (row.source_fields || [])" :key="`down-${row.target_field}-${field}`" class="field-badge downstream">{{ field }}</span>
+                              <span v-if="!(row.source_fields || []).length" class="field-badge downstream">-</span>
+                            </div>
                           </template>
                         </el-table-column>
                         <el-table-column label="" width="50" align="center">
@@ -211,24 +215,25 @@
                             <div class="flow-arrow-icon downstream">→</div>
                           </template>
                         </el-table-column>
-                        <el-table-column prop="target_table" :label="t('lineage.fieldColTargetTable')" width="160" show-overflow-tooltip />
-                        <el-table-column :label="t('lineage.fieldColTargetField')" min-width="140">
+                        <el-table-column prop="target_table" :label="t('lineage.fieldColTargetTable')" min-width="180" />
+                        <el-table-column :label="t('lineage.fieldColTargetField')" min-width="160">
                           <template #default="{ row }">
                             <span class="target-field">{{ row.target_field || '-' }}</span>
                           </template>
                         </el-table-column>
-                        <el-table-column :label="t('lineage.fieldColExpression')" min-width="240" show-overflow-tooltip>
+                        <el-table-column :label="t('lineage.fieldColExpression')" min-width="360">
                           <template #default="{ row }">
-                            <span>{{ row.expression || '-' }}</span>
+                            <span class="expr-text">{{ row.expression || '-' }}</span>
                           </template>
                         </el-table-column>
                       </el-table>
                     </div>
 
-                    <details style="margin-top:12px;border-top:1px solid #f0f0f0;padding-top:12px">
-                      <summary style="cursor:pointer;font-size:12px;color:#0050b3;font-weight:600;user-select:none">{{ t('lineage.btnViewFieldJson') }}</summary>
-                      <pre style="background:#f5f5f5;padding:10px;border-radius:4px;font-size:11px;overflow-x:auto;color:#333;line-height:1.4;margin-top:8px">{{ fieldLineageText }}</pre>
-                    </details>
+                    <div class="json-action-bar">
+                      <el-button text type="primary" size="small" @click="fieldJsonVisible = true">
+                        {{ t('lineage.btnViewFieldJson') }}
+                      </el-button>
+                    </div>
                   </template>
                 </div>
 
@@ -263,6 +268,10 @@
           </div>
         </el-tab-pane>
       </el-tabs>
+
+    <el-dialog v-model="fieldJsonVisible" :title="t('lineage.btnViewFieldJson')" width="72%" top="6vh" append-to-body>
+      <pre class="raw-json-dialog">{{ fieldLineageText }}</pre>
+    </el-dialog>
   </div>
 </template>
 
@@ -275,7 +284,7 @@ import { useLineageGraph } from '@/composables/useLineageGraph'
 import LineageFlowPanel from '@/components/lineage/LineageFlowPanel.vue'
 import LineageSyncPanel from '@/components/lineage/LineageSyncPanel.vue'
 import LineageTableList from '@/components/lineage/LineageTableList.vue'
-import { createFieldSpanMethod, formatLineageEdge } from '@/composables/useLineageFormat'
+import { formatLineageEdge } from '@/composables/useLineageFormat'
 
 const activeTab = ref('sync')
 const syncing = ref(false)
@@ -292,6 +301,7 @@ const omLineage = ref({})
 const omLineageText = ref('')
 const fieldLineage = ref({})
 const fieldLineageText = ref('')
+const fieldJsonVisible = ref(false)
 const upstreamList = ref([])
 const downstreamList = ref([])
 const impactRows = ref([])
@@ -398,7 +408,6 @@ const fieldDownstreamRows = computed(() => fieldLineage.value?.downstream_fields
 const edgeText = (edge) => formatLineageEdge(edge, nodeNameMap)
 const upstreamEdgesView = computed(() => (upstreamList.value || []).map(edgeText).filter(Boolean))
 const downstreamEdgesView = computed(() => (downstreamList.value || []).map(edgeText).filter(Boolean))
-const spanMethod = createFieldSpanMethod({ fieldDirectionTab, fieldUpstreamRows, fieldDownstreamRows })
 
 const {
   graphBox,
@@ -470,62 +479,13 @@ watch(tableKeyword, () => {
 /* ===== 查询网格 ===== */
 .query-grid {
   display: grid;
-  grid-template-columns: 300px 1fr;
+  grid-template-columns: 240px minmax(0, 1fr);
   gap: 12px;
   align-items: start;
 }
 
 .table-list-card {
-  border: 1px solid #f0f0f0;
-  border-radius: 8px;
-  background: #fff;
-  height: fit-content;
-  max-height: calc(100vh - 200px);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-/* ===== 表列表项 ===== */
-.table-item {
-  padding: 10px 0;
-  border-bottom: 1px solid #f0f0f0;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  border-left: 3px solid transparent;
-}
-
-.table-item:hover {
-  background: #f9f9f9;
-  border-left-color: #1890ff;
-}
-
-.table-item.active {
-  background: #f0f7ff;
-  border-left-color: #1890ff;
-}
-
-.table-name {
-  font-size: 12px;
-  font-weight: 700;
-  color: #1f2937;
-  line-height: 1.2;
-  word-break: break-all;
-}
-
-.table-sub {
-  font-size: 12px;
-  color: #6b7280;
-  margin-top: 3px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.table-meta {
-  font-size: 11px;
-  color: #9ca3af;
-  margin-top: 3px;
+  width: 100%;
 }
 
 /* ===== 详情列 ===== */
@@ -733,6 +693,36 @@ watch(tableKeyword, () => {
 }
 
 /* ===== 血缘合并表格 ===== */
+.field-lineage-panel {
+  border: 1px solid #e8edf3;
+  border-radius: 10px;
+  padding: 12px;
+  background: #f8fafc;
+  overflow: hidden;
+}
+
+.json-action-bar {
+  margin-top: 12px;
+  border-top: 1px solid #f0f0f0;
+  padding-top: 10px;
+  display: flex;
+  justify-content: flex-start;
+}
+
+.raw-json-dialog {
+  max-height: 72vh;
+  overflow: auto;
+  margin: 0;
+  padding: 14px;
+  border-radius: 8px;
+  background: #0f172a;
+  color: #dbeafe;
+  font-size: 12px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
 :deep(.lineage-compact-table .el-table__header th) {
   padding: 8px 8px !important;
   font-size: 12px;
@@ -750,6 +740,7 @@ watch(tableKeyword, () => {
 
 :deep(.lineage-merged-table) {
   border-collapse: collapse !important;
+  width: 100%;
 }
 
 :deep(.lineage-merged-table .el-table__header) {
@@ -779,11 +770,11 @@ watch(tableKeyword, () => {
 
 :deep(.lineage-merged-table .el-table__body td) {
   border-bottom: 1px solid #f0f0f0 !important;
-  padding: 7px 8px !important;
+  padding: 8px 8px !important;
   color: #595959;
   font-size: 12px;
-  line-height: 1.35;
-  vertical-align: middle;
+  line-height: 1.45;
+  vertical-align: top;
 }
 
 :deep(.lineage-merged-table .el-table__body tr:last-child td) {
@@ -823,32 +814,54 @@ watch(tableKeyword, () => {
 }
 
 .field-badge {
-  display: inline-block;
-  padding: 4px 8px;
-  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  padding: 3px 8px;
+  border-radius: 999px;
   font-size: 11px;
-  font-weight: 500;
-  word-break: break-word;
+  font-weight: 600;
+  word-break: break-all;
+  line-height: 1.5;
   background: rgba(24, 144, 255, 0.08);
   color: #0050b3;
-  border-left: 3px solid #1890ff;
+  border: 1px solid rgba(24, 144, 255, 0.22);
 }
 
 .field-badge.upstream {
   background: rgba(82, 196, 26, 0.1);
   color: #274e2b;
-  border-left: 3px solid #52c41a;
+  border-color: rgba(82, 196, 26, 0.28);
 }
 
 .field-badge.downstream {
   background: rgba(250, 173, 20, 0.1);
   color: #5c4a1a;
-  border-left: 3px solid #faad14;
+  border-color: rgba(250, 173, 20, 0.32);
+}
+
+.field-chip-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  max-width: 100%;
 }
 
 .target-field {
+  display: inline-block;
   color: #1f2937;
-  font-weight: 500;
+  font-weight: 700;
+  word-break: break-all;
+}
+
+.expr-text {
+  display: block;
+  color: #4b5563;
+  font-family: 'JetBrains Mono', Consolas, monospace;
+  font-size: 11px;
+  line-height: 1.55;
+  white-space: normal;
+  word-break: break-word;
 }
 
 </style>

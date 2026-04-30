@@ -24,6 +24,7 @@ frontend/dist/
 .DS_Store
 
 # Local agent/editor state
+AGENTS.md
 .claude/
 .codex/
 .cursor/
@@ -31,3 +32,5 @@ frontend/dist/
 
 # Runtime uploads
 uploads/
+# CocoIndex Code (ccc)
+/.cocoindex_code/

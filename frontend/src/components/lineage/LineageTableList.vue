@@ -1,12 +1,12 @@
 <template>
   <div class="table-list-card">
-    <div style="font-size:13px;font-weight:600;margin-bottom:12px;padding:20px 20px 0">{{ t('lineage.tableListTitle') }} ({{ tables.length }})</div>
-    <div style="padding:0 20px">
-      <div style="margin-bottom:12px">
+    <div class="list-title">{{ t('lineage.tableListTitle') }} <span>{{ tables.length }}</span></div>
+    <div class="list-body">
+      <div class="search-wrap">
         <el-input v-model="keywordModel" :placeholder="t('lineage.searchPlaceholder')" clearable @input="$emit('search')" />
       </div>
-      <el-scrollbar style="height:640px">
-        <div style="padding:0 20px">
+      <el-scrollbar class="table-scroll">
+        <div class="table-list">
           <div
             v-for="item in tables"
             :key="item.asset_id"
@@ -39,52 +39,91 @@ const keywordModel = computed({ get: () => props.keyword, set: v => emit('update
 
 <style scoped>
 .table-list-card {
+  --hsap-bg: #f5f7fb;
+  --hsap-border: rgba(59, 130, 246, .15);
+  --hsap-border-strong: rgba(59, 130, 246, .35);
+  --hsap-blue: #2563eb;
+  --hsap-text: #0f1c35;
+  --hsap-muted: #8fa3be;
   background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, .06);
-  height: fit-content;
-  max-height: calc(100vh - 200px);
+  border: 1px solid var(--hsap-border);
+  border-radius: 12px;
+  box-shadow: none;
+  height: calc(100vh - 220px);
+  min-height: 560px;
   display: flex;
   flex-direction: column;
   overflow: hidden;
 }
 
+.list-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 14px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--hsap-muted);
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.list-title span {
+  padding: 1px 8px;
+  border: 1px solid var(--hsap-border);
+  border-radius: 999px;
+  color: var(--hsap-blue);
+  background: rgba(37, 99, 235, .07);
+}
+
+.list-body {
+  min-height: 0;
+  flex: 1;
+  padding: 0 12px 12px;
+  display: flex;
+  flex-direction: column;
+}
+
+.search-wrap { margin-bottom: 10px; }
+.table-scroll { flex: 1; }
+.table-list { display: flex; flex-direction: column; gap: 8px; padding-right: 4px; }
+
 .table-item {
-  padding: 10px 12px;
-  border: 1px solid #ebeef5;
-  border-radius: 6px;
-  margin-bottom: 8px;
+  padding: 10px 11px;
+  border: 1px solid var(--hsap-border);
+  border-radius: 10px;
   cursor: pointer;
-  transition: all .2s ease;
-  background: #fff;
+  transition: all .18s ease;
+  background: var(--hsap-bg);
 }
 
 .table-item:hover {
-  border-color: #409eff;
-  background: #f0f9ff;
+  border-color: var(--hsap-border-strong);
+  background: #fff;
 }
 
 .table-item.active {
-  border-color: #409eff;
-  background: #ecf5ff;
+  border-color: rgba(37, 99, 235, .45);
+  background: rgba(37, 99, 235, .08);
+  box-shadow: 0 0 18px rgba(37, 99, 235, .12);
 }
 
 .table-name {
-  font-size: 12px;
-  font-weight: 600;
-  color: #1f2937;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--hsap-text);
   margin-bottom: 4px;
   word-break: break-word;
 }
 
 .table-sub {
   font-size: 12px;
-  color: #606266;
+  color: #4a6080;
   margin-bottom: 4px;
 }
 
 .table-meta {
   font-size: 11px;
-  color: #909399;
+  color: var(--hsap-muted);
 }
 </style>

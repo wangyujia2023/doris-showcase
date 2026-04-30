@@ -50,5 +50,5 @@ bash "$PROJECT_DIR/scripts/healthcheck.sh" || true
 
 echo "Frontend: http://SERVER_IP:$FRONTEND_PORT"
 echo "Backend docs: http://SERVER_IP:$BACKEND_PORT/docs"
-echo "Backend log: sh logs.sh backend"
-echo "Frontend log: sh logs.sh frontend"
+echo "Backend log: sh scripts/logs.sh backend"
+echo "Frontend log: sh scripts/logs.sh frontend"

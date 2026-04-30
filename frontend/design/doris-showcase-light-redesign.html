@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Doris Showcase · Light Redesign</title>
+<style>
+  :root {
+    --bg: #f5f7fb;
+    --paper: #ffffff;
+    --paper-soft: #fbfcff;
+    --ink: #182033;
+    --muted: #717b8f;
+    --line: #e4e9f2;
+    --brand: #1570ef;
+    --brand-2: #0ea5a4;
+    --brand-soft: #eaf3ff;
+    --green: #15a46e;
+    --amber: #d99016;
+    --red: #e5484d;
+    --violet: #7c3aed;
+    --shadow: 0 18px 45px rgba(24, 32, 51, .08);
+    --shadow-sm: 0 8px 22px rgba(24, 32, 51, .06);
+    --radius-xl: 26px;
+    --radius-lg: 18px;
+    --radius-md: 12px;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    color: var(--ink);
+    font-family: "Avenir Next", "Gill Sans", "PingFang SC", "Microsoft YaHei", sans-serif;
+    background:
+      radial-gradient(circle at 12% -8%, rgba(21,112,239,.16), transparent 30%),
+      radial-gradient(circle at 82% 0%, rgba(14,165,164,.13), transparent 28%),
+      linear-gradient(180deg, #f8fbff 0%, var(--bg) 42%, #eef3f9 100%);
+  }
+
+  .shell {
+    display: grid;
+    grid-template-columns: 212px minmax(0, 1fr);
+    min-height: 100vh;
+  }
+
+  .sidebar {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    padding: 12px 10px;
+    background: rgba(255,255,255,.78);
+    border-right: 1px solid rgba(228,233,242,.85);
+    backdrop-filter: blur(22px);
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 8px 12px;
+    border-bottom: 1px solid var(--line);
+  }
+  .brand-mark {
+    width: 34px;
+    height: 34px;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    color: white;
+    font-weight: 900;
+    background: linear-gradient(135deg, #1570ef, #0ea5a4);
+    box-shadow: 0 10px 26px rgba(21,112,239,.28);
+  }
+  .brand-title { font-size: 14px; font-weight: 850; letter-spacing: -.02em; }
+  .brand-sub { margin-top: 2px; font-size: 11px; color: var(--muted); }
+
+  .nav-section { margin-top: 12px; }
+  .nav-label {
+    padding: 0 12px 8px;
+    color: #9aa4b5;
+    font-size: 11px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    font-weight: 800;
+  }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: 30px;
+    padding: 0 10px;
+    margin-bottom: 2px;
+    border-radius: 9px;
+    color: #475467;
+    font-size: 13px;
+    font-weight: 650;
+  }
+  .nav-item .ico { width: 22px; text-align: center; opacity: .85; }
+  .nav-item.active {
+    color: var(--brand);
+    background: linear-gradient(135deg, #eaf3ff, #f4f8ff);
+    box-shadow: inset 0 0 0 1px rgba(21,112,239,.12);
+  }
+  .nav-item:hover { background: #f3f6fb; }
+
+  .main { min-width: 0; }
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 18px;
+    background: rgba(248,251,255,.78);
+    border-bottom: 1px solid rgba(228,233,242,.75);
+    backdrop-filter: blur(18px);
+  }
+  .crumb { color: #667085; font-size: 13px; font-weight: 650; }
+  .top-actions { display: flex; align-items: center; gap: 10px; }
+  .pill {
+    height: 30px;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 0 12px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: #fff;
+    font-size: 12px;
+    color: #475467;
+    box-shadow: var(--shadow-sm);
+  }
+  .pulse {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 0 5px rgba(21,164,110,.12);
+  }
+  .btn {
+    border: 0;
+    height: 34px;
+    padding: 0 14px;
+    border-radius: 12px;
+    color: white;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--brand), #3b82f6);
+    box-shadow: 0 10px 22px rgba(21,112,239,.24);
+  }
+
+  .content { padding: 14px 18px 28px; }
+
+  .hero {
+    position: relative;
+    overflow: hidden;
+    min-height: 168px;
+    padding: 18px;
+    border-radius: var(--radius-xl);
+    background:
+      linear-gradient(135deg, rgba(255,255,255,.96), rgba(248,251,255,.92)),
+      radial-gradient(circle at 72% 30%, rgba(21,112,239,.18), transparent 36%);
+    border: 1px solid rgba(228,233,242,.92);
+    box-shadow: var(--shadow);
+  }
+  .hero::after {
+    content: "";
+    position: absolute;
+    right: -80px;
+    top: -80px;
+    width: 330px;
+    height: 330px;
+    border-radius: 50%;
+    background: conic-gradient(from 220deg, rgba(21,112,239,.12), rgba(14,165,164,.22), rgba(245,158,11,.12), rgba(21,112,239,.12));
+    filter: blur(.2px);
+  }
+  .hero-grid {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 340px;
+    gap: 16px;
+    align-items: center;
+  }
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: #eef7ff;
+    color: var(--brand);
+    font-size: 12px;
+    font-weight: 850;
+  }
+  h1 {
+    margin: 10px 0 6px;
+    max-width: 760px;
+    font-size: clamp(24px, 3vw, 38px);
+    line-height: 1.02;
+    letter-spacing: -.055em;
+  }
+  .hero-desc {
+    max-width: 650px;
+    margin: 0;
+    color: #5d6678;
+    font-size: 13px;
+    line-height: 1.55;
+  }
+  .hero-metrics {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-top: 12px;
+  }
+  .metric-mini {
+    padding: 9px 10px;
+    border-radius: 12px;
+    background: rgba(255,255,255,.76);
+    border: 1px solid var(--line);
+  }
+  .metric-mini strong { display: block; font-size: 19px; letter-spacing: -.04em; }
+  .metric-mini span { color: var(--muted); font-size: 12px; }
+
+  .flow-card {
+    position: relative;
+    padding: 12px;
+    border-radius: 16px;
+    background: rgba(255,255,255,.82);
+    border: 1px solid var(--line);
+    box-shadow: var(--shadow-sm);
+  }
+  .flow-title { font-weight: 850; margin-bottom: 14px; }
+  .flow-node {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 9px;
+    margin-bottom: 6px;
+    border-radius: 12px;
+    background: var(--paper-soft);
+    border: 1px solid var(--line);
+  }
+  .node-dot {
+    width: 26px;
+    height: 26px;
+    display: grid;
+    place-items: center;
+    border-radius: 12px;
+    color: white;
+    font-weight: 900;
+    background: linear-gradient(135deg, var(--brand), var(--brand-2));
+  }
+  .flow-node b { display: block; font-size: 13px; }
+  .flow-node small { color: var(--muted); }
+  .flow-line {
+    height: 13px;
+    width: 2px;
+    margin: -4px 0 6px 28px;
+    background: linear-gradient(var(--brand), transparent);
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 16px;
+    margin-top: 12px;
+  }
+  .card {
+    border-radius: 14px;
+    background: rgba(255,255,255,.88);
+    border: 1px solid var(--line);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+  }
+  .card-hd {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 14px 8px;
+  }
+  .card-title { font-weight: 900; letter-spacing: -.02em; }
+  .card-sub { margin-top: 4px; color: var(--muted); font-size: 12px; }
+  .span-3 { grid-column: span 3; }
+  .span-4 { grid-column: span 4; }
+  .span-5 { grid-column: span 5; }
+  .span-7 { grid-column: span 7; }
+  .span-8 { grid-column: span 8; }
+  .span-12 { grid-column: span 12; }
+
+  .kpi { padding: 12px; min-height: 108px; }
+  .kpi-icon {
+    width: 30px; height: 30px; border-radius: 10px;
+    display: grid; place-items: center;
+    background: var(--brand-soft);
+    color: var(--brand);
+    font-weight: 900;
+  }
+  .kpi-value { margin-top: 10px; font-size: 25px; font-weight: 900; letter-spacing: -.05em; }
+  .kpi-name { color: #667085; font-size: 12px; font-weight: 700; }
+  .delta { margin-top: 10px; font-size: 12px; color: var(--green); font-weight: 850; }
+
+  .chart { padding: 0 18px 18px; height: 190px; display: flex; align-items: end; gap: 12px; }
+  .bar {
+    flex: 1;
+    min-width: 18px;
+    border-radius: 12px 12px 4px 4px;
+    background: linear-gradient(180deg, #5da8ff, #1570ef);
+    box-shadow: inset 0 1px rgba(255,255,255,.35);
+    position: relative;
+  }
+  .bar:nth-child(2n) { background: linear-gradient(180deg, #48d7bd, #0ea5a4); }
+  .bar::after {
+    content: attr(data-label);
+    position: absolute;
+    left: 50%; bottom: -22px;
+    transform: translateX(-50%);
+    color: var(--muted);
+    font-size: 11px;
+  }
+
+  .lineage-canvas {
+    margin: 0 18px 18px;
+    min-height: 210px;
+    border-radius: 18px;
+    background:
+      linear-gradient(#fff, #fff) padding-box,
+      linear-gradient(135deg, rgba(21,112,239,.24), rgba(14,165,164,.22)) border-box;
+    border: 1px solid transparent;
+    position: relative;
+    overflow: hidden;
+  }
+  .lineage-canvas svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .table-node {
+    position: absolute;
+    width: 160px;
+    padding: 10px 12px;
+    border-radius: 15px;
+    background: #fff;
+    border: 1px solid var(--line);
+    box-shadow: 0 12px 26px rgba(24,32,51,.08);
+  }
+  .table-node b { display: block; font-size: 13px; }
+  .table-node small { color: var(--muted); }
+  .table-node.main { border-color: rgba(21,112,239,.35); box-shadow: 0 16px 34px rgba(21,112,239,.14); }
+  .n1 { left: 24px; top: 28px; }
+  .n2 { left: 24px; bottom: 30px; }
+  .n3 { left: 280px; top: 78px; }
+  .n4 { right: 34px; top: 78px; }
+
+  .data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .data-table th, .data-table td { padding: 8px 14px; border-top: 1px solid var(--line); text-align: left; }
+  .data-table th { color: #667085; font-size: 12px; background: #fbfcff; }
+  .status { padding: 4px 8px; border-radius: 999px; font-size: 12px; font-weight: 850; }
+  .ok { color: var(--green); background: #eaf8f1; }
+  .warn { color: var(--amber); background: #fff5df; }
+  .bad { color: var(--red); background: #ffeded; }
+
+  .tag-cloud { padding: 0 14px 14px; display: flex; flex-wrap: wrap; gap: 7px; }
+  .tag {
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-weight: 850;
+    font-size: 12px;
+    background: #fff;
+    border: 1px solid currentColor;
+  }
+  .tag.blue { color: var(--brand); background: #eef6ff; }
+  .tag.green { color: var(--green); background: #edf9f3; }
+  .tag.amber { color: var(--amber); background: #fff7e8; }
+  .tag.rose { color: var(--red); background: #fff0f1; }
+  .tag.violet { color: var(--violet); background: #f4efff; }
+
+  @media (max-width: 1180px) {
+    .shell { grid-template-columns: 86px minmax(0, 1fr); }
+    .brand div:not(.brand-mark), .nav-label, .nav-item span:last-child { display: none; }
+    .nav-item { justify-content: center; }
+    .hero-grid { grid-template-columns: 1fr; }
+    .span-3, .span-4, .span-5, .span-7, .span-8 { grid-column: span 6; }
+  }
+  @media (max-width: 760px) {
+    .shell { display: block; }
+    .sidebar { display: none; }
+    .topbar { padding: 0 16px; }
+    .content { padding: 16px; }
+    .span-3, .span-4, .span-5, .span-7, .span-8 { grid-column: span 12; }
+    .hero { padding: 20px; }
+    .hero-metrics { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">D</div>
+        <div>
+          <div class="brand-title">Doris Showcase</div>
+          <div class="brand-sub">SelectDB Universal Demo</div>
+        </div>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-label">Overview</div>
+        <div class="nav-item active"><span class="ico">⌁</span><span>Home Dashboard</span></div>
+        <div class="nav-item"><span class="ico">◇</span><span>Operations Cockpit</span></div>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">CDP</div>
+        <div class="nav-item"><span class="ico">◌</span><span>User Analytics</span></div>
+        <div class="nav-item"><span class="ico">▦</span><span>Wide Table Query</span></div>
+        <div class="nav-item"><span class="ico">✦</span><span>Vector Search</span></div>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">DataOps</div>
+        <div class="nav-item"><span class="ico">⇄</span><span>Data Lineage</span></div>
+        <div class="nav-item"><span class="ico">▤</span><span>Metrics Platform</span></div>
+        <div class="nav-item"><span class="ico">☷</span><span>Observability</span></div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="crumb">Doris Showcase / Home Dashboard</div>
+        <div class="top-actions">
+          <div class="pill"><span class="pulse"></span>Doris 4.0 Connected</div>
+          <div class="pill">EN / 中文</div>
+          <button class="btn">Sync Lineage</button>
+        </div>
+      </header>
+
+      <section class="content">
+        <section class="hero">
+          <div class="hero-grid">
+            <div>
+              <div class="eyebrow">Apache Doris · Realtime Analytics Showcase</div>
+              <h1>Compact analytics console for Doris demos.</h1>
+              <p class="hero-desc">High-density light console with tighter navigation, compact cards, clearer data hierarchy, and reusable page patterns.</p>
+              <div class="hero-metrics">
+                <div class="metric-mini"><strong>38ms</strong><span>Avg query latency</span></div>
+                <div class="metric-mini"><strong>12</strong><span>Demo domains</span></div>
+                <div class="metric-mini"><strong>99.9%</strong><span>Service availability</span></div>
+              </div>
+            </div>
+            <div class="flow-card">
+              <div class="flow-title">Core Data Flow</div>
+              <div class="flow-node"><div class="node-dot">1</div><div><b>Doris Audit SQL</b><small>Insert-select jobs and business queries</small></div></div>
+              <div class="flow-line"></div>
+              <div class="flow-node"><div class="node-dot">2</div><div><b>Showcase Backend</b><small>Parse SQL, normalize metadata, enrich fields</small></div></div>
+              <div class="flow-line"></div>
+              <div class="flow-node"><div class="node-dot">3</div><div><b>OpenMetadata</b><small>Table and column lineage visualization</small></div></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="grid">
+          <div class="card kpi span-3"><div class="kpi-icon">Q</div><div class="kpi-value">1.28M</div><div class="kpi-name">Daily Events</div><div class="delta">↑ 12.4% vs yesterday</div></div>
+          <div class="card kpi span-3"><div class="kpi-icon">U</div><div class="kpi-value">86.7K</div><div class="kpi-name">Active Users</div><div class="delta">↑ 8.1% conversion</div></div>
+          <div class="card kpi span-3"><div class="kpi-icon">L</div><div class="kpi-value">214</div><div class="kpi-name">Lineage Edges</div><div class="delta">↑ 32 synced today</div></div>
+          <div class="card kpi span-3"><div class="kpi-icon">A</div><div class="kpi-value">5.6s</div><div class="kpi-name">AI Analysis Batch</div><div class="delta">↓ 41% runtime</div></div>
+
+          <div class="card span-7">
+            <div class="card-hd"><div><div class="card-title">Business Activity Trend</div><div class="card-sub">Realtime query result rendered as clean analytical cards</div></div><span class="pill">Last 7 days</span></div>
+            <div class="chart">
+              <div class="bar" style="height:42%" data-label="Mon"></div>
+              <div class="bar" style="height:58%" data-label="Tue"></div>
+              <div class="bar" style="height:76%" data-label="Wed"></div>
+              <div class="bar" style="height:64%" data-label="Thu"></div>
+              <div class="bar" style="height:88%" data-label="Fri"></div>
+              <div class="bar" style="height:72%" data-label="Sat"></div>
+              <div class="bar" style="height:94%" data-label="Sun"></div>
+            </div>
+          </div>
+
+          <div class="card span-5">
+            <div class="card-hd"><div><div class="card-title">Customer Labels</div><div class="card-sub">Softer colors, consistent token style, readable counts</div></div></div>
+            <div class="tag-cloud">
+              <span class="tag amber">High Net Worth 128</span>
+              <span class="tag blue">Fund Investor 342</span>
+              <span class="tag green">Mobile Active 1,204</span>
+              <span class="tag rose">Loan Risk Watch 37</span>
+              <span class="tag violet">Young Professional 518</span>
+              <span class="tag green">Cross-sell Candidate 264</span>
+              <span class="tag blue">Salary Customer 729</span>
+            </div>
+          </div>
+
+          <div class="card span-8">
+            <div class="card-hd"><div><div class="card-title">Lineage Preview</div><div class="card-sub">Rectangular entity nodes, readable table names, soft connector lines</div></div><span class="pill">Depth 3</span></div>
+            <div class="lineage-canvas">
+              <svg viewBox="0 0 820 276" preserveAspectRatio="none">
+                <path d="M190 72 C260 72 265 128 330 136" stroke="#94a3b8" stroke-width="2" fill="none" stroke-dasharray="7 7"/>
+                <path d="M190 206 C260 206 265 148 330 136" stroke="#94a3b8" stroke-width="2" fill="none" stroke-dasharray="7 7"/>
+                <path d="M510 136 C590 136 610 136 650 136" stroke="#1570ef" stroke-width="2.4" fill="none"/>
+              </svg>
+              <div class="table-node n1"><b>pim_item_master</b><small>retail_lineage</small></div>
+              <div class="table-node n2"><b>pos_sku_sales_detail</b><small>retail_lineage</small></div>
+              <div class="table-node main n3"><b>dws_product_sales</b><small>fact table · DWS</small></div>
+              <div class="table-node n4"><b>ads_product_rank</b><small>application layer</small></div>
+            </div>
+          </div>
+
+          <div class="card span-4">
+            <div class="card-hd"><div><div class="card-title">System Health</div><div class="card-sub">Small status table for operational clarity</div></div></div>
+            <table class="data-table">
+              <thead><tr><th>Service</th><th>Status</th><th>Latency</th></tr></thead>
+              <tbody>
+                <tr><td>Doris FE</td><td><span class="status ok">Online</span></td><td>31ms</td></tr>
+                <tr><td>Backend API</td><td><span class="status ok">Online</span></td><td>18ms</td></tr>
+                <tr><td>OpenMetadata</td><td><span class="status warn">Token Check</span></td><td>142ms</td></tr>
+                <tr><td>AI Function</td><td><span class="status ok">Ready</span></td><td>5.6s</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="card span-12">
+            <div class="card-hd"><div><div class="card-title">Recent Sync Results</div><div class="card-sub">Compact table pattern shared by lineage, logs, metrics, and AI pages</div></div></div>
+            <table class="data-table">
+              <thead><tr><th>Time</th><th>Type</th><th>Target Table</th><th>Source Tables</th><th>Result</th><th>Message</th></tr></thead>
+              <tbody>
+                <tr><td>09:42:18</td><td>Table Lineage</td><td>dws_product_sales</td><td>pos_sku_sales_detail, dwd_sku_dim</td><td><span class="status ok">Success</span></td><td>2 upstream edges pushed</td></tr>
+                <tr><td>09:41:56</td><td>Column Lineage</td><td>ads_product_rank.rank_score</td><td>dws_product_sales.net_amount_total</td><td><span class="status ok">Success</span></td><td>Expression captured</td></tr>
+                <tr><td>09:40:03</td><td>Audit Scan</td><td>retail_lineage</td><td>Doris audit log</td><td><span class="status warn">Skipped</span></td><td>Duplicate SQL hash</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

@@ -130,7 +130,7 @@ case "$MODE" in
     validate_db bjmetro
     ;;
   *)
-    echo "Usage: sh init_database.sh [all|core|lineage|regdb|bjmetro|wide|validate]"
+    echo "Usage: sh scripts/init_database.sh [all|core|lineage|regdb|bjmetro|wide|validate]"
     exit 1
     ;;
 esac
