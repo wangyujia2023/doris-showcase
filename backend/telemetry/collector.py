@@ -123,12 +123,9 @@ async def _flush(q: asyncio.Queue, table: str, cols: list):
             break
     if not rows:
         return
-    from backend.doris.connect import execute_many
-    placeholders = ",".join(["%s"] * len(cols))
-    sql = f"INSERT INTO {table} ({','.join(cols)}) VALUES ({placeholders})"
-    args = [tuple(r[c] for c in cols) for r in rows]
+    from backend.doris.connect import stream_load_json
     try:
-        await execute_many(sql, args)
+        await stream_load_json(table, rows, cols)
     except Exception as e:
         logger.warning(f"telemetry flush {table} failed: {e}")
 

@@ -1,4 +1,5 @@
 import logging
+import json
 import re as _re
 import time as _time
 import uuid as _uuid
@@ -6,6 +7,7 @@ from contextlib import asynccontextmanager
 from typing import Dict, List, Optional
 
 import aiomysql
+import httpx
 
 from backend.settings import settings
 from backend.telemetry.collector import emit_span, get_trace_id, get_trace_start
@@ -120,6 +122,48 @@ async def execute_many(sql: str, args_list: List[tuple]) -> int:
                 return cur.rowcount
     except Exception as e:
         logger.warning(f"execute_many: {e}")
+        return 0
+
+
+async def stream_load_json(table: str, rows: List[Dict], columns: List[str]) -> int:
+    if not rows:
+        return 0
+    if not _re.fullmatch(r"[A-Za-z0-9_]+", table):
+        raise ValueError("invalid Doris table name")
+
+    label = f"telemetry_{table}_{int(_time.time() * 1000)}_{_uuid.uuid4().hex[:8]}"
+    url = (
+        f"http://{settings.DORIS_STREAM_LOAD_HOST}:{settings.DORIS_STREAM_LOAD_PORT}"
+        f"/api/{settings.DORIS_DATABASE}/{table}/_stream_load"
+    )
+    headers = {
+        "label": label,
+        "format": "json",
+        "read_json_by_line": "true",
+        "columns": ",".join(columns),
+        "strict_mode": "false",
+        "Expect": "100-continue",
+    }
+    data = "\n".join(
+        json.dumps({col: row.get(col) for col in columns}, ensure_ascii=False, separators=(",", ":"))
+        for row in rows
+    )
+    try:
+        async with httpx.AsyncClient(follow_redirects=True, timeout=15, trust_env=False) as client:
+            resp = await client.put(
+                url,
+                content=data.encode("utf-8"),
+                headers=headers,
+                auth=(settings.DORIS_USER, settings.DORIS_PASSWORD),
+            )
+        resp.raise_for_status()
+        result = resp.json()
+        status = str(result.get("Status", "")).lower()
+        if status not in {"success", "publish timeout"}:
+            raise RuntimeError(result.get("Message") or result)
+        return int(result.get("NumberLoadedRows") or len(rows))
+    except Exception as e:
+        logger.warning(f"stream_load_json {table}: {e}")
         return 0
 
 

@@ -45,7 +45,8 @@ nohup "$NPM_BIN" run preview -- --host "$FRONTEND_HOST" --port "$FRONTEND_PORT" 
   > "$FRONTEND_LOG" 2>&1 &
 cd "$PROJECT_DIR"
 
-sleep 2
+wait_url "backend" "http://127.0.0.1:$BACKEND_PORT/api/system/health" 45 || true
+wait_url "frontend-proxy" "http://127.0.0.1:$FRONTEND_PORT/api/system/health" 45 || true
 bash "$PROJECT_DIR/scripts/healthcheck.sh" || true
 
 echo "Frontend: http://SERVER_IP:$FRONTEND_PORT"

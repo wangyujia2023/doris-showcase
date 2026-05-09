@@ -1,14 +1,18 @@
 <template>
   <div>
     <el-tabs v-model="activeTab" type="card" style="margin-bottom:0">
+      <el-tab-pane :label="t('ut.capOverview')" name="capabilities" />
       <el-tab-pane :label="t('ut.crowdBuild')" name="crowd" />
       <el-tab-pane :label="t('ut.portrait')" name="portrait" />
       <el-tab-pane :label="t('ut.mapPush')" name="map" />
       <el-tab-pane :label="t('ut.tagAnalysis')" name="taganalysis" />
       <el-tab-pane :label="t('ut.wideQuery')" name="wide" />
       <el-tab-pane :label="t('ut.behavior')" name="behavior" />
-      <el-tab-pane :label="t('etl')" name="etl" />
+      <el-tab-pane :label="t('etl')" name="ETL" />
     </el-tabs>
+
+    <!-- ═══════════════════ 能力概览 ═══════════════════ -->
+    <CapabilityOverview v-if="activeTab === 'capabilities'" />
 
     <!-- ═══════════════════ 人群包构建 ═══════════════════ -->
     <div v-if="activeTab === 'crowd'" class="card" style="border-top-left-radius:0">
@@ -592,6 +596,7 @@
 
 <script setup>
 import VChart from 'vue-echarts'
+import CapabilityOverview from '@/components/UserBehavior/CapabilityOverview.vue'
 import { useUserTagAnalysis } from '@/composables/useUserTagAnalysis'
 import { t } from '@/i18n'
 

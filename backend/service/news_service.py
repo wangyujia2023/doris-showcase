@@ -163,18 +163,24 @@ class NewsService:
         where = self._build_where("summarized", 0, article_ids)
         sql_display = f"""-- Doris AI_SUMMARIZE：对金融资讯正文进行高度概括
 -- Resource: default_ai_resource
-UPDATE news_article
-SET ai_summary = AI_SUMMARIZE(content),
-    summarized  = 1,
-    ai_method   = 'DORIS_AI_FUNCTION'
-WHERE {where}"""
+INSERT INTO news_article
+SELECT article_id, publish_ts, title, content, source, sector_tag,
+       AI_SUMMARIZE(content) AS ai_summary, 1 AS summarized,
+       ai_sentiment, sentiment_score, sentiment_done,
+       ai_extract, extracted, 'DORIS_AI_FUNCTION' AS ai_method
+FROM news_article
+WHERE {where}
+QUALIFY ROW_NUMBER() OVER (PARTITION BY article_id ORDER BY publish_ts DESC) = 1"""
 
         rc = await execute_write(f"""
-            UPDATE news_article
-            SET ai_summary = AI_SUMMARIZE(content),
-                summarized  = 1,
-                ai_method   = 'DORIS_AI_FUNCTION'
+            INSERT INTO news_article
+            SELECT article_id, publish_ts, title, content, source, sector_tag,
+                   AI_SUMMARIZE(content) AS ai_summary, 1 AS summarized,
+                   ai_sentiment, sentiment_score, sentiment_done,
+                   ai_extract, extracted, 'DORIS_AI_FUNCTION' AS ai_method
+            FROM news_article
             WHERE {where}
+            QUALIFY ROW_NUMBER() OVER (PARTITION BY article_id ORDER BY publish_ts DESC) = 1
         """)
         return {
             "msg": f"AI_SUMMARIZE 完成，处理 {rc} 篇",
@@ -188,31 +194,44 @@ WHERE {where}"""
         sql_display = f"""-- Doris AI_SENTIMENT：分析情感倾向
 -- 返回值: positive | negative | neutral | mixed
 -- Resource: default_ai_resource
-UPDATE news_article
-SET ai_sentiment  = AI_SENTIMENT(content),
-    sentiment_done = 1,
-    ai_method      = 'DORIS_AI_FUNCTION'
-WHERE {where}"""
+INSERT INTO news_article
+SELECT article_id, publish_ts, title, content, source, sector_tag,
+       ai_summary, summarized, ai_sentiment,
+       CASE ai_sentiment
+           WHEN 'positive' THEN  70
+           WHEN 'negative' THEN -70
+           WHEN 'mixed'    THEN  15
+           ELSE 0
+       END AS sentiment_score,
+       1 AS sentiment_done, ai_extract, extracted, 'DORIS_AI_FUNCTION' AS ai_method
+FROM (
+    SELECT article_id, publish_ts, title, content, source, sector_tag,
+           ai_summary, summarized, AI_SENTIMENT(content) AS ai_sentiment,
+           ai_extract, extracted
+    FROM news_article
+    WHERE {where}
+    QUALIFY ROW_NUMBER() OVER (PARTITION BY article_id ORDER BY publish_ts DESC) = 1
+) t"""
 
-        # Step 1: 情感分类
         rc = await execute_write(f"""
-            UPDATE news_article
-            SET ai_sentiment  = AI_SENTIMENT(content),
-                sentiment_done = 1,
-                ai_method      = 'DORIS_AI_FUNCTION'
-            WHERE {where}
-        """)
-        # Step 2: 根据情感类型映射评分
-        score_where = self._build_where("sentiment_done", 1, article_ids)
-        await execute_write(f"""
-            UPDATE news_article
-            SET sentiment_score = CASE ai_sentiment
-                WHEN 'positive' THEN  70
-                WHEN 'negative' THEN -70
-                WHEN 'mixed'    THEN  15
-                ELSE 0
-            END
-            WHERE {score_where}
+            INSERT INTO news_article
+            SELECT article_id, publish_ts, title, content, source, sector_tag,
+                   ai_summary, summarized, ai_sentiment,
+                   CASE ai_sentiment
+                       WHEN 'positive' THEN  70
+                       WHEN 'negative' THEN -70
+                       WHEN 'mixed'    THEN  15
+                       ELSE 0
+                   END AS sentiment_score,
+                   1 AS sentiment_done, ai_extract, extracted, 'DORIS_AI_FUNCTION' AS ai_method
+            FROM (
+                SELECT article_id, publish_ts, title, content, source, sector_tag,
+                       ai_summary, summarized, AI_SENTIMENT(content) AS ai_sentiment,
+                       ai_extract, extracted
+                FROM news_article
+                WHERE {where}
+                QUALIFY ROW_NUMBER() OVER (PARTITION BY article_id ORDER BY publish_ts DESC) = 1
+            ) t
         """)
         return {
             "msg": f"AI_SENTIMENT 完成，处理 {rc} 篇",
@@ -226,24 +245,24 @@ WHERE {where}"""
         labels_sql = "ARRAY(" + ",".join(f"'{l}'" for l in _EXTRACT_LABELS) + ")"
         sql_display = f"""-- Doris AI_EXTRACT：按标签列表提取结构化信息（返回 JSON）
 -- Resource: default_ai_resource
-UPDATE news_article
-SET ai_extract = AI_EXTRACT(
-        content,
-        {labels_sql}
-    ),
-    extracted = 1,
-    ai_method = 'DORIS_AI_FUNCTION'
-WHERE {where}"""
+INSERT INTO news_article
+SELECT article_id, publish_ts, title, content, source, sector_tag,
+       ai_summary, summarized, ai_sentiment, sentiment_score, sentiment_done,
+       AI_EXTRACT(content, {labels_sql}) AS ai_extract,
+       1 AS extracted, 'DORIS_AI_FUNCTION' AS ai_method
+FROM news_article
+WHERE {where}
+QUALIFY ROW_NUMBER() OVER (PARTITION BY article_id ORDER BY publish_ts DESC) = 1"""
 
         rc = await execute_write(f"""
-            UPDATE news_article
-            SET ai_extract = AI_EXTRACT(
-                    content,
-                    {labels_sql}
-                ),
-                extracted = 1,
-                ai_method = 'DORIS_AI_FUNCTION'
+            INSERT INTO news_article
+            SELECT article_id, publish_ts, title, content, source, sector_tag,
+                   ai_summary, summarized, ai_sentiment, sentiment_score, sentiment_done,
+                   AI_EXTRACT(content, {labels_sql}) AS ai_extract,
+                   1 AS extracted, 'DORIS_AI_FUNCTION' AS ai_method
+            FROM news_article
             WHERE {where}
+            QUALIFY ROW_NUMBER() OVER (PARTITION BY article_id ORDER BY publish_ts DESC) = 1
         """)
         return {
             "msg": f"AI_EXTRACT 完成，处理 {rc} 篇",
@@ -485,43 +504,50 @@ WHERE {where}"""
 
         # Step 1: AI_SUMMARIZE（未概括的）
         r1 = await execute_write(f"""
-            UPDATE news_article
-            SET ai_summary = AI_SUMMARIZE(content),
-                summarized  = 1,
-                ai_method   = 'DORIS_AI_FUNCTION'
+            INSERT INTO news_article
+            SELECT article_id, publish_ts, title, content, source, sector_tag,
+                   AI_SUMMARIZE(content) AS ai_summary, 1 AS summarized,
+                   ai_sentiment, sentiment_score, sentiment_done,
+                   ai_extract, extracted, 'DORIS_AI_FUNCTION' AS ai_method
+            FROM news_article
             WHERE summarized = 0
+            QUALIFY ROW_NUMBER() OVER (PARTITION BY article_id ORDER BY publish_ts DESC) = 1
         """)
         results.append(f"AI_SUMMARIZE: 处理 {r1} 篇")
 
         # Step 2: AI_SENTIMENT（未分析情感的）
         r2 = await execute_write(f"""
-            UPDATE news_article
-            SET ai_sentiment  = AI_SENTIMENT(content),
-                sentiment_done = 1,
-                ai_method      = 'DORIS_AI_FUNCTION'
-            WHERE sentiment_done = 0
+            INSERT INTO news_article
+            SELECT article_id, publish_ts, title, content, source, sector_tag,
+                   ai_summary, summarized, ai_sentiment,
+                   CASE ai_sentiment
+                       WHEN 'positive' THEN  60
+                       WHEN 'negative' THEN -60
+                       WHEN 'mixed'    THEN  15
+                       ELSE 0
+                   END AS sentiment_score,
+                   1 AS sentiment_done, ai_extract, extracted, 'DORIS_AI_FUNCTION' AS ai_method
+            FROM (
+                SELECT article_id, publish_ts, title, content, source, sector_tag,
+                       ai_summary, summarized, AI_SENTIMENT(content) AS ai_sentiment,
+                       ai_extract, extracted
+                FROM news_article
+                WHERE sentiment_done = 0
+                QUALIFY ROW_NUMBER() OVER (PARTITION BY article_id ORDER BY publish_ts DESC) = 1
+            ) t
         """)
         results.append(f"AI_SENTIMENT: 处理 {r2} 篇")
 
-        # Step 2b: 映射情感分数
-        await execute_write("""
-            UPDATE news_article
-            SET sentiment_score = CASE ai_sentiment
-                WHEN 'positive' THEN  60
-                WHEN 'negative' THEN -60
-                WHEN 'mixed'    THEN  15
-                ELSE 0
-            END
-            WHERE sentiment_done = 1 AND sentiment_score IS NULL
-        """)
-
         # Step 3: AI_EXTRACT（未提取标签的）
         r3 = await execute_write(f"""
-            UPDATE news_article
-            SET ai_extract = AI_EXTRACT(content, {labels_sql}),
-                extracted = 1,
-                ai_method = 'DORIS_AI_FUNCTION'
+            INSERT INTO news_article
+            SELECT article_id, publish_ts, title, content, source, sector_tag,
+                   ai_summary, summarized, ai_sentiment, sentiment_score, sentiment_done,
+                   AI_EXTRACT(content, {labels_sql}) AS ai_extract,
+                   1 AS extracted, 'DORIS_AI_FUNCTION' AS ai_method
+            FROM news_article
             WHERE extracted = 0
+            QUALIFY ROW_NUMBER() OVER (PARTITION BY article_id ORDER BY publish_ts DESC) = 1
         """)
         results.append(f"AI_EXTRACT: 处理 {r3} 篇")
 

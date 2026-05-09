@@ -112,3 +112,20 @@ check_url() {
   cat /tmp/doris_showcase_health.err 2>/dev/null || true
   return 1
 }
+
+wait_url() {
+  local name="$1"
+  local url="$2"
+  local max_wait="${3:-30}"
+  local elapsed=0
+  while [ "$elapsed" -lt "$max_wait" ]; do
+    if curl -fsS --max-time 2 "$url" >/dev/null 2>&1; then
+      echo "Ready $name"
+      return 0
+    fi
+    sleep 1
+    elapsed=$((elapsed + 1))
+  done
+  echo "WARN $name not ready after ${max_wait}s: $url"
+  return 1
+}

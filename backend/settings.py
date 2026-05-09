@@ -48,6 +48,9 @@ class Settings:
         # Doris 连接
         self.DORIS_HOST: str = os.getenv("DORIS_HOST", "10.26.20.3")
         self.DORIS_PORT: int = _env_int("DORIS_PORT", "19030")
+        self.DORIS_HTTP_PORT: int = _env_int("DORIS_HTTP_PORT", "18030")
+        self.DORIS_STREAM_LOAD_HOST: str = os.getenv("DORIS_STREAM_LOAD_HOST", self.DORIS_HOST)
+        self.DORIS_STREAM_LOAD_PORT: int = _env_int("DORIS_STREAM_LOAD_PORT", "18041")
         self.DORIS_USER: str = os.getenv("DORIS_USER", "root")
         self.DORIS_PASSWORD: str = os.getenv("DORIS_PASSWORD", "")
         self.DORIS_DATABASE: str = os.getenv("DORIS_DATABASE", "doris_showcase")
