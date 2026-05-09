@@ -1,5 +1,7 @@
 # Doris 4.0 Showcase Platform
 
+English | [中文](README_CN.md)
+
 A full-stack Doris 4.0 demo platform for customer data, metrics analysis, vector image search, data lineage, regulatory reporting, fund research, securities realtime warehouse, manufacturing, and metro operation scenarios.
 
 ## Tech Stack
@@ -42,8 +44,8 @@ BACKEND_PROXY_HOST=127.0.0.1
 FRONTEND_HOST=0.0.0.0
 FRONTEND_PORT=5173
 
-DORIS_HOST=10.26.20.3
-DORIS_PORT=19030
+DORIS_HOST=127.0.0.1
+DORIS_PORT=9030
 DORIS_USER=root
 DORIS_PASSWORD=
 DORIS_DATABASE=doris_showcase
@@ -53,7 +55,7 @@ LINEAGE_DATABASE=lineage_showcase
 UPLOAD_DIR=./uploads
 LOG_DIR=./logs
 
-OPENMETADATA_BASE_URL=http://10.26.20.3:8585/api
+OPENMETADATA_BASE_URL=http://YOUR_OPENMETADATA_HOST:8585/api
 OPENMETADATA_JWT_TOKEN=
 INIT_DATABASE_ON_DEPLOY=false
 DROP_DATABASES=false
@@ -238,7 +240,7 @@ Required `.env` settings:
 
 ```env
 LINEAGE_DATABASE=lineage_showcase
-OPENMETADATA_BASE_URL=http://10.26.20.3:8585/api
+OPENMETADATA_BASE_URL=http://YOUR_OPENMETADATA_HOST:8585/api
 OPENMETADATA_JWT_TOKEN=YOUR_OPENMETADATA_BOT_TOKEN
 ```
 
@@ -330,7 +332,7 @@ If the frontend is blank or keeps loading:
 ## Minimal Server Setup Flow
 
 ```bash
-git clone https://github.com/wangyujia2023/doris-showcase.git
+git clone https://github.com/YOUR_ORG/doris-showcase.git
 cd doris-showcase
 cp .env.example .env
 # edit .env if needed
