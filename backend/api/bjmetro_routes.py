@@ -105,6 +105,14 @@ async def equip_fault_by_line():
 async def equip_maintenance_log():
     return await _equip().maintenance_log()
 
+@router.get("/bjmetro/equipment/fault-trend")
+async def equip_fault_trend():
+    return await _equip().fault_trend()
+
+@router.get("/bjmetro/equipment/device-mttr")
+async def equip_device_mttr():
+    return await _equip().device_mttr()
+
 
 # ── 经营收益 ────────────────────────────────────────────────────────
 @router.get("/bjmetro/revenue/kpi")

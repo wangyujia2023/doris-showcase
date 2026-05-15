@@ -90,11 +90,18 @@
         <div id="bj-punctuality" style="height:260px"></div>
       </el-card>
 
-      <!-- {{ t('bjm.line') }}{{ t('bjm.status') }}表 -->
+      <!-- Line Status 表 -->
       <el-card class="chart-card">
         <template #header><div class="ch">🟢 {{ t('bjm.statusTitle') }}</div></template>
         <el-table :data="lineStatus" size="small" style="width:100%">
-          <el-table-column prop="line_name" :label="t('bjm.line')" width="80"/>
+          <el-table-column :label="t('bjm.line')" width="130">
+            <template #default="{ row }">
+              <div style="display:flex;align-items:center;gap:6px">
+                <span :style="{ display:'inline-block', width:'9px', height:'9px', borderRadius:'50%', background:row.line_color }"></span>
+                <span style="font-size:11px">{{ row.line_name }}</span>
+              </div>
+            </template>
+          </el-table-column>
           <el-table-column :label="t('bjm.status')" width="70">
             <template #default="{ row }">
               <el-tag :type="row.delay_count > 0 ? 'warning' : 'success'" size="small">
@@ -102,12 +109,12 @@
               </el-tag>
             </template>
           </el-table-column>
-          <el-table-column :label="t('bjm.punctuality') || '准点率'" width="70">
+          <el-table-column :label="t('bjm.punctuality') || '准点率'" width="65">
             <template #default="{ row }">
               {{ row.punctuality_rate ? (row.punctuality_rate * 100).toFixed(1) + '%' : '-' }}
             </template>
           </el-table-column>
-          <el-table-column :label="`${t('bjm.passenger')}(万)`" width="70">
+          <el-table-column :label="`${t('bjm.passenger')}(万)`">
             <template #default="{ row }">
               {{ fmtPassengers(row.daily_passengers) }}
             </template>
@@ -135,7 +142,7 @@ const alerts      = ref([])
 const lineStatus  = ref([])
 const loading     = ref(true)
 
-const severityClass = (s) => ({ '严重': 'crit', '警告': 'warn', '信息': 'info' }[s] || 'info')
+const severityClass = (s) => ({ 'Critical': 'crit', 'Warning': 'warn', 'Information': 'info' }[s] || 'info')
 
 // 客流(万) 显示：0 是有效值，null/undefined 才显示 -
 const fmtPassengers = (v) => (v != null ? Math.round(v / 10000) : '-')

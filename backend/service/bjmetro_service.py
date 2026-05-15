@@ -92,12 +92,14 @@ class BJMetroOverviewService:
             WHERE revenue_date=(SELECT MAX(revenue_date) FROM bj_metro_revenue)""")
         total_rev_w = round((row3.get("total_rev") or 0) / 100 / 10000, 1)
 
+        row4 = await bj_query_one("SELECT COUNT(*) AS n FROM bj_metro_lines WHERE status='Operating'")
+
         return {
             "daily_passengers_w": round(passengers / 10000, 1),
             "punctuality_rate":   round(float(row2.get("avg_punct") or 0.994), 4),
             "daily_revenue_w":    total_rev_w,
             "fault_count":        int(row2.get("faults") or 0),
-            "active_lines":       len(LINES),
+            "active_lines":       int(row4.get("n") or 0),
             "active_trains":      int(row2.get("trains") or 0),
         }
 
@@ -141,7 +143,7 @@ class BJMetroOverviewService:
             FROM bj_metro_fault_log f
             LEFT JOIN bj_metro_lines l ON f.line_id=l.line_id
             LEFT JOIN bj_metro_stations s ON f.station_id=s.station_id AND f.line_id=s.line_id
-            WHERE f.status='处理中'
+            WHERE f.status != 'Resolved'
             ORDER BY f.fault_time DESC LIMIT 10""")
         return {"data": rows}
 
@@ -296,8 +298,8 @@ class BJMetroEquipmentService:
     async def equipment_kpi(self) -> Dict:
         row = await bj_query_one("""
             SELECT COUNT(*) AS total_faults,
-                   SUM(CASE WHEN status='处理中' THEN 1 ELSE 0 END) AS open_faults,
-                   SUM(CASE WHEN severity='严重'  THEN 1 ELSE 0 END) AS critical,
+                   SUM(CASE WHEN status != 'Resolved' THEN 1 ELSE 0 END) AS open_faults,
+                   SUM(CASE WHEN severity='Critical'  THEN 1 ELSE 0 END) AS critical,
                    ROUND(AVG(resolve_min), 1) AS avg_resolve_min
             FROM bj_metro_fault_log""")
         return {
@@ -310,7 +312,7 @@ class BJMetroEquipmentService:
     async def fault_distribution(self) -> Dict:
         rows = await bj_query("""
             SELECT device_type, COUNT(*) AS cnt,
-                   SUM(CASE WHEN severity='严重' THEN 1 ELSE 0 END) AS critical_cnt
+                   SUM(CASE WHEN severity='Critical' THEN 1 ELSE 0 END) AS critical_cnt
             FROM bj_metro_fault_log
             GROUP BY device_type ORDER BY cnt DESC""")
         return {"data": rows}
@@ -319,7 +321,7 @@ class BJMetroEquipmentService:
         rows = await bj_query("""
             SELECT f.line_id, l.line_name, l.line_color,
                    COUNT(*) AS total_faults,
-                   SUM(CASE WHEN f.severity='严重' THEN 1 ELSE 0 END) AS critical_cnt,
+                   SUM(CASE WHEN f.severity='Critical' THEN 1 ELSE 0 END) AS critical_cnt,
                    ROUND(AVG(f.resolve_min),1) AS avg_resolve_min
             FROM bj_metro_fault_log f
             JOIN bj_metro_lines l ON f.line_id=l.line_id
@@ -336,7 +338,31 @@ class BJMetroEquipmentService:
             FROM bj_metro_fault_log f
             LEFT JOIN bj_metro_lines l ON f.line_id=l.line_id
             LEFT JOIN bj_metro_stations s ON f.station_id=s.station_id AND f.line_id=s.line_id
-            ORDER BY f.fault_time DESC LIMIT 20""")
+            ORDER BY f.fault_time DESC LIMIT 50""")
+        return {"data": rows}
+
+    async def fault_trend(self) -> Dict:
+        rows = await bj_query("""
+            SELECT DATE(fault_time) AS date,
+                   COUNT(*) AS total,
+                   SUM(CASE WHEN severity='Critical' THEN 1 ELSE 0 END) AS critical,
+                   SUM(CASE WHEN severity='Warning'  THEN 1 ELSE 0 END) AS warning,
+                   SUM(CASE WHEN severity='Information' THEN 1 ELSE 0 END) AS info
+            FROM bj_metro_fault_log
+            WHERE fault_time >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+            GROUP BY DATE(fault_time) ORDER BY date""")
+        return {"data": rows}
+
+    async def device_mttr(self) -> Dict:
+        rows = await bj_query("""
+            SELECT device_type,
+                   COUNT(*) AS total,
+                   ROUND(AVG(resolve_min), 0) AS avg_resolve_min,
+                   ROUND(MIN(resolve_min), 0) AS min_resolve_min,
+                   ROUND(MAX(resolve_min), 0) AS max_resolve_min
+            FROM bj_metro_fault_log
+            WHERE resolve_min IS NOT NULL
+            GROUP BY device_type ORDER BY avg_resolve_min DESC""")
         return {"data": rows}
 
 

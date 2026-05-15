@@ -40,6 +40,11 @@
     </div>
 
     <el-card class="chart-card">
+      <template #header><div class="ch">📊 各线路收入对比（万英镑）</div></template>
+      <div id="bj-rev-byline" style="height:240px"></div>
+    </el-card>
+
+    <el-card class="chart-card">
       <template #header><div class="ch">📋 {{ t('bjm.revenueDetailTitle') }}</div></template>
       <el-table :data="revenueByLine" stripe size="small" style="width:100%">
         <el-table-column :label="t('bjm.line')" width="100">
@@ -100,7 +105,7 @@ onMounted(async () => {
   revTrend.value      = rt.data || []
   ticketTypes.value   = tt.data || []
   revenueByLine.value = rb.data || []
-  renderRevTrend(); renderTicketType()
+  renderRevTrend(); renderTicketType(); renderByLineChart()
 })
 
 const renderRevTrend = () => {
@@ -114,6 +119,22 @@ const renderRevTrend = () => {
       { name: t('bjm.ticketRevShort'), type: 'bar', stack: 'r', data: revTrend.value.map(d => d.ticket_w), itemStyle: { color: '#409eff' } },
       { name: t('bjm.adRevShort'), type: 'bar', stack: 'r', data: revTrend.value.map(d => d.ad_w),     itemStyle: { color: '#67c23a' } },
       { name: t('bjm.commRevShort'), type: 'bar', stack: 'r', data: revTrend.value.map(d => d.comm_w),   itemStyle: { color: '#e6a23c' } },
+    ]
+  })
+}
+
+const renderByLineChart = () => {
+  const sorted = [...revenueByLine.value].sort((a, b) => (+b.ticket_w + +b.ad_w + +b.comm_w) - (+a.ticket_w + +a.ad_w + +a.comm_w))
+  renderChart('bj-rev-byline', {
+    tooltip: { trigger: 'axis' },
+    legend: { bottom: 0, textStyle: { fontSize: 11 } },
+    grid: { left: 90, right: 20, top: 20, bottom: 40 },
+    xAxis: { type: 'value', axisLabel: { color: '#999', fontSize: 11 }, splitLine: { lineStyle: { color: '#f0f2f5' } } },
+    yAxis: { type: 'category', data: sorted.map(d => d.line_name), axisLabel: { color: '#64748b', fontSize: 11 } },
+    series: [
+      { name: t('bjm.ticketRevShort'), type: 'bar', stack: 'r', data: sorted.map(d => +d.ticket_w), itemStyle: { color: '#409eff' } },
+      { name: t('bjm.adRevShort'),     type: 'bar', stack: 'r', data: sorted.map(d => +d.ad_w),     itemStyle: { color: '#67c23a' } },
+      { name: t('bjm.commRevShort'),   type: 'bar', stack: 'r', data: sorted.map(d => +d.comm_w),   itemStyle: { color: '#e6a23c', borderRadius: [0,3,3,0] } },
     ]
   })
 }

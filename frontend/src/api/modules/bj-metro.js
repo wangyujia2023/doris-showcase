@@ -1,10 +1,7 @@
-import { http, httpBench, httpFast, httpLong } from '../http'
+import { http } from '../http'
 
-// ── 北京地铁运营分析 ───────────────────────────────────────────────
+// ── London Underground (TfL) operations ──────────────────────────
 export const bjMetroApi = {
-  init:  () => http.post('/bjmetro/init'),
-  seed:  () => http.post('/bjmetro/seed'),
-
   // 运营总览（合并接口）
   overviewAll:        () => http.get('/bjmetro/overview/all'),
   overviewKpi:        () => http.get('/bjmetro/overview/kpi'),
@@ -31,6 +28,8 @@ export const bjMetroApi = {
   equipFaultDist:     () => http.get('/bjmetro/equipment/fault-dist'),
   equipFaultByLine:   () => http.get('/bjmetro/equipment/fault-by-line'),
   equipMaintLog:      () => http.get('/bjmetro/equipment/maintenance-log'),
+  equipFaultTrend:    () => http.get('/bjmetro/equipment/fault-trend'),
+  equipDeviceMttr:    () => http.get('/bjmetro/equipment/device-mttr'),
 
   // 经营收益
   revenueKpi:         () => http.get('/bjmetro/revenue/kpi'),

@@ -12338,6 +12338,23 @@ INSERT INTO `bj_metro_fault_log` (fault_id,fault_time,line_id,station_id,device_
   ('F00179','2026-04-20 20:53:00','PIC','PIC020','Escalator','Power Outage','Warning','Earl''s Court station Escalator: Power Outage detected, maintenance logged','2026-04-20 22:23:00',90,'Resolved','Taylor'),
   ('F00180','2026-04-26 12:12:34','PIC','PIC033','Escalator','Cooling Failure','Information','Leicester Square station Escalator: Cooling Failure detected, maintenance logged','2026-04-26 14:25:34',133,'Resolved','Brown');
 
+INSERT INTO `bj_metro_fault_log` (fault_id,fault_time,line_id,station_id,device_type,fault_type,severity,description,resolve_time,resolve_min,status,handler) VALUES
+  ('F00181','2026-05-15 06:23:11','CEN','CEN028','Signal System','Signal Delay','Critical','Bank station Signal System: Signal Delay causing service disruption, engineers on site',NULL,NULL,'Processing','Johnson'),
+  ('F00182','2026-05-15 07:41:05','JUB','JUB013','Track Circuit','Power Failure','Critical','London Bridge station Track Circuit: Power Failure, line suspended between stations',NULL,NULL,'Processing','Davies'),
+  ('F00183','2026-05-15 08:03:47','NOR','NOR023','Platform Screen Door','Door Control Fault','Critical','Bank station Platform Screen Door: door fault blocking service, maintenance dispatched',NULL,NULL,'Processing','Johnson'),
+  ('F00184','2026-05-15 06:55:30','ELZ','ELZ020','Power Supply','Power Outage','Warning','Paddington station Power Supply: partial outage, backup running',NULL,NULL,'Processing','Smith'),
+  ('F00185','2026-05-15 07:28:14','PIC','PIC042','Escalator','Drive Chain Break','Warning','King''s Cross St. Pancras station Escalator: out of service, passengers using stairs',NULL,NULL,'Processing','Brown'),
+  ('F00186','2026-05-15 08:47:22','VIC','VIC007','Ticket Gate','Gate Jam','Warning','Victoria station Ticket Gate: 3 gates blocked, queues forming at barriers',NULL,NULL,'Processing','Williams'),
+  ('F00187','2026-05-15 09:12:05','MET','MET018','HVAC','Cooling Failure','Warning','Liverpool Street station HVAC: ventilation reduced, temperatures elevated',NULL,NULL,'Processing','Taylor'),
+  ('F00188','2026-05-15 09:33:40','BKL','BKL012','Lift','Motor Overheat','Warning','Oxford Circus station Lift: out of service, accessibility affected',NULL,NULL,'Processing','Jones'),
+  ('F00189','2026-05-15 07:05:55','DIS','DIS042','CCTV','Sensor Failure','Information','Earl''s Court station CCTV: camera offline, maintenance scheduled',NULL,NULL,'Processing','Davies'),
+  ('F00190','2026-05-15 08:22:18','CIR','CIR014','PA System','Connectivity Issue','Information','Paddington station PA System: announcements intermittent, engineers investigating',NULL,NULL,'Processing','Brown'),
+  ('F00191','2026-05-14 22:15:40','HAM','HAM009','Signal System','Emergency Stop','Critical','Hammersmith station Signal System: emergency stop triggered, safety check underway',NULL,NULL,'Processing','Johnson'),
+  ('F00192','2026-05-14 23:41:06','WAT','WAT001','Track Circuit','Overload','Warning','Waterloo station Track Circuit: load spike detected, monitoring',NULL,NULL,'Processing','Smith'),
+  ('F00193','2026-05-15 00:08:53','JUB','JUB019','Platform Screen Door','Emergency Stop','Warning','Westminster station Platform Screen Door: interlock fault, service delayed',NULL,NULL,'Processing','Taylor'),
+  ('F00194','2026-05-15 05:30:27','NOR','NOR001','Escalator','Motor Overheat','Information','Morden station Escalator: motor temperature high, running at reduced speed',NULL,NULL,'Processing','Williams'),
+  ('F00195','2026-05-15 10:05:14','CEN','CEN035','Power Supply','Sensor Failure','Information','Stratford station Power Supply: monitoring sensor offline, manual checks in progress',NULL,NULL,'Processing','Jones');
+
 INSERT INTO `bj_metro_revenue` (revenue_date,line_id,ticket_revenue,subsidy_amount,ticket_count,ad_revenue,commercial_revenue) VALUES
   ('2026-04-16','BKL',89223405,21286434,213965,6163247,2609358),
   ('2026-04-16','CEN',332779828,90524176,751196,19881715,6288791),
