@@ -27,15 +27,25 @@ requirements.txt      Backend Python dependencies
 
 ## Configuration
 
-All runtime configuration is centralized in the root `.env` file.
+### Web Setup Wizard (recommended)
 
-Create it from the template:
+On first launch, open the frontend in your browser and click **System Config → Init Wizard**. The three-step wizard covers:
+
+1. **Basic** — upload/log directories and optional LLM provider (Gemini, OpenAI, Qwen, DeepSeek, or custom endpoint + API key).
+2. **Connection** — Doris host, port, user, password, and database. Use the built-in test button to verify before saving.
+3. **Import** — one-click demo data import into the configured database.
+
+The wizard writes all settings to the root `.env` file and they persist across restarts.
+
+### Manual configuration
+
+For headless or CI deployments, copy the template and edit directly:
 
 ```bash
 cp .env.example .env
 ```
 
-Common settings:
+Key settings:
 
 ```env
 BACKEND_HOST=0.0.0.0
@@ -49,8 +59,6 @@ DORIS_PORT=9030
 DORIS_USER=root
 DORIS_PASSWORD=
 DORIS_DATABASE=doris_showcase
-DORIS_AI_RESOURCE=gemini_llm
-LINEAGE_DATABASE=lineage_showcase
 
 UPLOAD_DIR=./uploads
 LOG_DIR=./logs
@@ -63,39 +71,30 @@ DROP_DATABASES=false
 
 Notes:
 
-- `BACKEND_HOST` is the backend bind address. `0.0.0.0` is suitable for servers.
-- `BACKEND_PROXY_HOST` is the frontend proxy target host. Use `127.0.0.1`, not `0.0.0.0`.
-- `BACKEND_PORT` defaults to `27713`.
-- `FRONTEND_PORT` defaults to `5173`.
+- `BACKEND_PROXY_HOST` is the Vite proxy target. Use `127.0.0.1`, not `0.0.0.0`.
 - `UPLOAD_DIR` stores uploaded vector-search images. Scripts create this directory automatically.
-- `LOG_DIR` stores backend/frontend logs. Defaults to `./logs`.
 - `INIT_DATABASE_ON_DEPLOY=true` makes `deploy.sh` run `scripts/init_database.sh all` before startup.
 - `DROP_DATABASES=true` makes `scripts/init_database.sh` drop managed demo databases before recreating them.
-- `DORIS_AI_RESOURCE` sets `default_ai_resource` for every backend Doris session. It is required only for Doris AI Function pages.
 - OpenMetadata settings are required only for lineage synchronization to OpenMetadata.
 
 ## Database Initialization
 
-SQL files are grouped by database under `sql/by_database/`.
+SQL files are grouped by scenario under `sql/by_database/`, but all demo tables are imported into the single configured `DORIS_DATABASE`.
 
-Databases:
+Default database:
 
-- `doris_showcase`: main business demo database
-- `lineage_showcase`: retail lineage demo database
-- `regdb`: regulatory reporting demo database
-- `bjmetro`: metro operation demo database
+- `doris_showcase`: all business, regulatory, metro, and lineage demo tables
 
-Initialize all databases:
+Initialize all demo tables:
 
 ```bash
 sh scripts/init_database.sh
 ```
 
-Initialize one database:
+Initialize one scenario into the same database:
 
 ```bash
 sh scripts/init_database.sh core
-sh scripts/init_database.sh lineage
 sh scripts/init_database.sh regdb
 sh scripts/init_database.sh bjmetro
 ```
@@ -108,48 +107,11 @@ Validate existing databases without importing data:
 sh scripts/init_database.sh validate
 ```
 
-Drop and recreate managed demo databases:
+Drop and recreate the managed demo database:
 
 ```bash
 DROP_DATABASES=true sh scripts/init_database.sh all
 ```
-
-## Doris AI Function Resource
-
-This project does not create Doris AI resources automatically.
-
-Before using pages that call Doris AI functions, such as News AI Analysis, configure an AI resource in Doris once. After the resource is created, set it as the default resource for the Doris session or user.
-
-Example:
-
-```sql
-CREATE RESOURCE 'gemini_llm'
-PROPERTIES (
-    'type'             = 'ai',
-    'ai.provider_type' = 'gemini',
-    'ai.model_name'    = 'gemini-2.5-flash',
-    'ai.endpoint'      = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent',
-    'ai.api_key'       = '<YOUR_API_KEY>'
-);
-
-SET default_ai_resource = 'gemini_llm';
-```
-
-Set the same resource name in `.env`:
-
-```env
-DORIS_AI_RESOURCE=gemini_llm
-```
-
-The backend will run `SET default_ai_resource = 'gemini_llm'` for its Doris sessions. After that, Doris AI functions can be called without passing the resource name explicitly, for example:
-
-```sql
-SELECT AI_SUMMARIZE(content) FROM news_article LIMIT 1;
-SELECT AI_SENTIMENT(content) FROM news_article LIMIT 1;
-SELECT AI_EXTRACT(content, 'Event Type, Affected Sector') FROM news_article LIMIT 1;
-```
-
-Do not commit real API keys to this repository. Keep them only in Doris resource configuration or your own secure operations system.
 
 ## One-Click Deployment
 
@@ -334,10 +296,8 @@ If the frontend is blank or keeps loading:
 ```bash
 git clone https://github.com/YOUR_ORG/doris-showcase.git
 cd doris-showcase
-cp .env.example .env
-# edit .env if needed
-sh scripts/init_database.sh
 sh deploy.sh
+# open http://SERVER_IP:5173 → System Config → Init Wizard → configure and import
 ```
 
 

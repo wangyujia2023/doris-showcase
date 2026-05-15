@@ -27,9 +27,19 @@ requirements.txt      后端 Python 依赖
 
 ## 环境配置
 
-所有运行时配置集中在根目录 `.env` 文件中。
+### 页面向导配置（推荐）
 
-从模板创建：
+首次启动后，在浏览器打开前端，点击 **系统配置 → 初始化向导**，按三步完成配置：
+
+1. **基础配置** — 上传/日志目录，以及可选的 LLM 提供商（Gemini、OpenAI、Qwen、DeepSeek 或自定义端点 + API Key）。
+2. **连接配置** — Doris 的主机、端口、用户名、密码和数据库名，可通过内置测试按钮验证连通性后保存。
+3. **数据导入** — 一键导入全部演示数据到已配置的数据库。
+
+向导保存的配置写入根目录 `.env` 文件，重启后自动读取，永久生效。
+
+### 手动配置
+
+无界面或 CI/CD 部署场景，可直接编辑配置文件：
 
 ```bash
 cp .env.example .env
@@ -49,8 +59,6 @@ DORIS_PORT=9030
 DORIS_USER=root
 DORIS_PASSWORD=
 DORIS_DATABASE=doris_showcase
-DORIS_AI_RESOURCE=gemini_llm
-LINEAGE_DATABASE=lineage_showcase
 
 UPLOAD_DIR=./uploads
 LOG_DIR=./logs
@@ -63,41 +71,32 @@ DROP_DATABASES=false
 
 配置说明：
 
-- `BACKEND_HOST`：后端监听地址，服务器部署填 `0.0.0.0`。
 - `BACKEND_PROXY_HOST`：前端 Vite 代理的目标地址，填 `127.0.0.1`，不要填 `0.0.0.0`。
-- `BACKEND_PORT`：默认 `27713`。
-- `FRONTEND_PORT`：默认 `5173`。
 - `UPLOAD_DIR`：向量图片检索上传目录，脚本会自动创建。
-- `LOG_DIR`：后端和前端日志目录，默认 `./logs`。
 - `INIT_DATABASE_ON_DEPLOY=true`：`deploy.sh` 启动前自动执行数据库初始化。
 - `DROP_DATABASES=true`：初始化脚本会先删除再重建受管数据库。
-- `DORIS_AI_RESOURCE`：配置 Doris AI 函数所用的 AI Resource 名称，仅 AI 功能页面需要。
 - OpenMetadata 相关配置仅用于血缘同步功能，不配置则本地血缘页面仍可正常显示。
 
 ## 数据库初始化
 
-SQL 文件按数据库分组存放在 `sql/by_database/`。
+SQL 文件按场景分组存放在 `sql/by_database/`，但所有演示表都会导入同一个 `DORIS_DATABASE`。
 
-涉及的数据库：
+默认数据库：
 
-- `doris_showcase`：主业务演示数据库（用户画像、CDP、证券、基金、制造等）
-- `lineage_showcase`：零售血缘演示数据库
-- `regdb`：监管报送演示数据库
-- `bjmetro`：地铁运营演示数据库
+- `doris_showcase`：承载用户画像、CDP、证券、基金、制造、监管、地铁、血缘等全部演示表
 
-初始化全部数据库：
+初始化全部演示表：
 
 ```bash
 sh scripts/init_database.sh
 ```
 
-初始化单个数据库：
+初始化单个场景到同一个库：
 
 ```bash
 sh scripts/init_database.sh core      # doris_showcase
-sh scripts/init_database.sh lineage   # lineage_showcase
-sh scripts/init_database.sh regdb     # regdb
-sh scripts/init_database.sh bjmetro   # bjmetro
+sh scripts/init_database.sh regdb     # 监管表
+sh scripts/init_database.sh bjmetro   # 地铁表
 ```
 
 仅校验数据库（不导入数据）：
@@ -106,44 +105,11 @@ sh scripts/init_database.sh bjmetro   # bjmetro
 sh scripts/init_database.sh validate
 ```
 
-删除并重建受管数据库：
+删除并重建受管演示库：
 
 ```bash
 DROP_DATABASES=true sh scripts/init_database.sh all
 ```
-
-## Doris AI 函数配置
-
-本项目不会自动创建 AI Resource。使用新闻 AI 分析等页面前，需在 Doris 中预先创建 AI Resource：
-
-```sql
-CREATE RESOURCE 'gemini_llm'
-PROPERTIES (
-    'type'             = 'ai',
-    'ai.provider_type' = 'gemini',
-    'ai.model_name'    = 'gemini-2.5-flash',
-    'ai.endpoint'      = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent',
-    'ai.api_key'       = '<YOUR_API_KEY>'
-);
-
-SET default_ai_resource = 'gemini_llm';
-```
-
-在 `.env` 中配置同名 Resource：
-
-```env
-DORIS_AI_RESOURCE=gemini_llm
-```
-
-后端会在每次 Doris 会话中自动执行 `SET default_ai_resource = 'gemini_llm'`，之后即可直接调用 AI 函数：
-
-```sql
-SELECT AI_SUMMARIZE(content) FROM news_article LIMIT 1;
-SELECT AI_SENTIMENT(content) FROM news_article LIMIT 1;
-SELECT AI_EXTRACT(content, 'Event Type, Affected Sector') FROM news_article LIMIT 1;
-```
-
-**请勿将真实 API Key 提交到代码仓库。**
 
 ## 一键部署
 
@@ -318,10 +284,8 @@ curl http://127.0.0.1:5173/api/system/health
 ```bash
 git clone https://github.com/YOUR_ORG/doris-showcase.git
 cd doris-showcase
-cp .env.example .env
-# 按实际环境修改 .env
-sh scripts/init_database.sh
 sh deploy.sh
+# 打开 http://服务器IP:5173 → 系统配置 → 初始化向导 → 配置连接并导入数据
 ```
 
 ## 运维命令速查
