@@ -3,6 +3,7 @@
     <!-- 子导航 Tab -->
     <div class="sub-nav">
       <div class="sub-nav-left">
+        <el-button size="small" :loading="initing" @click="initData">{{ t('metro.initData') }}</el-button>
       </div>
       <div class="sn-tabs">
         <div v-for="tab in TABS" :key="tab.key"
@@ -31,6 +32,8 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { t, locale } from '@/i18n'
+import { bjMetroApi } from '@/api'
+import { ElMessage } from 'element-plus'
 import OverviewTab  from '@/components/bjmetro/OverviewTab.vue'
 import FlowTab      from '@/components/bjmetro/FlowTab.vue'
 import TrainTab     from '@/components/bjmetro/TrainTab.vue'
@@ -47,9 +50,24 @@ const TABS = computed(() => [
   { key: 'arch',      label: `🏗️ ${t('metro.tabArch')}` },
 ])
 
-const activeTab  = ref('overview')
+const activeTab = ref('overview')
+const initing   = ref(false)
 
 const switchTab = (key) => { activeTab.value = key }
+
+async function initData() {
+  initing.value = true
+  try {
+    await bjMetroApi.init()
+    await bjMetroApi.seed()
+    ElMessage.success(t('metro.initOk'))
+    window.location.reload()
+  } catch (e) {
+    ElMessage.error(t('metro.initFail'))
+  } finally {
+    initing.value = false
+  }
+}
 </script>
 
 <style scoped>
