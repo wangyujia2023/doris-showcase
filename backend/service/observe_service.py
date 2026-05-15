@@ -1,6 +1,7 @@
 import asyncio
 from backend.log_store import log_store, db_call_store
 from backend.doris.connect import execute_query, execute_one, execute_write
+from backend.settings import settings
 
 
 class ObserveService:
@@ -57,7 +58,37 @@ class ObserveService:
                         "top_paths": top_paths or [], "source": "doris"}
         except Exception:
             pass
-        return {**log_store.get_stats(), "source": "memory"}
+        all_logs = log_store.get_all()
+        level_cnt: dict = {}
+        svc_cnt: dict = {}
+        slow = 0
+        total_dur = 0.0
+        for l in all_logs:
+            lv = l.get("level", "INFO"); level_cnt[lv] = level_cnt.get(lv, 0) + 1
+            sv = l.get("service", ""); svc_cnt[sv] = svc_cnt.get(sv, 0) + 1
+            dur = l.get("duration_ms", 0) or 0; total_dur += dur
+            if dur > 1000: slow += 1
+        n = len(all_logs)
+        path_cnt: dict = {}
+        for l in all_logs:
+            p = l.get("path", "")
+            if p not in path_cnt: path_cnt[p] = {"count": 0, "total": 0.0}
+            path_cnt[p]["count"] += 1; path_cnt[p]["total"] += l.get("duration_ms", 0) or 0
+        top_paths = sorted(
+            [{"path": k, "count": v["count"], "avg_duration": round(v["total"]/v["count"], 2)}
+             for k, v in path_cnt.items()], key=lambda x: -x["count"])[:10]
+        return {
+            "total": n,
+            "errors": level_cnt.get("ERROR", 0),
+            "warns":  level_cnt.get("WARN", 0),
+            "slow":   slow,
+            "avg_duration_ms": round(total_dur / n, 2) if n else 0,
+            "avg_db_ms": 0,
+            "level_counts": [{"level": k, "cnt": v} for k, v in sorted(level_cnt.items(), key=lambda x: -x[1])],
+            "svc_counts":   [{"service": k, "cnt": v} for k, v in sorted(svc_cnt.items(), key=lambda x: -x[1])],
+            "top_paths": top_paths,
+            "source": "memory",
+        }
 
     async def traces(self, page=1, size=20):
         try:
@@ -67,7 +98,7 @@ class ObserveService:
                 "db_time_ms,level,log_time AS start_time "
                 "FROM sys_logs ORDER BY log_time DESC LIMIT %s OFFSET %s", (size, offset)
             )
-            if rows is not None:
+            if rows:
                 tids = [r["trace_id"] for r in rows]
                 span_counts = {}
                 if tids:
@@ -166,54 +197,17 @@ class ObserveService:
                 "services": list(dict.fromkeys(s["service"] for s in spans)), "spans": spans}
 
     async def classify_logs(self):
-        """用 AI_CLASSIFY(qwen_llm) 对未打标签的 sys_logs.message 打标签，写回 log_tag"""
+        """用 Doris AI_CLASSIFY 对未打标签的 sys_logs.message 打标签，写回 log_tag"""
         try:
+            resource = settings.DORIS_AI_RESOURCE or "llm_resource"
             sql = """UPDATE sys_logs
-                SET log_tag = AI_CLASSIFY('qwen_llm', message,
+                SET log_tag = AI_CLASSIFY(%s, message,
                     ARRAY('慢请求','服务异常','正常请求','数据库超时','认证失败','业务错误','高频访问','安全告警'))
                 WHERE log_tag IS NULL OR log_tag = ''"""
-            affected = await execute_write(sql)
+            affected = await execute_write(sql, (resource,))
             return {"status": "success", "updated": affected}
         except Exception as e:
             return {"status": "error", "message": str(e)}
-
-    async def tag_stats(self):
-        """对 sys_logs.log_tag 做统计分析"""
-        try:
-            tag_dist, level_tag, svc_tag, perf_tag = await asyncio.gather(
-                execute_query(
-                    "SELECT log_tag, COUNT(*) AS cnt,"
-                    "ROUND(COUNT(*)*100.0/SUM(COUNT(*)) OVER(),2) AS pct "
-                    "FROM sys_logs WHERE log_tag IS NOT NULL AND log_tag!='' "
-                    "GROUP BY log_tag ORDER BY cnt DESC"),
-                execute_query(
-                    "SELECT log_tag, level, COUNT(*) AS cnt "
-                    "FROM sys_logs WHERE log_tag IS NOT NULL AND log_tag!='' "
-                    "GROUP BY log_tag, level ORDER BY log_tag, cnt DESC"),
-                execute_query(
-                    "SELECT log_tag, service, COUNT(*) AS cnt "
-                    "FROM sys_logs WHERE log_tag IS NOT NULL AND log_tag!='' "
-                    "GROUP BY log_tag, service ORDER BY log_tag, cnt DESC"),
-                execute_query(
-                    "SELECT log_tag,ROUND(AVG(duration_ms),2) AS avg_ms,"
-                    "MAX(duration_ms) AS max_ms, COUNT(*) AS cnt "
-                    "FROM sys_logs WHERE log_tag IS NOT NULL AND log_tag!='' "
-                    "GROUP BY log_tag ORDER BY avg_ms DESC"),
-            )
-            total_tagged = await execute_one(
-                "SELECT COUNT(*) AS tagged, "
-                "(SELECT COUNT(*) FROM sys_logs) AS total FROM sys_logs "
-                "WHERE log_tag IS NOT NULL AND log_tag!=''")
-            return {
-                "tag_distribution": tag_dist,
-                "level_by_tag": level_tag,
-                "svc_by_tag": svc_tag,
-                "perf_by_tag": perf_tag,
-                "tagged": total_tagged.get("tagged", 0) if total_tagged else 0,
-                "total": total_tagged.get("total", 0) if total_tagged else 0,
-            }
-        except Exception as e:
-            return {"tag_distribution": [], "level_by_tag": [], "svc_by_tag": [], "perf_by_tag": [], "tagged": 0, "total": 0}
 
     async def query_logs(self, search=None, level=None, service=None, page=1, size=50):
         return await self.logs(path=search, level=level, service=service, page=page, size=size)

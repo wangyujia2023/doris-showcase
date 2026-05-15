@@ -19,7 +19,6 @@ Project: $PROJECT_DIR
 Backend port: $BACKEND_PORT
 Frontend port: $FRONTEND_PORT
 Main DB: $DORIS_DATABASE
-Lineage DB: $LINEAGE_DATABASE
 Upload dir: $UPLOAD_DIR
 Log dir: $LOG_DIR
 INFO

@@ -382,24 +382,6 @@ INSERT INTO `service_log` (`trace_id`, `span_id`, `request_time`, `method`, `pat
   ('service__004', 'service__004', '2025-04-04 09:04:00', 'service_log_meth', 'service_log_path_4', 4, 0.2000, 'service_log_ip_address_4', 'service_log_user_agent_4', 'English mock description for service_log row 4', '["demo","english","mock"]'),
   ('service__005', 'service__005', '2025-04-05 09:05:00', 'service_log_meth', 'service_log_path_5', 5, 0.2500, 'service_log_ip_address_5', 'service_log_user_agent_5', 'English mock description for service_log row 5', '["demo","english","mock"]');
 
--- Table: sys_logs
-TRUNCATE TABLE `sys_logs`;
-INSERT INTO `sys_logs` (`trace_id`, `log_time`, `level`, `service`, `method`, `path`, `status_code`, `duration_ms`, `db_time_ms`, `message`, `log_tag`) VALUES
-  ('sys_logs_001', '2025-04-01 09:01:00.000', 'L1', 'sys_logs_service_1', 'sys_logs_m', 'sys_logs_path_1', 1, 0.0500, 1.1100, 'English mock description for sys_logs row 1', 'sys_logs_log_tag_1'),
-  ('sys_logs_002', '2025-04-02 09:02:00.000', 'L2', 'sys_logs_service_2', 'sys_logs_m', 'sys_logs_path_2', 2, 0.1000, 2.2200, 'English mock description for sys_logs row 2', 'sys_logs_log_tag_2'),
-  ('sys_logs_003', '2025-04-03 09:03:00.000', 'L3', 'sys_logs_service_3', 'sys_logs_m', 'sys_logs_path_3', 3, 0.1500, 3.3300, 'English mock description for sys_logs row 3', 'sys_logs_log_tag_3'),
-  ('sys_logs_004', '2025-04-04 09:04:00.000', 'L4', 'sys_logs_service_4', 'sys_logs_m', 'sys_logs_path_4', 4, 0.2000, 4.4400, 'English mock description for sys_logs row 4', 'sys_logs_log_tag_4'),
-  ('sys_logs_005', '2025-04-05 09:05:00.000', 'L5', 'sys_logs_service_5', 'sys_logs_m', 'sys_logs_path_5', 5, 0.2500, 5.5500, 'English mock description for sys_logs row 5', 'sys_logs_log_tag_5');
-
--- Table: sys_spans
-TRUNCATE TABLE `sys_spans`;
-INSERT INTO `sys_spans` (`trace_id`, `span_id`, `parent_span_id`, `span_time`, `service`, `operation`, `offset_ms`, `duration_ms`, `status`, `db_query`) VALUES
-  ('sys_span_001', 'sys_span_001', 'sys_span_001', '2025-04-01 09:01:00.000', 'sys_spans_service_1', 'sys_spans_operation_1', 1.1100, 0.0500, 'Normal', 'sys_spans_db_query_1'),
-  ('sys_span_002', 'sys_span_002', 'sys_span_002', '2025-04-02 09:02:00.000', 'sys_spans_service_2', 'sys_spans_operation_2', 2.2200, 0.1000, 'Running', 'sys_spans_db_query_2'),
-  ('sys_span_003', 'sys_span_003', 'sys_span_003', '2025-04-03 09:03:00.000', 'sys_spans_service_3', 'sys_spans_operation_3', 3.3300, 0.1500, 'Success', 'sys_spans_db_query_3'),
-  ('sys_span_004', 'sys_span_004', 'sys_span_004', '2025-04-04 09:04:00.000', 'sys_spans_service_4', 'sys_spans_operation_4', 4.4400, 0.2000, 'Active', 'sys_spans_db_query_4'),
-  ('sys_span_005', 'sys_span_005', 'sys_span_005', '2025-04-05 09:05:00.000', 'sys_spans_service_5', 'sys_spans_operation_5', 5.5500, 0.2500, 'Completed', 'sys_spans_db_query_5');
-
 -- Table: tag_dict
 TRUNCATE TABLE tag_dict;
 INSERT INTO tag_dict (`tag_id`, `tag_category`, `tag_name`, `tag_label`, `tag_desc`, `value_type`, `value_options`, `source_table`, `source_field`, `is_ai_tag`, `enable_bitmap`, `status`, `sort_order`, `created_at`) VALUES

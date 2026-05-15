@@ -30,7 +30,7 @@ load_env() {
   DORIS_USER="${DORIS_USER:-root}"
   DORIS_PASSWORD="${DORIS_PASSWORD:-}"
   DORIS_DATABASE="${DORIS_DATABASE:-doris_showcase}"
-  LINEAGE_DATABASE="${LINEAGE_DATABASE:-lineage_showcase}"
+  LINEAGE_DATABASE="${LINEAGE_DATABASE:-$DORIS_DATABASE}"
   PYTHON_BIN="${PYTHON_BIN:-python3}"
   NPM_BIN="${NPM_BIN:-npm}"
   LOG_DIR="$(project_path "${LOG_DIR:-logs}")"

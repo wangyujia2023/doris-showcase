@@ -9,7 +9,8 @@ import aiomysql
 from backend.doris.connect import execute_query, get_conn
 from backend.settings import settings
 
-DB = "bjmetro"
+def _db() -> str:
+    return settings.DORIS_DATABASE
 
 # ── 数据库查询工具 ────────────────────────────────────────────────────────────
 
@@ -17,7 +18,7 @@ async def bj_query(sql: str) -> List[Dict]:
     try:
         async with get_conn() as conn:
             async with conn.cursor(aiomysql.DictCursor) as cur:
-                await cur.execute(f"USE {DB}")
+                await cur.execute(f"USE {_db()}")
                 try:
                     await cur.execute(sql)
                     rows = await cur.fetchall()
@@ -38,7 +39,7 @@ async def bj_exec(sql: str):
     try:
         async with get_conn() as conn:
             async with conn.cursor() as cur:
-                await cur.execute(f"USE {DB}")
+                await cur.execute(f"USE {_db()}")
                 try:
                     await cur.execute(sql)
                     await conn.commit()
@@ -54,7 +55,7 @@ async def bj_exec_many(sql: str, data: list):
     try:
         async with get_conn() as conn:
             async with conn.cursor() as cur:
-                await cur.execute(f"USE {DB}")
+                await cur.execute(f"USE {_db()}")
                 try:
                     await cur.executemany(sql, data)
                     await conn.commit()
@@ -205,11 +206,11 @@ class BJMetroInitService:
         executed, skipped = 0, 0
         try:
             # 先用无上下文依赖的方式建库
-            await execute_query(f"CREATE DATABASE IF NOT EXISTS {DB}")
+            await execute_query(f"CREATE DATABASE IF NOT EXISTS {_db()}")
 
             async with get_conn() as conn:
                 async with conn.cursor() as cur:
-                    await cur.execute(f"USE {DB}")
+                    await cur.execute(f"USE {_db()}")
                     try:
                         for stmt in stmts:
                             try:

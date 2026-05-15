@@ -1,16 +1,5 @@
 <template>
   <div class="sat-wrap">
-    <!-- 顶部横幅 -->
-    <div class="sat-banner">
-      <el-icon size="20" color="#00d4ff"><Aim /></el-icon>
-      <span class="banner-title">{{ t('satellite.title') }}</span>
-      <el-tag type="danger" size="small" effect="dark">{{ t('satellite.secret') }}</el-tag>
-      <el-tag size="small" effect="dark" style="background:#0a2a4a;border-color:#00d4ff;color:#00d4ff">{{ t('satellite.bigintTs') }}</el-tag>
-      <el-button size="small" type="primary" :loading="initing" @click="initData" style="margin-left:auto">
-        {{ t('satellite.initBtn') }}
-      </el-button>
-    </div>
-
     <!-- 1. 概览卡片 -->
     <div class="overview-row">
       <div class="ov-card" v-for="c in ovCards" :key="c.label" :style="{borderColor:c.color}">
@@ -122,8 +111,7 @@
 
 <script setup>
 import { ref, computed, reactive, onMounted } from 'vue'
-import { Search, Clock, Aim } from '@element-plus/icons-vue'
-import { ElMessage } from 'element-plus'
+import { Search, Clock } from '@element-plus/icons-vue'
 import { use } from 'echarts/core'
 import { CanvasRenderer } from 'echarts/renderers'
 import { PieChart, BarChart } from 'echarts/charts'
@@ -141,7 +129,6 @@ const charts   = ref({})
 const rows     = ref([])
 const total    = ref(0)
 const loading  = ref(false)
-const initing  = ref(false)
 const page     = ref(1)
 const timeRange = ref(null)
 const f = reactive({ satellite_name:'', satellite_type:'', data_type:'', target_type:'', quality_min:null, status:'' })
@@ -254,15 +241,6 @@ async function loadList() {
   } finally { loading.value = false }
 }
 
-async function initData() {
-  initing.value = true
-  try {
-    await satelliteApi.init()
-    ElMessage.success(t('satellite.initDone'))
-    await Promise.all([loadOverview(), loadCharts(), loadList()])
-  } finally { initing.value = false }
-}
-
 async function loadOverview() { overview.value = await satelliteApi.overview() }
 async function loadCharts()   { charts.value   = await satelliteApi.charts()   }
 
@@ -273,8 +251,6 @@ onMounted(async () => {
 
 <style scoped>
 .sat-wrap { display:flex; flex-direction:column; gap:14px; }
-.sat-banner { display:flex; align-items:center; gap:10px; background:#0a1628; border-radius:8px; padding:12px 20px; }
-.banner-title { font-size:15px; font-weight:700; color:#00d4ff; letter-spacing:2px; }
 .overview-row { display:grid; grid-template-columns:repeat(5,1fr); gap:12px; }
 .ov-card { background:#fff; border-radius:8px; padding:16px; text-align:center; border-top:3px solid; box-shadow:0 1px 4px rgba(0,0,0,.06); }
 .ov-val { font-size:26px; font-weight:700; }

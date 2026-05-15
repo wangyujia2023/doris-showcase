@@ -14,7 +14,6 @@ const routes = [
   { path: '/report',        component: () => import('@/views/BankReport.vue'),          meta: { titleKey: 'menu.report' } },
   { path: '/metrics',       component: () => import('@/views/MetricsPlatform.vue'),     meta: { titleKey: 'menu.metrics' } },
   { path: '/observe',       component: () => import('@/views/LogObserve.vue'),          meta: { titleKey: 'menu.observe' } },
-  { path: '/log-tag-stats', component: () => import('@/views/LogTagStats.vue'),         meta: { titleKey: 'menu.logTagStats' } },
   { path: '/trace',         component: () => import('@/views/TraceView.vue'),           meta: { titleKey: 'menu.trace' } },
   { path: '/satellite',     component: () => import('@/views/Satellite.vue'),           meta: { titleKey: 'menu.satellite' } },
   { path: '/benchmark',     component: () => import('@/views/Benchmark.vue'),           meta: { titleKey: 'menu.benchmark' } },
@@ -25,6 +24,7 @@ const routes = [
   { path: '/bjmetro',       component: () => import('@/views/BJMetro.vue'),               meta: { titleKey: 'menu.bjmetro' } },
   { path: '/regulatory',    component: () => import('@/views/Regulatory.vue'),             meta: { titleKey: 'menu.regulatory' } },
   { path: '/lineage',       component: () => import('@/views/Lineage.vue'),               meta: { titleKey: 'menu.lineage' } },
+  { path: '/init-wizard',   component: () => import('@/views/InitWizard.vue'),           meta: { titleKey: 'menu.initWizard' } },
   { path: '/config',        component: () => import('@/views/SysConfig.vue'),           meta: { titleKey: 'menu.config' } },
 ]
 

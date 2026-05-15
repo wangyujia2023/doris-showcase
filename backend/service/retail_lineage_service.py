@@ -15,7 +15,7 @@ from backend.settings import settings
 
 class RetailLineageService:
     def __init__(self) -> None:
-        self.db = settings.LINEAGE_DATABASE
+        self.db = settings.DORIS_DATABASE
 
     def _t(self, name: str) -> str:
         return f"{self.db}.{name}"

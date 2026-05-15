@@ -6,15 +6,18 @@ import aiomysql
 from backend.doris.connect import execute_query, get_conn
 from backend.settings import settings
 
-DB  = "regdb"
 ORG = "BANK_DEMO_001"
+
+
+def _db() -> str:
+    return settings.DORIS_DATABASE
 
 # ── DB 工具 ────────────────────────────────────────────────────
 async def rg_query(sql: str) -> List[Dict]:
     try:
         async with get_conn() as conn:
             async with conn.cursor(aiomysql.DictCursor) as cur:
-                await cur.execute(f"USE {DB}")
+                await cur.execute(f"USE {_db()}")
                 try:
                     await cur.execute(sql)
                     rows = [dict(r) for r in await cur.fetchall()]
@@ -40,7 +43,7 @@ async def rg_exec(sql: str):
     try:
         async with get_conn() as conn:
             async with conn.cursor() as cur:
-                await cur.execute(f"USE {DB}")
+                await cur.execute(f"USE {_db()}")
                 try:
                     await cur.execute(sql)
                     await conn.commit()
@@ -54,7 +57,7 @@ async def rg_exec_many(sql: str, data: list):
     try:
         async with get_conn() as conn:
             async with conn.cursor() as cur:
-                await cur.execute(f"USE {DB}")
+                await cur.execute(f"USE {_db()}")
                 try:
                     await cur.executemany(sql, data)
                     await conn.commit()
@@ -107,10 +110,10 @@ class RegInitService:
                 stmts.append(stmt)
         executed = skipped = 0
         try:
-            await execute_query(f"CREATE DATABASE IF NOT EXISTS {DB}")
+            await execute_query(f"CREATE DATABASE IF NOT EXISTS {_db()}")
             async with get_conn() as conn:
                 async with conn.cursor() as cur:
-                    await cur.execute(f"USE {DB}")
+                    await cur.execute(f"USE {_db()}")
                     try:
                         for stmt in stmts:
                             try:

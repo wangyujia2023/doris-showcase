@@ -27,7 +27,6 @@ export const menuGroups = [
       { path: '/report', titleKey: 'menu.report', icon: 'Document' },
       { path: '/metrics', titleKey: 'menu.metrics', icon: 'DataAnalysis' },
       { path: '/observe', titleKey: 'menu.observe', icon: 'Monitor' },
-      { path: '/log-tag-stats', titleKey: 'menu.logTagStats', icon: 'PriceTag' },
       { path: '/trace', titleKey: 'menu.trace', icon: 'Share' },
       { path: '/benchmark', titleKey: 'menu.benchmark', icon: 'Histogram' },
     ],
@@ -49,11 +48,13 @@ export const menuGroups = [
     items: [
       { path: '/fund', titleKey: 'menu.fund', icon: 'TrendCharts' },
       { path: '/news', titleKey: 'menu.news', icon: 'Cpu' },
-      { path: '/lineage', titleKey: 'menu.lineage', icon: 'Share' },
     ],
   },
   {
     titleKey: 'group.system',
-    items: [{ path: '/config', titleKey: 'menu.config', icon: 'Setting' }],
+    items: [
+      { path: '/init-wizard', titleKey: 'menu.initWizard', icon: 'Tools' },
+      { path: '/config', titleKey: 'menu.config', icon: 'Setting' },
+    ],
   },
 ]

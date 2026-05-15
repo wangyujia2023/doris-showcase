@@ -52,42 +52,50 @@ def _now() -> str:
 def emit_log(trace_id: str, level: str, service: str, method: str,
              path: str, status_code: int, duration_ms: float,
              db_time_ms: float, message: str):
+    row = {
+        "trace_id":    trace_id,
+        "log_time":    _now(),
+        "level":       level,
+        "service":     service,
+        "method":      method,
+        "path":        path[:500],
+        "status_code": status_code,
+        "duration_ms": round(duration_ms, 3),
+        "db_time_ms":  round(db_time_ms, 3),
+        "message":     message[:2000],
+        "log_tag":     "",
+    }
     try:
-        _log_q.put_nowait({
-            "trace_id":    trace_id,
-            "log_time":    _now(),
-            "level":       level,
-            "service":     service,
-            "method":      method,
-            "path":        path[:500],
-            "status_code": status_code,
-            "duration_ms": round(duration_ms, 3),
-            "db_time_ms":  round(db_time_ms, 3),
-            "message":     message[:2000],
-            "log_tag":     "",
-        })
+        _log_q.put_nowait(row)
     except asyncio.QueueFull:
         pass
+    # 同步写内存 store，保证 Doris 不可用时 observe/trace 仍有数据
+    from backend.log_store import log_store
+    log_store.add({**row})
 
 
 def emit_span(trace_id: str, span_id: str, parent_span_id: str,
               service: str, operation: str, offset_ms: float,
               duration_ms: float, status: str, db_query: str = ""):
+    row = {
+        "trace_id":       trace_id,
+        "span_id":        span_id,
+        "parent_span_id": parent_span_id,
+        "span_time":      _now(),
+        "service":        service,
+        "operation":      operation[:200],
+        "offset_ms":      round(offset_ms, 3),
+        "duration_ms":    round(duration_ms, 3),
+        "status":         status,
+        "db_query":       db_query[:500],
+    }
     try:
-        _span_q.put_nowait({
-            "trace_id":       trace_id,
-            "span_id":        span_id,
-            "parent_span_id": parent_span_id,
-            "span_time":      _now(),
-            "service":        service,
-            "operation":      operation[:200],
-            "offset_ms":      round(offset_ms, 3),
-            "duration_ms":    round(duration_ms, 3),
-            "status":         status,
-            "db_query":       db_query[:500],
-        })
+        _span_q.put_nowait(row)
     except asyncio.QueueFull:
         pass
+    if service == "Doris":
+        from backend.log_store import db_call_store
+        db_call_store.add({**row})
 
 
 # ── 路径 → 服务映射 ───────────────────────────────────────────────

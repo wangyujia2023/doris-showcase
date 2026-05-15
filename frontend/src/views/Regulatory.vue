@@ -13,12 +13,6 @@
         <el-select v-model="period" size="small" style="width:110px" @change="onPeriodChange">
           <el-option v-for="p in periods" :key="p" :label="p" :value="p"/>
         </el-select>
-        <el-button size="small" :loading="initLoading" @click="handleInit">{{ t('regulatory.buildTable') }}</el-button>
-        <el-button size="small" type="success" :loading="seedLoading" @click="handleSeed">{{ t('regulatory.seedData') }}</el-button>
-        <el-button size="small" type="warning" :loading="processLoading" @click="handleProcess">
-          {{ t('regulatory.process') }}
-        </el-button>
-        <el-button size="small" type="primary" @click="handleSubmit">{{ t('regulatory.submit') }}</el-button>
       </div>
     </div>
 
@@ -33,8 +27,6 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
-import { ElMessage } from 'element-plus'
-import { regulatoryApi } from '@/api'
 import RegulatoryOverviewTab from '@/components/regulatory/RegulatoryOverviewTab.vue'
 import LineageTab  from '@/components/regulatory/LineageTab.vue'
 import MasterTab   from '@/components/regulatory/MasterTab.vue'
@@ -51,48 +43,11 @@ const TABS = [
 const activeTab     = ref('overview')
 const period        = ref('2024-03')
 const periods       = ['2024-03','2023-12','2023-09','2023-06']
-const initLoading   = ref(false)
-const seedLoading   = ref(false)
-const processLoading= ref(false)
 const overviewRef   = ref()
-const masterRef     = ref()
 const tabs = computed(() => TABS.map(tab => ({ ...tab, label: t(tab.labelKey) })))
 
 const onPeriodChange = () => {
   overviewRef.value?.reload?.()
-}
-
-const handleInit = async () => {
-  initLoading.value = true
-  try {
-    const r = await regulatoryApi.init()
-    ElMessage[r.success ? 'success' : 'error'](r.msg)
-  } finally { initLoading.value = false }
-}
-
-const handleSeed = async () => {
-  seedLoading.value = true
-  try {
-    const r = await regulatoryApi.seed()
-    ElMessage[r.success ? 'success' : 'error'](r.msg)
-    if (r.success) overviewRef.value?.reload?.()
-  } finally { seedLoading.value = false }
-}
-
-const handleProcess = async () => {
-  processLoading.value = true
-  try {
-    const r = await regulatoryApi.process()
-    ElMessage[r.success ? 'success' : 'error'](r.msg)
-    if (r.success) {
-      masterRef.value?.reload?.()
-      ElMessage.info(t('regulatory.processDone'))
-    }
-  } finally { processLoading.value = false }
-}
-
-const handleSubmit = () => {
-  ElMessage.success(t('regulatory.submitOk'))
 }
 </script>
 

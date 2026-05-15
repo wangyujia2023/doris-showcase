@@ -12,8 +12,6 @@
         </div>
       </div>
       <div class="sn-actions">
-        <el-button size="small" type="primary" :loading="initLoading" @click="handleInit">{{ t('metro.initBtn') }}</el-button>
-        <el-button size="small" type="success" :loading="seedLoading" @click="handleSeed">{{ t('metro.seedBtn') }}</el-button>
         <span class="live-dot-wrap"><span class="live-dot"></span>{{ t('metro.realtime') }}</span>
       </div>
     </div>
@@ -33,8 +31,6 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { t, locale } from '@/i18n'
-import { ElMessage } from 'element-plus'
-import { bjMetroApi } from '@/api'
 import OverviewTab  from '@/components/bjmetro/OverviewTab.vue'
 import FlowTab      from '@/components/bjmetro/FlowTab.vue'
 import TrainTab     from '@/components/bjmetro/TrainTab.vue'
@@ -52,26 +48,8 @@ const TABS = computed(() => [
 ])
 
 const activeTab  = ref('overview')
-const initLoading = ref(false)
-const seedLoading = ref(false)
 
 const switchTab = (key) => { activeTab.value = key }
-
-const handleInit = async () => {
-  initLoading.value = true
-  try {
-    const res = await bjMetroApi.init()
-    ElMessage[res.success ? 'success' : 'error'](res.msg)
-  } finally { initLoading.value = false }
-}
-
-const handleSeed = async () => {
-  seedLoading.value = true
-  try {
-    const res = await bjMetroApi.seed()
-    ElMessage[res.success ? 'success' : 'error'](res.msg)
-  } finally { seedLoading.value = false }
-}
 </script>
 
 <style scoped>

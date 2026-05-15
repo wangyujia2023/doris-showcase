@@ -5,6 +5,7 @@ import router from './router'
 import './styles/layout.css'
 import { useDictionaryStore } from './store/dictionary'
 import './styles/app.css'
+import './styles/setup.css'
 
 const app = createApp(App)
 

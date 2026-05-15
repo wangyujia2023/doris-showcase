@@ -23,8 +23,7 @@ async def get_pool() -> aiomysql.Pool:
         _pool = await aiomysql.create_pool(
             host=settings.DORIS_HOST, port=settings.DORIS_PORT,
             user=settings.DORIS_USER, password=settings.DORIS_PASSWORD,
-            db=settings.DORIS_DATABASE,
-            connect_timeout=100,
+            db=settings.DORIS_DATABASE
         )
     return _pool
 
@@ -148,23 +147,36 @@ async def stream_load_json(table: str, rows: List[Dict], columns: List[str]) -> 
         json.dumps({col: row.get(col) for col in columns}, ensure_ascii=False, separators=(",", ":"))
         for row in rows
     )
-    try:
-        async with httpx.AsyncClient(follow_redirects=True, timeout=15, trust_env=False) as client:
-            resp = await client.put(
-                url,
-                content=data.encode("utf-8"),
-                headers=headers,
-                auth=(settings.DORIS_USER, settings.DORIS_PASSWORD),
-            )
+    async def _do_load() -> dict:
+        auth = (settings.DORIS_USER, settings.DORIS_PASSWORD)
+        async with httpx.AsyncClient(follow_redirects=False, timeout=15, trust_env=False) as client:
+            resp = await client.put(url, content=data.encode("utf-8"), headers=headers, auth=auth)
+            # Doris FE → BE 重定向时 httpx 会丢弃 Authorization，手动跟随并带上鉴权
+            if resp.is_redirect:
+                location = resp.headers.get("location", "")
+                resp = await client.put(location, content=data.encode("utf-8"), headers=headers, auth=auth)
         resp.raise_for_status()
-        result = resp.json()
-        status = str(result.get("Status", "")).lower()
-        if status not in {"success", "publish timeout"}:
-            raise RuntimeError(result.get("Message") or result)
-        return int(result.get("NumberLoadedRows") or len(rows))
-    except Exception as e:
-        logger.warning(f"stream_load_json {table}: {e}")
-        return 0
+        return resp.json()
+
+    for attempt in range(2):
+        try:
+            result = await _do_load()
+            status = str(result.get("Status", "")).lower()
+            if status not in {"success", "publish timeout"}:
+                msg = result.get("Message") or str(result)
+                # 新建表 metadata 尚未传播到 BE，等 2 秒重试一次
+                if "NOT_FOUND" in msg and attempt == 0:
+                    await asyncio.sleep(2)
+                    continue
+                raise RuntimeError(msg)
+            return int(result.get("NumberLoadedRows") or len(rows))
+        except Exception as e:
+            if attempt == 0 and "NOT_FOUND" in str(e):
+                await asyncio.sleep(2)
+                continue
+            logger.warning(f"stream_load_json {table}: {e}")
+            return 0
+    return 0
 
 
 async def ping() -> bool:

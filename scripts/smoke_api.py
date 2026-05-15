@@ -54,7 +54,6 @@ TESTS = [
     ("POST", "/metrics/query", {"dimensions": ["asset_level"], "measures": ["user_cnt", "total_aum"], "limit": 20, "page": 1}),
     ("GET", "/observe/logs?limit=20", None),
     ("GET", "/observe/stats", None),
-    ("GET", "/observe/tag-stats", None),
     ("GET", "/trace/list?limit=20", None),
     ("GET", "/benchmark/audit-stats?limit=300", None),
     ("GET", "/mfg/overview", None),

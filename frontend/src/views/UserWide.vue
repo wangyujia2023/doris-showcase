@@ -52,7 +52,6 @@
         <el-form-item>
           <el-button type="primary" :loading="loading" @click="handleSearch">{{ t('common.search') }}</el-button>
           <el-button @click="handleReset">{{ t('common.reset') }}</el-button>
-          <el-button type="success" :loading="exporting" @click="handleExport">{{ t('common.export') }}</el-button>
         </el-form-item>
       </el-form>
       <div style="font-size:12px;color:#909399;margin-top:4px">{{ t('user.haspHint') }}</div>
@@ -223,7 +222,6 @@ const total    = ref(0)
 const page     = ref(1)
 const pageSize = ref(20)
 const loading  = ref(false)
-const exporting = ref(false)
 const queryTime = ref(0)
 const drawerVisible = ref(false)
 const selectedUser  = ref(null)
@@ -257,12 +255,6 @@ function handleReset() {
 
 function showDetail(row) { selectedUser.value = row; drawerVisible.value = true }
 
-async function handleExport() {
-  exporting.value = true
-  try {
-    ElMessage.info(t('user.exportMsg'))
-  } finally { exporting.value = false }
-}
 
 onMounted(fetchData)
 </script>

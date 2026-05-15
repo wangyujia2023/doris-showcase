@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Database Control Console</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20,400,0,0&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            inter: ['Inter', 'ui-sans-serif', 'system-ui'],
+            mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    html { font-family: Inter, ui-sans-serif, system-ui; }
+    .material-symbols-outlined { font-size: 17px; line-height: 1; }
+    .data-value, .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+    .dot-grid { grid-template-columns: repeat(28, minmax(0, 1fr)); }
+    @media (max-width: 900px) {
+      .console-shell { grid-template-columns: 1fr; }
+      .sidebar { width: 100%; height: auto; border-right: 0; }
+      .dot-grid { grid-template-columns: repeat(18, minmax(0, 1fr)); }
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
+  <div id="app" class="min-h-screen">
+    <div class="console-shell grid min-h-screen grid-cols-[220px_1fr]">
+      <aside class="sidebar w-[220px] border-r border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950">
+        <div class="flex h-12 items-center justify-between border-b border-slate-200 px-3 dark:border-slate-800">
+          <div>
+            <div class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Doris Console</div>
+            <div class="mono text-[11px] text-slate-700 dark:text-slate-300">prod-cn-north-01</div>
+          </div>
+          <span class="material-symbols-outlined text-blue-600">database</span>
+        </div>
+
+        <nav class="p-2 text-[12px]">
+          <div class="px-2 py-1 text-[10px] font-bold uppercase tracking-widest text-slate-500">Operate</div>
+          <a class="flex h-7 items-center gap-2 border border-blue-200 bg-blue-50 px-2 font-semibold text-blue-600 dark:border-blue-900/70 dark:bg-blue-950/40" href="#"><span class="material-symbols-outlined">monitoring</span>Overview</a>
+          <a class="mt-1 flex h-7 items-center gap-2 px-2 text-slate-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-900" href="#"><span class="material-symbols-outlined">dns</span>Clusters</a>
+          <a class="mt-1 flex h-7 items-center gap-2 px-2 text-slate-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-900" href="#"><span class="material-symbols-outlined">schema</span>Tables</a>
+          <a class="mt-1 flex h-7 items-center gap-2 px-2 text-slate-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-900" href="#"><span class="material-symbols-outlined">query_stats</span>Queries</a>
+          <a class="mt-1 flex h-7 items-center gap-2 px-2 text-slate-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-900" href="#"><span class="material-symbols-outlined">account_tree</span>Lineage</a>
+
+          <div class="mt-4 px-2 py-1 text-[10px] font-bold uppercase tracking-widest text-slate-500">Control</div>
+          <a class="flex h-7 items-center gap-2 px-2 text-slate-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-900" href="#"><span class="material-symbols-outlined">hub</span>Replication</a>
+          <a class="mt-1 flex h-7 items-center gap-2 px-2 text-slate-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-900" href="#"><span class="material-symbols-outlined">lock</span>Access</a>
+          <a class="mt-1 flex h-7 items-center gap-2 px-2 text-slate-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-900" href="#"><span class="material-symbols-outlined">settings</span>Settings</a>
+        </nav>
+
+        <div class="mt-2 border-y border-slate-200 p-3 dark:border-slate-800">
+          <div class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Connection</div>
+          <div class="mt-2 flex items-center justify-between text-[11px]">
+            <span class="text-slate-500">FE Leader</span>
+            <span class="mono text-emerald-700 dark:text-emerald-400">10.26.20.3</span>
+          </div>
+          <div class="mt-1 flex items-center justify-between text-[11px]">
+            <span class="text-slate-500">QPS Cap</span>
+            <span class="mono">42,000</span>
+          </div>
+        </div>
+      </aside>
+
+      <main class="min-w-0">
+        <header class="flex h-12 items-center justify-between border-b border-slate-200 bg-white px-3 dark:border-slate-800 dark:bg-slate-950">
+          <div class="flex min-w-0 items-center gap-3">
+            <span class="material-symbols-outlined text-slate-500">terminal</span>
+            <div class="min-w-0">
+              <h1 class="truncate text-[13px] font-bold">Cluster Runtime Control Plane</h1>
+              <p class="mono truncate text-[10px] text-slate-500">env=production / version=2.1.7 / build=2026.05.04-rc2</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="hidden border border-emerald-200 bg-emerald-50 px-2 py-1 text-[10px] font-bold uppercase tracking-widest text-emerald-700 sm:inline dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-400">Nominal</span>
+            <button id="themeToggle" class="flex h-8 items-center gap-1 border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">
+              <span class="material-symbols-outlined">dark_mode</span>
+              Theme
+            </button>
+          </div>
+        </header>
+
+        <section class="border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950">
+          <div class="grid grid-cols-2 divide-x divide-y divide-slate-200 dark:divide-slate-800 md:grid-cols-3 xl:grid-cols-6">
+            <div class="p-3">
+              <div class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Query Latency P95</div>
+              <div class="mt-1 flex items-end justify-between gap-2"><span class="data-value text-[22px] font-bold">18.7ms</span><span class="mono text-[10px] text-emerald-700">↓ 9%</span></div>
+              <svg viewBox="0 0 120 18" class="mt-2 h-[18px] w-full text-blue-600" fill="none"><path d="M0 12 L10 11 L20 13 L30 7 L40 9 L50 4 L60 8 L70 6 L80 10 L90 5 L100 7 L120 3" stroke="currentColor" stroke-width="1.5"/></svg>
+            </div>
+            <div class="p-3">
+              <div class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Ingest Rows/sec</div>
+              <div class="mt-1 flex items-end justify-between gap-2"><span class="data-value text-[22px] font-bold">921K</span><span class="mono text-[10px] text-emerald-700">↑ 4%</span></div>
+              <div class="mt-3 h-0.5 bg-slate-100 dark:bg-slate-800"><div class="h-0.5 w-[74%] bg-emerald-500"></div></div>
+            </div>
+            <div class="p-3">
+              <div class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Compaction Debt</div>
+              <div class="mt-1 flex items-end justify-between gap-2"><span class="data-value text-[22px] font-bold">2.41TB</span><span class="mono text-[10px] text-amber-700">↑ 11%</span></div>
+              <div class="mt-3 h-0.5 bg-slate-100 dark:bg-slate-800"><div class="h-0.5 w-[61%] bg-amber-500"></div></div>
+            </div>
+            <div class="p-3">
+              <div class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Replica Health</div>
+              <div class="mt-1 flex items-end justify-between gap-2"><span class="data-value text-[22px] font-bold">99.94%</span><span class="mono text-[10px] text-emerald-700">↑ 0.2%</span></div>
+              <svg viewBox="0 0 120 18" class="mt-2 h-[18px] w-full text-emerald-600" fill="none"><path d="M0 14 L12 13 L24 12 L36 12 L48 9 L60 10 L72 8 L84 8 L96 6 L108 5 L120 5" stroke="currentColor" stroke-width="1.5"/></svg>
+            </div>
+            <div class="p-3">
+              <div class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Running Queries</div>
+              <div class="mt-1 flex items-end justify-between gap-2"><span class="data-value text-[22px] font-bold">1,284</span><span class="mono text-[10px] text-blue-600">→ 0%</span></div>
+              <div class="mt-3 h-0.5 bg-slate-100 dark:bg-slate-800"><div class="h-0.5 w-[42%] bg-blue-600"></div></div>
+            </div>
+            <div class="p-3">
+              <div class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Error Budget</div>
+              <div class="mt-1 flex items-end justify-between gap-2"><span class="data-value text-[22px] font-bold">84.2%</span><span class="mono text-[10px] text-red-600">↓ 3%</span></div>
+              <div class="mt-3 h-0.5 bg-slate-100 dark:bg-slate-800"><div class="h-0.5 w-[84%] bg-red-500"></div></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="grid gap-0 border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950 xl:grid-cols-[1fr_360px]">
+          <div class="min-w-0 border-r border-slate-200 dark:border-slate-800">
+            <div class="flex h-9 items-center justify-between border-b border-slate-200 px-3 dark:border-slate-800">
+              <h2 class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Backend Nodes</h2>
+              <span class="mono text-[10px] text-slate-500">auto-refresh 5s</span>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full min-w-[980px] border-collapse text-left text-[12px]">
+                <thead class="bg-slate-50 dark:bg-slate-900/70">
+                  <tr class="border-b border-slate-200 dark:border-slate-800">
+                    <th class="px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-slate-500">Node</th>
+                    <th class="px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-slate-500">Role</th>
+                    <th class="px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-slate-500">Resources</th>
+                    <th class="px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-slate-500">Storage</th>
+                    <th class="px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-slate-500">Queries</th>
+                    <th class="px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-slate-500">State</th>
+                    <th class="px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-slate-500">Last Heartbeat</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-200 dark:divide-slate-800">
+                  <tr class="hover:bg-slate-50/80 dark:hover:bg-slate-900/80">
+                    <td class="px-3 py-2"><div class="mono font-semibold">be-10.26.20.11</div><div class="mono text-[10px] text-slate-500">v2.1.7 / id=84031</div></td>
+                    <td class="px-3 py-2">Compute + Storage</td>
+                    <td class="px-3 py-2"><div class="flex items-center gap-2"><span class="mono w-10">CPU</span><div class="h-1 w-24 bg-slate-100 dark:bg-slate-800"><div class="h-1 w-[66%] bg-blue-600"></div></div><span class="mono text-[10px]">66%</span></div><div class="mt-1 flex items-center gap-2"><span class="mono w-10">RAM</span><div class="h-1 w-24 bg-slate-100 dark:bg-slate-800"><div class="h-1 w-[58%] bg-emerald-500"></div></div><span class="mono text-[10px]">58%</span></div></td>
+                    <td class="px-3 py-2"><span class="mono">18.2 / 24TB</span></td>
+                    <td class="px-3 py-2 mono">284</td>
+                    <td class="px-3 py-2"><span class="border border-emerald-200 bg-emerald-50 px-1.5 py-0.5 text-[10px] font-bold uppercase text-emerald-700 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-400">Healthy</span></td>
+                    <td class="px-3 py-2 mono text-slate-500">2026-05-04 10:31:12</td>
+                  </tr>
+                  <tr class="hover:bg-slate-50/80 dark:hover:bg-slate-900/80">
+                    <td class="px-3 py-2"><div class="mono font-semibold">be-10.26.20.12</div><div class="mono text-[10px] text-slate-500">v2.1.7 / id=84032</div></td>
+                    <td class="px-3 py-2">Compute + Storage</td>
+                    <td class="px-3 py-2"><div class="flex items-center gap-2"><span class="mono w-10">CPU</span><div class="h-1 w-24 bg-slate-100 dark:bg-slate-800"><div class="h-1 w-[81%] bg-amber-500"></div></div><span class="mono text-[10px]">81%</span></div><div class="mt-1 flex items-center gap-2"><span class="mono w-10">RAM</span><div class="h-1 w-24 bg-slate-100 dark:bg-slate-800"><div class="h-1 w-[72%] bg-blue-600"></div></div><span class="mono text-[10px]">72%</span></div></td>
+                    <td class="px-3 py-2"><span class="mono">21.6 / 24TB</span></td>
+                    <td class="px-3 py-2 mono">419</td>
+                    <td class="px-3 py-2"><span class="border border-amber-200 bg-amber-50 px-1.5 py-0.5 text-[10px] font-bold uppercase text-amber-700 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-400">Degraded</span></td>
+                    <td class="px-3 py-2 mono text-slate-500">2026-05-04 10:31:10</td>
+                  </tr>
+                  <tr class="hover:bg-slate-50/80 dark:hover:bg-slate-900/80">
+                    <td class="px-3 py-2"><div class="mono font-semibold">be-10.26.20.13</div><div class="mono text-[10px] text-slate-500">v2.1.6 / id=84033</div></td>
+                    <td class="px-3 py-2">Storage</td>
+                    <td class="px-3 py-2"><div class="flex items-center gap-2"><span class="mono w-10">CPU</span><div class="h-1 w-24 bg-slate-100 dark:bg-slate-800"><div class="h-1 w-[44%] bg-emerald-500"></div></div><span class="mono text-[10px]">44%</span></div><div class="mt-1 flex items-center gap-2"><span class="mono w-10">RAM</span><div class="h-1 w-24 bg-slate-100 dark:bg-slate-800"><div class="h-1 w-[53%] bg-emerald-500"></div></div><span class="mono text-[10px]">53%</span></div></td>
+                    <td class="px-3 py-2"><span class="mono">14.8 / 24TB</span></td>
+                    <td class="px-3 py-2 mono">97</td>
+                    <td class="px-3 py-2"><span class="border border-emerald-200 bg-emerald-50 px-1.5 py-0.5 text-[10px] font-bold uppercase text-emerald-700 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-400">Healthy</span></td>
+                    <td class="px-3 py-2 mono text-slate-500">2026-05-04 10:31:12</td>
+                  </tr>
+                  <tr class="hover:bg-slate-50/80 dark:hover:bg-slate-900/80">
+                    <td class="px-3 py-2"><div class="mono font-semibold">be-10.26.20.14</div><div class="mono text-[10px] text-slate-500">v2.1.7 / id=84034</div></td>
+                    <td class="px-3 py-2">Compute</td>
+                    <td class="px-3 py-2"><div class="flex items-center gap-2"><span class="mono w-10">CPU</span><div class="h-1 w-24 bg-slate-100 dark:bg-slate-800"><div class="h-1 w-[91%] bg-red-500"></div></div><span class="mono text-[10px]">91%</span></div><div class="mt-1 flex items-center gap-2"><span class="mono w-10">RAM</span><div class="h-1 w-24 bg-slate-100 dark:bg-slate-800"><div class="h-1 w-[86%] bg-amber-500"></div></div><span class="mono text-[10px]">86%</span></div></td>
+                    <td class="px-3 py-2"><span class="mono">9.1 / 12TB</span></td>
+                    <td class="px-3 py-2 mono">484</td>
+                    <td class="px-3 py-2"><span class="border border-red-200 bg-red-50 px-1.5 py-0.5 text-[10px] font-bold uppercase text-red-600 dark:border-red-900 dark:bg-red-950 dark:text-red-400">Hot</span></td>
+                    <td class="px-3 py-2 mono text-slate-500">2026-05-04 10:31:08</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <aside class="bg-white dark:bg-slate-950">
+            <div class="flex h-9 items-center justify-between border-b border-slate-200 px-3 dark:border-slate-800">
+              <h2 class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Replica Matrix</h2>
+              <span class="mono text-[10px] text-slate-500">112 shards</span>
+            </div>
+            <div class="p-3">
+              <div class="dot-grid grid gap-1">
+                <span class="h-3 w-3 rounded-sm bg-emerald-500"></span><span class="h-3 w-3 rounded-sm bg-emerald-500"></span><span class="h-3 w-3 rounded-sm bg-emerald-500"></span><span class="h-3 w-3 rounded-sm bg-amber-500"></span><span class="h-3 w-3 rounded-sm bg-emerald-500"></span><span class="h-3 w-3 rounded-sm bg-emerald-500"></span><span class="h-3 w-3 rounded-sm bg-red-500"></span><span class="h-3 w-3 rounded-sm bg-emerald-500"></span>
+                <span class="h-3 w-3 rounded-sm bg-emerald-500"></span><span class="h-3 w-3 rounded-sm bg-emerald-500"></span><span class="h-3 w-3 rounded-sm bg-emerald-500"></span><span class="h-3 w-3 rounded-sm bg-emerald-500"></span><span class="h-3 w-3 rounded-sm bg-amber-500"></span><span class="h-3 w-3 rounded-sm bg-emerald-500"></span><span class="h-3 w-3 rounded-sm bg-emerald-500"></span><span class="h-3 w-3 rounded-sm bg-emerald-500"></span>
+                <span class="h-3 w-3 rounded-sm bg-emerald-500"></span><span class="h-3 w-3 rounded-sm bg-slate-300 dark:bg-slate-700"></span><span class="h-3 w-3 rounded-sm bg-emerald-500"></span><span class="h-3 w-3 rounded-sm bg-emerald-500"></span><span class="h-3 w-3 rounded-sm bg-emerald-500"></span><span class="h-3 w-3 rounded-sm bg-emerald-500"></span><span class="h-3 w-3 rounded-sm bg-emerald-500"></span><span class="h-3 w-3 rounded-sm bg-amber-500"></span>
+                <span class="h-3 w-3 rounded-sm bg-emerald-500"></span><span class="h-3 w-3 rounded-sm bg-emerald-500"></span><span class="h-3 w-3 rounded-sm bg-emerald-500"></span><span class="h-3 w-3 rounded-sm bg-emerald-500"></span><span class="h-3 w-3 rounded-sm bg-emerald-500"></span><span class="h-3 w-3 rounded-sm bg-emerald-500"></span><span class="h-3 w-3 rounded-sm bg-emerald-500"></span><span class="h-3 w-3 rounded-sm bg-emerald-500"></span>
+              </div>
+              <div class="mt-3 grid grid-cols-2 gap-2 border-t border-slate-200 pt-3 text-[11px] dark:border-slate-800">
+                <div><span class="inline-block h-2 w-2 bg-emerald-500"></span> Healthy <span class="mono text-slate-500">104</span></div>
+                <div><span class="inline-block h-2 w-2 bg-amber-500"></span> Lagging <span class="mono text-slate-500">6</span></div>
+                <div><span class="inline-block h-2 w-2 bg-red-500"></span> Missing <span class="mono text-slate-500">1</span></div>
+                <div><span class="inline-block h-2 w-2 bg-slate-300 dark:bg-slate-700"></span> Moving <span class="mono text-slate-500">1</span></div>
+              </div>
+            </div>
+          </aside>
+        </section>
+
+        <section class="grid gap-0 bg-white dark:bg-slate-950 lg:grid-cols-3">
+          <div class="border-b border-r border-slate-200 p-3 dark:border-slate-800 lg:border-b-0">
+            <div class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Slow Query Queue</div>
+            <div class="mt-2 space-y-2 text-[11px]">
+              <div class="flex items-center justify-between"><span class="mono truncate">select customer_id, sum(amount)...</span><span class="mono text-red-600">8.42s</span></div>
+              <div class="flex items-center justify-between"><span class="mono truncate">insert into dwd_event_log...</span><span class="mono text-amber-700">3.19s</span></div>
+              <div class="flex items-center justify-between"><span class="mono truncate">alter table risk_profile...</span><span class="mono text-slate-500">1.04s</span></div>
+            </div>
+          </div>
+          <div class="border-b border-r border-slate-200 p-3 dark:border-slate-800 lg:border-b-0">
+            <div class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Tablet Scheduler</div>
+            <div class="mt-2 grid grid-cols-3 gap-2 text-[11px]"><div><div class="mono text-lg font-bold">2,184</div><div class="text-slate-500">Pending</div></div><div><div class="mono text-lg font-bold">913</div><div class="text-slate-500">Running</div></div><div><div class="mono text-lg font-bold text-red-600">17</div><div class="text-slate-500">Failed</div></div></div>
+          </div>
+          <div class="p-3">
+            <div class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Audit Stream</div>
+            <div class="mt-2 space-y-1 text-[11px]">
+              <div><span class="mono text-slate-500">10:31:14</span> role grant applied to <span class="mono">analyst_ro</span></div>
+              <div><span class="mono text-slate-500">10:30:55</span> partition rollup completed <span class="mono">ods_txn_202605</span></div>
+              <div><span class="mono text-slate-500">10:30:01</span> backup checkpoint emitted <span class="mono">s3://prod/doris</span></div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    const root = document.documentElement;
+    const button = document.getElementById('themeToggle');
+    const saved = localStorage.getItem('console-theme');
+    if (saved === 'dark') root.classList.add('dark');
+    button.addEventListener('click', () => {
+      root.classList.toggle('dark');
+      localStorage.setItem('console-theme', root.classList.contains('dark') ? 'dark' : 'light');
+    });
+  </script>
+</body>
+</html>

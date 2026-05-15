@@ -1256,67 +1256,6 @@ PROPERTIES (
 "group_commit_data_bytes" = "134217728"
 );
 
--- Table: sys_logs
-CREATE TABLE IF NOT EXISTS `sys_logs` (
-  `trace_id` varchar(32) NULL,
-  `log_time` datetime(3) NULL,
-  `level` varchar(10) NULL,
-  `service` varchar(60) NULL,
-  `method` varchar(10) NULL,
-  `path` varchar(500) NULL,
-  `status_code` int NULL,
-  `duration_ms` double NULL,
-  `db_time_ms` double NULL,
-  `message` varchar(2000) NULL,
-  `log_tag` varchar(50) NULL
-) ENGINE=OLAP
-UNIQUE KEY(`trace_id`, `log_time`)
-DISTRIBUTED BY HASH(`trace_id`) BUCKETS 4
-PROPERTIES (
-"replication_allocation" = "tag.location.default: 1",
-"min_load_replica_num" = "-1",
-"is_being_synced" = "false",
-"storage_medium" = "hdd",
-"storage_format" = "V2",
-"inverted_index_storage_format" = "V3",
-"enable_unique_key_merge_on_write" = "true",
-"light_schema_change" = "true",
-"disable_auto_compaction" = "false",
-"enable_single_replica_compaction" = "false",
-"group_commit_interval_ms" = "10000",
-"group_commit_data_bytes" = "134217728",
-"enable_mow_light_delete" = "false"
-);
-
--- Table: sys_spans
-CREATE TABLE IF NOT EXISTS `sys_spans` (
-  `trace_id` varchar(32) NULL,
-  `span_id` varchar(32) NULL,
-  `parent_span_id` varchar(32) NULL,
-  `span_time` datetime(3) NULL,
-  `service` varchar(60) NULL,
-  `operation` varchar(200) NULL,
-  `offset_ms` double NULL,
-  `duration_ms` double NULL,
-  `status` varchar(10) NULL,
-  `db_query` varchar(500) NULL
-) ENGINE=OLAP
-DUPLICATE KEY(`trace_id`, `span_id`)
-DISTRIBUTED BY HASH(`trace_id`) BUCKETS 4
-PROPERTIES (
-"replication_allocation" = "tag.location.default: 1",
-"min_load_replica_num" = "-1",
-"is_being_synced" = "false",
-"storage_medium" = "hdd",
-"storage_format" = "V2",
-"inverted_index_storage_format" = "V3",
-"light_schema_change" = "true",
-"disable_auto_compaction" = "false",
-"enable_single_replica_compaction" = "false",
-"group_commit_interval_ms" = "10000",
-"group_commit_data_bytes" = "134217728"
-);
-
 -- Table: tag_dict
 CREATE TABLE IF NOT EXISTS `tag_dict` (
   `tag_id` bigint NOT NULL COMMENT "标签ID",
@@ -1441,17 +1380,7 @@ CREATE TABLE IF NOT EXISTS `user_base` (
 DUPLICATE KEY(`user_id`)
 DISTRIBUTED BY HASH(`user_id`) BUCKETS 2
 PROPERTIES (
-"replication_allocation" = "tag.location.default: 1",
-"min_load_replica_num" = "-1",
-"is_being_synced" = "false",
-"storage_medium" = "hdd",
-"storage_format" = "V2",
-"inverted_index_storage_format" = "V3",
-"light_schema_change" = "true",
-"disable_auto_compaction" = "false",
-"enable_single_replica_compaction" = "false",
-"group_commit_interval_ms" = "10000",
-"group_commit_data_bytes" = "134217728"
+"replication_allocation" = "tag.location.default: 1"
 );
 
 -- Table: user_behavior
@@ -1483,17 +1412,7 @@ PARTITION p2025_06 VALUES [('2025-06-01'), ('2025-07-01')),
 PARTITION p_future VALUES [('2025-07-01'), (MAXVALUE)))
 DISTRIBUTED BY HASH(`user_id`) BUCKETS 64
 PROPERTIES (
-"replication_allocation" = "tag.location.default: 1",
-"min_load_replica_num" = "-1",
-"is_being_synced" = "false",
-"storage_medium" = "hdd",
-"storage_format" = "V2",
-"inverted_index_storage_format" = "V3",
-"light_schema_change" = "true",
-"disable_auto_compaction" = "false",
-"enable_single_replica_compaction" = "false",
-"group_commit_interval_ms" = "10000",
-"group_commit_data_bytes" = "134217728"
+"replication_allocation" = "tag.location.default: 1"
 );
 
 -- Table: user_log_raw
@@ -1528,17 +1447,7 @@ PARTITION p2025_06 VALUES [('2025-06-01'), ('2025-07-01')),
 PARTITION p_future VALUES [('2025-07-01'), (MAXVALUE)))
 DISTRIBUTED BY HASH(`log_id`) BUCKETS 64
 PROPERTIES (
-"replication_allocation" = "tag.location.default: 1",
-"min_load_replica_num" = "-1",
-"is_being_synced" = "false",
-"storage_medium" = "hdd",
-"storage_format" = "V2",
-"inverted_index_storage_format" = "V3",
-"light_schema_change" = "true",
-"disable_auto_compaction" = "false",
-"enable_single_replica_compaction" = "false",
-"group_commit_interval_ms" = "10000",
-"group_commit_data_bytes" = "134217728"
+"replication_allocation" = "tag.location.default: 1"
 );
 
 -- Table: user_log_tag
@@ -1568,19 +1477,7 @@ PARTITION p2025_06 VALUES [('2025-06-01'), ('2025-07-01')),
 PARTITION p_future VALUES [('2025-07-01'), (MAXVALUE)))
 DISTRIBUTED BY HASH(`log_id`) BUCKETS 32
 PROPERTIES (
-"replication_allocation" = "tag.location.default: 1",
-"min_load_replica_num" = "-1",
-"is_being_synced" = "false",
-"storage_medium" = "hdd",
-"storage_format" = "V2",
-"inverted_index_storage_format" = "V3",
-"enable_unique_key_merge_on_write" = "true",
-"light_schema_change" = "true",
-"disable_auto_compaction" = "false",
-"enable_single_replica_compaction" = "false",
-"group_commit_interval_ms" = "10000",
-"group_commit_data_bytes" = "134217728",
-"enable_mow_light_delete" = "false"
+"replication_allocation" = "tag.location.default: 1"
 );
 
 -- Table: user_segment
@@ -1602,17 +1499,7 @@ AGGREGATE KEY(`segment_id`, `segment_name`, `segment_desc`, `rule_config`, `segm
 COMMENT '人群包表 - Bitmap存储'
 DISTRIBUTED BY HASH(`segment_id`) BUCKETS 8
 PROPERTIES (
-"replication_allocation" = "tag.location.default: 1",
-"min_load_replica_num" = "-1",
-"is_being_synced" = "false",
-"storage_medium" = "hdd",
-"storage_format" = "V2",
-"inverted_index_storage_format" = "V3",
-"light_schema_change" = "true",
-"disable_auto_compaction" = "false",
-"enable_single_replica_compaction" = "false",
-"group_commit_interval_ms" = "10000",
-"group_commit_data_bytes" = "134217728"
+"replication_allocation" = "tag.location.default: 1"
 );
 
 -- Table: user_tag
@@ -1635,17 +1522,7 @@ PARTITION p2025_q4 VALUES [('2025-10-01'), ('2026-01-01')),
 PARTITION p_future VALUES [('2026-01-01'), (MAXVALUE)))
 DISTRIBUTED BY HASH(`tag_name`, `tag_value`) BUCKETS 32
 PROPERTIES (
-"replication_allocation" = "tag.location.default: 1",
-"min_load_replica_num" = "-1",
-"is_being_synced" = "false",
-"storage_medium" = "hdd",
-"storage_format" = "V2",
-"inverted_index_storage_format" = "V3",
-"light_schema_change" = "true",
-"disable_auto_compaction" = "false",
-"enable_single_replica_compaction" = "false",
-"group_commit_interval_ms" = "10000",
-"group_commit_data_bytes" = "134217728"
+"replication_allocation" = "tag.location.default: 1"
 );
 
 
@@ -1734,10 +1611,47 @@ DUPLICATE KEY(`customer_id`)
 COMMENT 'Customer tag wide table for CDP analysis'
 DISTRIBUTED BY HASH(`customer_id`) BUCKETS 8
 PROPERTIES (
-"replication_allocation" = "tag.location.default: 1",
-"storage_format" = "V2",
-"light_schema_change" = "true"
+"replication_allocation" = "tag.location.default: 1"
 );
+
+--sys_logs
+CREATE TABLE IF NOT EXISTS `sys_logs` (
+    `trace_id` varchar(32) NULL,
+    `log_time` datetime(3) NULL,
+    `level` varchar(10) NULL,
+    `service` varchar(60) NULL,
+    `method` varchar(10) NULL,
+    `path` varchar(500) NULL,
+    `status_code` int NULL,
+    `duration_ms` double NULL,
+    `db_time_ms` double NULL,
+    `message` varchar(2000) NULL,
+    `log_tag` varchar(50) NULL
+) ENGINE=OLAP
+UNIQUE KEY(`trace_id`, `log_time`)
+DISTRIBUTED BY HASH(`trace_id`) BUCKETS 4
+PROPERTIES (
+"replication_allocation" = "tag.location.default: 1"
+);
+-- Table: sys_spans
+CREATE TABLE IF NOT EXISTS `sys_spans` (
+  `trace_id` varchar(32) NULL,
+  `span_id` varchar(32) NULL,
+  `parent_span_id` varchar(32) NULL,
+  `span_time` datetime(3) NULL,
+  `service` varchar(60) NULL,
+  `operation` varchar(200) NULL,
+  `offset_ms` double NULL,
+  `duration_ms` double NULL,
+  `status` varchar(10) NULL,
+  `db_query` varchar(500) NULL
+) ENGINE=OLAP
+DUPLICATE KEY(`trace_id`, `span_id`)
+DISTRIBUTED BY HASH(`trace_id`) BUCKETS 4
+PROPERTIES (
+"replication_allocation" = "tag.location.default: 1"
+);
+
 
 -- Table: user_wide
 DROP TABLE IF EXISTS `user_wide`;
@@ -2780,19 +2694,5 @@ UNIQUE KEY(`user_id`)
 COMMENT 'User wide table - 500-column point-query optimized table'
 DISTRIBUTED BY HASH(`user_id`) BUCKETS 10
 PROPERTIES (
-"replication_allocation" = "tag.location.default: 1",
-"min_load_replica_num" = "-1",
-"is_being_synced" = "false",
-"storage_medium" = "hdd",
-"storage_format" = "V2",
-"inverted_index_storage_format" = "V3",
-"enable_unique_key_merge_on_write" = "true",
-"light_schema_change" = "true",
-"row_store_columns" = "user_id,update_date,user_name,asset_level,aum_total,log_tags",
-"row_store_page_size" = "4096",
-"disable_auto_compaction" = "false",
-"enable_single_replica_compaction" = "false",
-"group_commit_interval_ms" = "10000",
-"group_commit_data_bytes" = "134217728",
-"enable_mow_light_delete" = "false"
+"replication_allocation" = "tag.location.default: 1"
 );

@@ -9,7 +9,6 @@ ensure_dirs
 need_cmd mysql "Doris MySQL client"
 
 main_db="$DORIS_DATABASE"
-lineage_db="$LINEAGE_DATABASE"
 
 drop_db_if_requested() {
   local db="$1"
@@ -19,14 +18,35 @@ drop_db_if_requested() {
   fi
 }
 
-run_pair() {
+run_sql_file_into_db() {
   local db="$1"
-  local schema="$2"
-  local mock="$3"
-  drop_db_if_requested "$db"
-  run_sql_file "$schema"
-  run_sql_file "$mock"
-  validate_db "$db"
+  local sql_file="$2"
+  local full_path="$PROJECT_DIR/$sql_file"
+  local tmp
+  if [ ! -f "$full_path" ]; then
+    echo "FAIL SQL file not found: $sql_file"
+    exit 1
+  fi
+  tmp="$(mktemp)"
+  awk '
+    {
+      line=toupper($0)
+      if (line ~ /^[[:space:]]*CREATE[[:space:]]+DATABASE[[:space:]]+/) next
+      if (line ~ /^[[:space:]]*USE[[:space:]]+/) next
+      print
+    }
+  ' "$full_path" > "$tmp"
+  echo "Running $sql_file -> $db"
+  mysql_cli "$db" < "$tmp"
+  rm -f "$tmp"
+}
+
+run_pair() {
+  local schema="$1"
+  local mock="$2"
+  mysql_query "CREATE DATABASE IF NOT EXISTS \`$main_db\`;"
+  run_sql_file_into_db "$main_db" "$schema"
+  run_sql_file_into_db "$main_db" "$mock"
 }
 
 validate_count() {
@@ -51,37 +71,30 @@ validate_db() {
     "$main_db")
       validate_count "$db" user_wide 1
       validate_count "$db" user_behavior 1
-      validate_count "$db" sys_logs 1
       validate_count "$db" news_article 1
       validate_count "$db" t_customer_tags 1
-      ;;
-    "$lineage_db")
       validate_count "$db" lineage_asset 1
       validate_count "$db" lineage_edge 1
-      ;;
-    regdb)
       validate_count "$db" reg_master 1
-      ;;
-    bjmetro)
       validate_count "$db" bj_metro_lines 1
       ;;
   esac
 }
 
 init_main() {
-  run_pair "$main_db" "sql/by_database/doris_showcase_schema.sql" "sql/by_database/doris_showcase_mock.sql"
+  run_pair "sql/by_database/doris_showcase_schema.sql" "sql/by_database/doris_showcase_mock.sql"
 }
 
 init_lineage() {
-  run_pair "$lineage_db" "sql/by_database/lineage_showcase_schema.sql" "sql/by_database/lineage_showcase_mock.sql"
+  run_pair "sql/by_database/lineage_showcase_schema.sql" "sql/by_database/lineage_showcase_mock.sql"
 }
 
 init_regdb() {
-  run_pair regdb "sql/by_database/regdb_schema.sql" "sql/by_database/regdb_mock.sql"
+  run_pair "sql/by_database/regdb_schema.sql" "sql/by_database/regdb_mock.sql"
 }
 
 init_bjmetro() {
-  run_pair bjmetro "sql/by_database/bjmetro_schema.sql" "sql/by_database/bjmetro_mock.sql"
+  run_pair "sql/by_database/bjmetro_schema.sql" "sql/by_database/bjmetro_mock.sql"
 }
 
 init_wide() {
@@ -96,13 +109,13 @@ cat <<INFO
 == Doris Showcase database initialization ==
 Doris: $DORIS_USER@$DORIS_HOST:$DORIS_PORT
 Main database: $main_db
-Lineage database: $lineage_db
 Upload dir: $UPLOAD_DIR
 Drop databases: $DROP_DATABASES
 INFO
 
 case "$MODE" in
   all)
+    drop_db_if_requested "$main_db"
     init_main
     init_lineage
     init_regdb
@@ -125,9 +138,6 @@ case "$MODE" in
     ;;
   validate)
     validate_db "$main_db"
-    validate_db "$lineage_db"
-    validate_db regdb
-    validate_db bjmetro
     ;;
   *)
     echo "Usage: sh scripts/init_database.sh [all|core|lineage|regdb|bjmetro|wide|validate]"
