@@ -1,17 +1,15 @@
-"""北京地铁运营分析平台 - API 路由"""
+"""London Underground (TfL) operations - API routes"""
 from fastapi import APIRouter, Query
 from functools import lru_cache
 
 from backend.service.bjmetro_service import (
-    BJMetroInitService, BJMetroOverviewService, BJMetroFlowService,
+    BJMetroOverviewService, BJMetroFlowService,
     BJMetroTrainService, BJMetroEquipmentService, BJMetroRevenueService,
 )
 
 router = APIRouter()
 
 
-@lru_cache
-def _init():     return BJMetroInitService()
 @lru_cache
 def _overview(): return BJMetroOverviewService()
 @lru_cache
@@ -22,16 +20,6 @@ def _train():    return BJMetroTrainService()
 def _equip():    return BJMetroEquipmentService()
 @lru_cache
 def _revenue():  return BJMetroRevenueService()
-
-
-# ── 初始化 ──────────────────────────────────────────────────────────
-@router.post("/bjmetro/init")
-async def bjmetro_init():
-    return await _init().init_tables()
-
-@router.post("/bjmetro/seed")
-async def bjmetro_seed():
-    return await _init().seed_data()
 
 
 # ── 运营总览 ────────────────────────────────────────────────────────

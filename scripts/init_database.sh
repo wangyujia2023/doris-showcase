@@ -93,10 +93,6 @@ init_regdb() {
   run_pair "sql/by_database/regdb_schema.sql" "sql/by_database/regdb_mock.sql"
 }
 
-init_bjmetro() {
-  run_pair "sql/by_database/bjmetro_schema.sql" "sql/by_database/bjmetro_mock.sql"
-}
-
 init_wide() {
   echo "Running wide-table schema and mock data for $main_db"
   mysql_query "CREATE DATABASE IF NOT EXISTS \`$main_db\`;"
@@ -119,7 +115,6 @@ case "$MODE" in
     init_main
     init_lineage
     init_regdb
-    init_bjmetro
     ;;
   core|main|doris_showcase)
     init_main
@@ -130,9 +125,6 @@ case "$MODE" in
   regdb)
     init_regdb
     ;;
-  bjmetro)
-    init_bjmetro
-    ;;
   wide)
     init_wide
     ;;
@@ -140,7 +132,7 @@ case "$MODE" in
     validate_db "$main_db"
     ;;
   *)
-    echo "Usage: sh scripts/init_database.sh [all|core|lineage|regdb|bjmetro|wide|validate]"
+    echo "Usage: sh scripts/init_database.sh [all|core|lineage|regdb|wide|validate]"
     exit 1
     ;;
 esac

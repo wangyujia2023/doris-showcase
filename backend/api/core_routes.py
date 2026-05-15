@@ -588,7 +588,7 @@ async def test_init_llm(payload: InitConfigPayload):
 
 @router.post("/system/init/database")
 async def run_database_init(payload: InitRunPayload):
-    if payload.mode not in {"all", "core", "lineage", "regdb", "bjmetro", "wide", "validate"}:
+    if payload.mode not in {"all", "core", "lineage", "regdb", "wide", "validate"}:
         raise HTTPException(status_code=400, detail="Invalid init mode")
     proc = await asyncio.create_subprocess_exec(
         "sh", "scripts/init_database.sh", payload.mode,
@@ -605,7 +605,7 @@ async def run_database_init(payload: InitRunPayload):
 
 @router.post("/system/init/database/stream")
 async def run_database_init_stream(payload: InitRunPayload):
-    if payload.mode not in {"all", "core", "lineage", "regdb", "bjmetro", "wide", "validate"}:
+    if payload.mode not in {"all", "core", "lineage", "regdb", "wide", "validate"}:
         raise HTTPException(status_code=400, detail="Invalid init mode")
 
     async def generate():
