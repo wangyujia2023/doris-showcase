@@ -1,10 +1,13 @@
 """银行监管报送一表通 - 服务层"""
+import logging
 import os, random, asyncio
 from datetime import datetime
 from typing import Dict, List
 import aiomysql
 from backend.doris.connect import execute_query, get_conn
 from backend.settings import settings
+
+logger = logging.getLogger(__name__)
 
 ORG = "BANK_DEMO_001"
 
@@ -32,7 +35,7 @@ async def rg_query(sql: str) -> List[Dict]:
                 finally:
                     await cur.execute(f"USE {settings.DORIS_DATABASE}")
     except Exception as e:
-        print(f"rg_query error: {e}")
+        logger.warning(f"rg_query error: {e}")
         return []
 
 async def rg_query_one(sql: str) -> Dict:
@@ -50,7 +53,7 @@ async def rg_exec(sql: str):
                 finally:
                     await cur.execute(f"USE {settings.DORIS_DATABASE}")
     except Exception as e:
-        print(f"rg_exec error: {e}")
+        logger.warning(f"rg_exec error: {e}")
 
 async def rg_exec_many(sql: str, data: list):
     if not data: return
@@ -64,7 +67,7 @@ async def rg_exec_many(sql: str, data: list):
                 finally:
                     await cur.execute(f"USE {settings.DORIS_DATABASE}")
     except Exception as e:
-        print(f"rg_exec_many error: {e}")
+        logger.warning(f"rg_exec_many error: {e}")
 
 # ── 报告期枚举 ─────────────────────────────────────────────────
 MONTHLY_PERIODS = [f"2023-{m:02d}" for m in range(7, 13)] + \

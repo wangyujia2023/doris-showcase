@@ -1,5 +1,8 @@
 <template>
   <div class="tab-wrap">
+    <div v-if="loading" class="loading-mask"><el-icon class="loading-spin"><Loading /></el-icon><span>{{ t('common.loading') }}</span></div>
+    <el-alert v-else-if="error" :title="error" type="error" show-icon style="margin-bottom:8px"/>
+    <template v-else>
     <div class="kpi-row" v-if="kpi">
       <div class="kpi-card" style="--top:#67c23a">
         <div class="kc-label">{{ t('bjm.trainPunctuality') }}</div>
@@ -88,11 +91,13 @@
         </el-table-column>
       </el-table>
     </el-card>
+    </template>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted, nextTick } from 'vue'
+import { Loading } from '@element-plus/icons-vue'
 import { bjMetroApi } from '@/api'
 import { t } from '@/i18n'
 import { useDomChart } from '@/composables/useChart'
@@ -103,20 +108,28 @@ const kpi        = ref(null)
 const punctTrend = ref([])
 const faultTypes = ref([])
 const trainList  = ref([])
+const loading    = ref(true)
+const error      = ref('')
 
 onMounted(async () => {
-  const [k, pt, ft, tl] = await Promise.all([
-    bjMetroApi.trainKpi(),
-    bjMetroApi.trainPunctTrend(),
-    bjMetroApi.trainFaultTypes(),
-    bjMetroApi.trainList(),
-  ])
-  kpi.value        = k
-  punctTrend.value = pt.data || []
-  faultTypes.value = ft.data || []
-  trainList.value  = tl.data || []
-  await nextTick()
-  renderPunctTrend(); renderFaultPie(); renderDelayByLine(); renderPunctRank()
+  try {
+    const [k, pt, ft, tl] = await Promise.all([
+      bjMetroApi.trainKpi(),
+      bjMetroApi.trainPunctTrend(),
+      bjMetroApi.trainFaultTypes(),
+      bjMetroApi.trainList(),
+    ])
+    kpi.value        = k
+    punctTrend.value = pt.data || []
+    faultTypes.value = ft.data || []
+    trainList.value  = tl.data || []
+    await nextTick()
+    renderPunctTrend(); renderFaultPie(); renderDelayByLine(); renderPunctRank()
+  } catch (e) {
+    error.value = e.message || 'Failed to load train data'
+  } finally {
+    loading.value = false
+  }
 })
 
 const renderPunctTrend = () => {
@@ -194,6 +207,9 @@ const renderPunctRank = () => {
 
 <style scoped>
 .tab-wrap { display:flex; flex-direction:column; gap:12px; }
+.loading-mask { display:flex; align-items:center; justify-content:center; gap:10px; height:200px; color:#909399; font-size:14px; }
+.loading-spin { animation:spin 1s linear infinite; font-size:20px; color:#409eff; }
+@keyframes spin { from { transform:rotate(0deg); } to { transform:rotate(360deg); } }
 .kpi-row { display:grid; grid-template-columns:repeat(6,1fr); gap:10px; }
 .kpi-card { background:#fff; border:1px solid #e8edf3; border-top:3px solid var(--top,#409eff); border-radius:6px; padding:14px 16px; }
 .kc-label { font-size:12px; color:#909399; margin-bottom:8px; }

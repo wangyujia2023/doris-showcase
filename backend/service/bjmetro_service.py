@@ -1,66 +1,20 @@
 """London Underground (TfL) operations service"""
-import asyncio
-from datetime import date, datetime, timedelta
+import logging
 from typing import Dict, List
 
-import aiomysql
-from backend.doris.connect import execute_query, get_conn
-from backend.settings import settings
+from backend.doris.connect import execute_query, execute_one
 
-def _db() -> str:
-    return settings.DORIS_DATABASE
+logger = logging.getLogger(__name__)
 
 # ── 数据库查询工具 ────────────────────────────────────────────────────────────
 
-async def bj_query(sql: str) -> List[Dict]:
-    try:
-        async with get_conn() as conn:
-            async with conn.cursor(aiomysql.DictCursor) as cur:
-                await cur.execute(f"USE {_db()}")
-                try:
-                    await cur.execute(sql)
-                    rows = await cur.fetchall()
-                    return [dict(r) for r in rows]
-                finally:
-                    await cur.execute(f"USE {settings.DORIS_DATABASE}")
-    except Exception as e:
-        print(f"bj_query error: {e}")
-        return []
+async def bj_query(sql: str, args: tuple = None) -> List[Dict]:
+    return await execute_query(sql, args)
 
 
-async def bj_query_one(sql: str) -> Dict:
-    rows = await bj_query(sql)
-    return rows[0] if rows else {}
-
-
-async def bj_exec(sql: str):
-    try:
-        async with get_conn() as conn:
-            async with conn.cursor() as cur:
-                await cur.execute(f"USE {_db()}")
-                try:
-                    await cur.execute(sql)
-                    await conn.commit()
-                finally:
-                    await cur.execute(f"USE {settings.DORIS_DATABASE}")
-    except Exception as e:
-        print(f"bj_exec error: {e}")
-
-
-async def bj_exec_many(sql: str, data: list):
-    if not data:
-        return
-    try:
-        async with get_conn() as conn:
-            async with conn.cursor() as cur:
-                await cur.execute(f"USE {_db()}")
-                try:
-                    await cur.executemany(sql, data)
-                    await conn.commit()
-                finally:
-                    await cur.execute(f"USE {settings.DORIS_DATABASE}")
-    except Exception as e:
-        print(f"bj_exec_many error: {e}")
+async def bj_query_one(sql: str, args: tuple = None) -> Dict:
+    row = await execute_one(sql, args)
+    return row or {}
 
 
 # ═══════════════════════════════════════════════════════════
@@ -196,7 +150,8 @@ class BJMetroFlowService:
         rows = await bj_query("""
             SELECT flow_hour AS hour,
                    ROUND(AVG(CASE WHEN DAYOFWEEK(flow_date) NOT IN (1,7) THEN total_passengers END)) AS workday_avg,
-                   ROUND(AVG(CASE WHEN DAYOFWEEK(flow_date) IN (1,7) THEN total_passengers END)) AS weekend_avg
+                   ROUND(AVG(CASE WHEN DAYOFWEEK(flow_date) IN (1,7) THEN total_passengers END)) AS weekend_avg,
+                   ROUND(AVG(overcapacity_cnt)) AS avg_overcap
             FROM bj_metro_hourly_flow
             GROUP BY flow_hour ORDER BY flow_hour""")
         return {"data": rows}
@@ -213,16 +168,18 @@ class BJMetroFlowService:
         return {"data": rows}
 
     async def od_hot_pairs(self, peak_type: str = "morning") -> Dict:
-        rows = await bj_query(f"""
+        if peak_type not in ("morning", "evening", "offpeak"):
+            peak_type = "morning"
+        rows = await bj_query("""
             SELECT o.origin_id, s1.station_name AS origin_name,
                    o.dest_id,   s2.station_name AS dest_name,
                    SUM(o.flow_count) AS total_flow
             FROM bj_metro_od_flow o
             JOIN bj_metro_stations s1 ON o.origin_id=s1.station_id
             JOIN bj_metro_stations s2 ON o.dest_id=s2.station_id
-            WHERE o.peak_type='{peak_type}'
+            WHERE o.peak_type=%s
             GROUP BY o.origin_id,s1.station_name,o.dest_id,s2.station_name
-            ORDER BY total_flow DESC LIMIT 15""")
+            ORDER BY total_flow DESC LIMIT 15""", (peak_type,))
         return {"data": rows}
 
     async def flow_trend_30d(self) -> Dict:

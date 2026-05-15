@@ -1,5 +1,8 @@
 <template>
   <div class="tab-wrap">
+    <div v-if="loading" class="loading-mask"><el-icon class="loading-spin"><Loading /></el-icon><span>{{ t('common.loading') }}</span></div>
+    <el-alert v-else-if="error" :title="error" type="error" show-icon style="margin-bottom:8px"/>
+    <template v-else>
     <div class="kpi-row">
       <div class="kpi-card" style="--top:#409eff">
         <div class="kc-label">{{ t('bjm.flowToday') }}</div>
@@ -64,11 +67,13 @@
         </el-table>
       </el-card>
     </div>
+    </template>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { Loading } from '@element-plus/icons-vue'
 import { bjMetroApi } from '@/api'
 import { t } from '@/i18n'
 import { useDomChart } from '@/composables/useChart'
@@ -93,20 +98,31 @@ const eveningPeak = computed(() => {
   const h = hourly.value.find(d => d.hour === 17)
   return h ? Math.round((h.workday_avg || 0) / 10000) : 0
 })
-const overcapTotal = computed(() => 12)
+const overcapTotal = computed(() =>
+  hourly.value.reduce((s, h) => s + (h.avg_overcap || 0), 0)
+)
+
+const loading = ref(true)
+const error   = ref('')
 
 onMounted(async () => {
-  const [h, t, hs, od] = await Promise.all([
-    bjMetroApi.flowHourly(),
-    bjMetroApi.flowTrend(),
-    bjMetroApi.flowHotStations(),
-    bjMetroApi.flowOdPairs('morning'),
-  ])
-  hourly.value     = h.data || []
-  trend30d.value   = t.data || []
-  hotStations.value= hs.data || []
-  odPairs.value    = od.data || []
-  renderHourly(); renderTrend(); renderHotStations()
+  try {
+    const [h, trend, hs, od] = await Promise.all([
+      bjMetroApi.flowHourly(),
+      bjMetroApi.flowTrend(),
+      bjMetroApi.flowHotStations(),
+      bjMetroApi.flowOdPairs('morning'),
+    ])
+    hourly.value     = h.data || []
+    trend30d.value   = trend.data || []
+    hotStations.value= hs.data || []
+    odPairs.value    = od.data || []
+    renderHourly(); renderTrend(); renderHotStations()
+  } catch (e) {
+    error.value = e.message || 'Failed to load flow data'
+  } finally {
+    loading.value = false
+  }
 })
 
 const loadOd = async () => {
@@ -169,6 +185,9 @@ const renderHotStations = () => {
 
 <style scoped>
 .tab-wrap { display: flex; flex-direction: column; gap: 12px; }
+.loading-mask { display:flex; align-items:center; justify-content:center; gap:10px; height:200px; color:#909399; font-size:14px; }
+.loading-spin { animation:spin 1s linear infinite; font-size:20px; color:#409eff; }
+@keyframes spin { from { transform:rotate(0deg); } to { transform:rotate(360deg); } }
 .kpi-row { display: grid; grid-template-columns: repeat(5,1fr); gap: 10px; }
 .kpi-card { background:#fff; border:1px solid #e8edf3; border-top:3px solid var(--top,#409eff); border-radius:6px; padding:14px 16px; }
 .kc-label { font-size:12px; color:#909399; margin-bottom:8px; }

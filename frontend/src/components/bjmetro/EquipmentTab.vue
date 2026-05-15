@@ -1,5 +1,8 @@
 <template>
   <div class="tab-wrap">
+    <div v-if="loading" class="loading-mask"><el-icon class="loading-spin"><Loading /></el-icon><span>{{ t('common.loading') }}</span></div>
+    <el-alert v-else-if="error" :title="error" type="error" show-icon style="margin-bottom:8px"/>
+    <template v-else>
     <div class="kpi-row" v-if="kpi">
       <div class="kpi-card" style="--top:#67c23a">
         <div class="kc-label">{{ t('bjm.faultTotal') }}</div>
@@ -86,11 +89,13 @@
         <el-table-column prop="handler" :label="t('bjm.handler')" width="80"/>
       </el-table>
     </el-card>
+    </template>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { Loading } from '@element-plus/icons-vue'
 import { bjMetroApi } from '@/api'
 import { t } from '@/i18n'
 import { useDomChart } from '@/composables/useChart'
@@ -104,6 +109,8 @@ const maintLog  = ref([])
 const faultTrend= ref([])
 const deviceMttr= ref([])
 const search    = ref('')
+const loading   = ref(true)
+const error     = ref('')
 
 const filteredLog = computed(() => {
   if (!search.value) return maintLog.value
@@ -117,21 +124,27 @@ const filteredLog = computed(() => {
 })
 
 onMounted(async () => {
-  const [k, fd, fl, ml, ft, dm] = await Promise.all([
-    bjMetroApi.equipKpi(),
-    bjMetroApi.equipFaultDist(),
-    bjMetroApi.equipFaultByLine(),
-    bjMetroApi.equipMaintLog(),
-    bjMetroApi.equipFaultTrend(),
-    bjMetroApi.equipDeviceMttr(),
-  ])
-  kpi.value       = k
-  faultDist.value = fd.data || []
-  faultLine.value = fl.data || []
-  maintLog.value  = ml.data || []
-  faultTrend.value= ft.data || []
-  deviceMttr.value= dm.data || []
-  renderDist(); renderByLine(); renderTrend(); renderMttr()
+  try {
+    const [k, fd, fl, ml, ft, dm] = await Promise.all([
+      bjMetroApi.equipKpi(),
+      bjMetroApi.equipFaultDist(),
+      bjMetroApi.equipFaultByLine(),
+      bjMetroApi.equipMaintLog(),
+      bjMetroApi.equipFaultTrend(),
+      bjMetroApi.equipDeviceMttr(),
+    ])
+    kpi.value       = k
+    faultDist.value = fd.data || []
+    faultLine.value = fl.data || []
+    maintLog.value  = ml.data || []
+    faultTrend.value= ft.data || []
+    deviceMttr.value= dm.data || []
+    renderDist(); renderByLine(); renderTrend(); renderMttr()
+  } catch (e) {
+    error.value = e.message || 'Failed to load equipment data'
+  } finally {
+    loading.value = false
+  }
 })
 
 const renderDist = () => {
@@ -204,6 +217,9 @@ const renderMttr = () => {
 
 <style scoped>
 .tab-wrap { display:flex; flex-direction:column; gap:12px; }
+.loading-mask { display:flex; align-items:center; justify-content:center; gap:10px; height:200px; color:#909399; font-size:14px; }
+.loading-spin { animation:spin 1s linear infinite; font-size:20px; color:#409eff; }
+@keyframes spin { from { transform:rotate(0deg); } to { transform:rotate(360deg); } }
 .kpi-row { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
 .kpi-card { background:#fff; border:1px solid #e8edf3; border-top:3px solid var(--top,#409eff); border-radius:6px; padding:14px 16px; }
 .kc-label { font-size:12px; color:#909399; margin-bottom:8px; }

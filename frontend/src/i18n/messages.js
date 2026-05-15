@@ -724,11 +724,6 @@ export const messages = {
       generateBtn: '生成数据',
     },
     metro: {
-      initBtn: '建表',
-      seedBtn: '导入数据',
-      initData: '初始化数据',
-      initOk: '数据初始化完成',
-      initFail: '初始化失败，请检查 Doris 连接',
       tabOverview: '运营总览',
       tabFlow: '客流分析',
       tabTrain: '列车运行',
@@ -1928,11 +1923,6 @@ export const messages = {
       generateBtn: 'Generate Data',
     },
     metro: {
-      initBtn: 'Build Tables',
-      seedBtn: 'Import Data',
-      initData: 'Init Data',
-      initOk: 'Data initialized successfully',
-      initFail: 'Init failed, check Doris connection',
       tabOverview: 'Operations Overview',
       tabFlow: 'Passenger Flow',
       tabTrain: 'Train Operations',
