@@ -28,7 +28,7 @@
           <span style="margin-left:auto;color:#67c23a;font-size:12px">{{ sqlExpanded ? t('common.collapse') : t('common.expand') }}</span>
         </div>
         <div v-if="!sqlExpanded" class="sql-collapsed" @click="sqlExpanded = true">
-          <span class="sql-collapsed-hint">UPDATE user_wide SET log_tags = AI_CLASSIFY('qwen_llm_resource', CONCAT(...), ARRAY[...])  </span>
+          <span class="sql-collapsed-hint">UPDATE user_wide SET log_tags = AI_CLASSIFY('llm_resource', CONCAT(...), ARRAY[...])  </span>
           <el-link type="success" :underline="false" style="font-size:12px">{{ t('expandSql') }}</el-link>
         </div>
         <pre v-else class="sql-code">{{ showcaseSQL }}</pre>
@@ -349,21 +349,19 @@ import { registerEchartsBasic } from '@/plugins/registerEchartsBasic'
 registerEchartsBasic()
 
 
-const showcaseSQL = `-- Doris AI_CLASSIFY 打标签（一键执行，无需离线建模）
+const showcaseSQL = `-- Doris AI_CLASSIFY tagging (one-click, no offline training)
 UPDATE user_wide
 SET log_tags = AI_CLASSIFY(
-    'qwen_llm_resource',                          -- Doris Resource：已注册的 LLM 端点
+    'llm_resource',
     CONCAT(
-        '{{ t('logClassify.assetLevel') }}:', asset_level,
-        ' AUM:', aum_total, '万',
-        ' {{ t('logClassify.active') }}度:', active_level,
-        ' {{ t('logClassify.lifecycle') }}:', lifecycle_stage
-    ),                                            -- 输入：用户画像文本
-    ARRAY[
-        '高净值','基金偏好','理财偏好','贷款需求',
-        '异地登录','大额转账','频繁操作','保险偏好',
-        '稳健型','贵宾','新客','高频交易'
-    ]                                             -- 候选标签集合
+        'Asset Level:', asset_level,
+        ' AUM:', aum_total, '(10k)',
+        ' Activity:', active_level,
+        ' Lifecycle:', lifecycle_stage
+    ),
+    ARRAY('High Net Worth','Fund Preference','Wealth Preference','Loan Demand',
+          'Remote Login','Large Transfer','Frequent Operations','Insurance Preference',
+          'Conservative','VIP','New Customer','High-Frequency Trading')
 )
 WHERE log_tags IS NULL OR log_tags = '[]';`
 

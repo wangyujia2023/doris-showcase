@@ -168,69 +168,83 @@ class TagAnalysisService:
         return rows
 
     async def run_classify(self):
-        """
-        模拟 Doris AI_CLASSIFY 打标签：
-        根据用户属性规则推断标签，写入 user_wide.log_tags。
-        实际生产中此处替换为 AI_CLASSIFY SQL 一键执行。
-        """
-        users = await execute_query("""
-            SELECT user_id, asset_level, aum_total, active_level,
-                   lifecycle_stage, anomaly_flag, preferred_channel
-            FROM user_wide
-            LIMIT 500
-        """)
+        from backend.settings import settings
+        ai_resource = (settings.DORIS_AI_RESOURCE or "llm_resource").strip()
 
-        tagged_count = 0
+        classify_sql = f"""
+UPDATE user_wide SET log_tags = AI_CLASSIFY(
+    '{ai_resource}',
+    CONCAT('资产等级:', asset_level, ' AUM:', aum_total, '万', ' 活跃度:', active_level, ' 生命周期:', lifecycle_stage),
+    ARRAY('高净值','基金偏好','理财偏好','贷款需求','异地登录','大额转账','频繁操作','保险偏好','稳健型','贵宾','新客','高频交易')
+) WHERE log_tags IS NULL OR log_tags = '[]'
+        """
+        try:
+            tagged = await execute_write(classify_sql)
+        except Exception as e:
+            import logging
+            logging.getLogger(__name__).warning(f"AI_CLASSIFY failed, falling back to rule-based: {e}")
+            tagged = await self._rule_based_classify()
+
+        total_row = await execute_one("SELECT COUNT(*) AS n FROM user_wide")
+        total = int((total_row or {}).get("n", 0))
+        samples_raw = await execute_query(
+            "SELECT user_id, log_tags FROM user_wide "
+            "WHERE log_tags IS NOT NULL AND log_tags != '[]' LIMIT 5"
+        )
         samples = []
+        for r in samples_raw:
+            try:
+                tags = json.loads(r.get("log_tags") or "[]")
+            except Exception:
+                tags = []
+            samples.append({"user_id": r["user_id"], "tags": tags[:4]})
 
+        return {"status": "ok", "total": total, "tagged": tagged or len(samples_raw), "samples": samples}
+
+    async def _rule_based_classify(self) -> int:
+        users = await execute_query(
+            "SELECT user_id, asset_level, aum_total, active_level, "
+            "lifecycle_stage, anomaly_flag, preferred_channel "
+            "FROM user_wide WHERE log_tags IS NULL OR log_tags = '[]' LIMIT 500"
+        )
+        tagged = 0
         for u in users:
-            aum      = float(u.get("aum_total") or 0)
-            asset    = u.get("asset_level") or ""
-            active   = u.get("active_level") or ""
+            aum = float(u.get("aum_total") or 0)
+            asset = u.get("asset_level") or ""
+            active = u.get("active_level") or ""
             lifecycle = u.get("lifecycle_stage") or ""
-            anomaly  = int(u.get("anomaly_flag") or 0)
-            channel  = u.get("preferred_channel") or ""
-
+            anomaly = int(u.get("anomaly_flag") or 0)
+            channel = u.get("preferred_channel") or ""
             tags = []
             if aum > 80 or asset in ("VIP私行", "VIP钻石"):
                 tags.append("高净值")
             if asset in ("VIP私行", "VIP钻石", "VIP铂金"):
                 tags.append("贵宾")
-            if lifecycle == "新客期":
+            if lifecycle in ("新客", "新客期"):
                 tags.append("新客")
-            if active == "高活跃":
+            if active in ("高活", "高活跃"):
                 tags.append("高频交易")
             if anomaly == 1:
-                tags.append("频繁操作")
+                tags.extend(["频繁操作", "异地登录"])
                 if aum > 50:
                     tags.append("大额转账")
-                tags.append("异地登录")
             if aum < 8:
                 tags.append("贷款需求")
             if "基金" in channel:
                 tags.append("基金偏好")
-            elif "理财" in channel or aum > 20:
+            elif aum > 20:
                 tags.append("理财偏好")
-            if active in ("低活跃",) and aum < 30:
+            if active in ("低活", "低活跃") and aum < 30:
                 tags.append("稳健型")
             if "保险" in channel:
                 tags.append("保险偏好")
-
             if tags:
                 tags_json = json.dumps(list(dict.fromkeys(tags)), ensure_ascii=False)
                 await execute_write(
                     f"UPDATE user_wide SET log_tags = '{tags_json}' WHERE user_id = {u['user_id']}"
                 )
-                tagged_count += 1
-                if len(samples) < 5:
-                    samples.append({"user_id": u["user_id"], "tags": tags[:4]})
-
-        return {
-            "status": "ok",
-            "total": len(users),
-            "tagged": tagged_count,
-            "samples": samples,
-        }
+                tagged += 1
+        return tagged
 
     async def tag_cooccurrence(self):
         """标签共现矩阵（两两同时出现的用户数）

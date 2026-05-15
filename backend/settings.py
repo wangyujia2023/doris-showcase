@@ -22,7 +22,7 @@ def _load_dotenv_file(path: str = ".env") -> None:
         key, value = line.split("=", 1)
         key = key.strip()
         value = value.strip().strip('"').strip("'")
-        os.environ.setdefault(key, value)
+        os.environ[key] = value
 
 
 def _env_bool(key: str, default: str = "false") -> bool:
@@ -54,7 +54,7 @@ class Settings:
         self.DORIS_USER: str = os.getenv("DORIS_USER", "root")
         self.DORIS_PASSWORD: str = os.getenv("DORIS_PASSWORD", "")
         self.DORIS_DATABASE: str = os.getenv("DORIS_DATABASE", "doris_showcase")
-        self.DORIS_AI_RESOURCE: str = os.getenv("DORIS_AI_RESOURCE", "")
+        self.DORIS_AI_RESOURCE: str = os.getenv("DORIS_AI_RESOURCE", "llm_resource")
         self.DB_WARMUP_ON_START: bool = _env_bool("DB_WARMUP_ON_START", "false")
         self.BACKEND_HOST: str = os.getenv("BACKEND_HOST", "0.0.0.0")
         self.BACKEND_PORT: int = _env_int("BACKEND_PORT", "27713")
@@ -78,7 +78,7 @@ class Settings:
         self.BEHAVIOR_SCAN_DAYS: int = _env_int("BEHAVIOR_SCAN_DAYS", "120")
         self.OPENMETADATA_BASE_URL: str = os.getenv("OPENMETADATA_BASE_URL", "http://10.26.20.3:8585/api")
         self.OPENMETADATA_JWT_TOKEN: str = os.getenv("OPENMETADATA_JWT_TOKEN", "")
-        self.LINEAGE_DATABASE: str = os.getenv("LINEAGE_DATABASE", os.getenv("RETAIL_LINEAGE_DB", "lineage_showcase"))
+        self.LINEAGE_DATABASE: str = os.getenv("LINEAGE_DATABASE", os.getenv("RETAIL_LINEAGE_DB", self.DORIS_DATABASE))
         self.RETAIL_LINEAGE_DB: str = self.LINEAGE_DATABASE  # Backward compatible alias
 
         # 数据安全（脱敏）

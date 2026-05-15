@@ -33,14 +33,19 @@ export function useVectorLabels(labels, dictionary) {
   function labelSelectorStyle(label, selected) {
     const color = isUsefulColor(label.color) ? label.color : labelColor(label.label_name)
     if (!selected) {
-      return { '--label-color': color, color, borderColor: softBorder(color), background: '#fff' }
+      return {
+        '--label-color': '#909399',
+        color: '#909399',
+        borderColor: '#e4e7ed',
+        background: '#f5f7fa',
+      }
     }
     return {
       '--label-color': color,
-      '--label-soft-bg': softBg(color, '16'),
-      color,
-      borderColor: softBorder(color),
-      background: `linear-gradient(135deg, ${softBg(color, '16')} 0%, #ffffff 100%)`,
+      color: '#fff',
+      borderColor: color,
+      background: color,
+      boxShadow: `0 2px 6px ${softBg(color, '55')}`,
     }
   }
 
