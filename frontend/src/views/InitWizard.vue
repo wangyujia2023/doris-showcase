@@ -161,7 +161,7 @@
 import { computed, nextTick, onMounted, reactive, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Lock } from '@element-plus/icons-vue'
-import { systemApi } from '@/api'
+import { systemApi, bjMetroApi } from '@/api'
 import { t } from '@/i18n'
 
 const activeStep = ref(0)
@@ -332,6 +332,20 @@ async function runInit(mode) {
       scrollLog()
     }
     const ok = output.value.includes('✅')
+    if (ok && mode !== 'validate') {
+      output.value += '\n>>> Initializing BJMetro tables...\n'
+      scrollLog()
+      try {
+        const r1 = await bjMetroApi.init()
+        output.value += `    build tables: ${r1.msg || 'ok'}\n`
+        const r2 = await bjMetroApi.seed()
+        output.value += `    seed data:    ${r2.msg || 'ok'}\n`
+        output.value += '✅ BJMetro done\n'
+      } catch (e2) {
+        output.value += `    ⚠ BJMetro: ${e2.message}\n`
+      }
+      scrollLog()
+    }
     ElMessage[ok ? 'success' : 'error'](ok
       ? (mode === 'validate' ? t('initWizard.validateOk') : t('initWizard.importOk'))
       : t('initWizard.importFail'))
