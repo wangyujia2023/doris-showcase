@@ -25,37 +25,40 @@ async def bj_query_one(sql: str, args: tuple = None) -> Dict:
 class BJMetroOverviewService:
 
     async def today_kpi(self) -> Dict:
-        # 今日全网客流（取最新有数据的日期）
         row = await bj_query_one("""
-            SELECT SUM(inbound_count) AS total_passengers
-            FROM bj_metro_daily_flow
-            WHERE flow_date=(SELECT MAX(flow_date) FROM bj_metro_daily_flow)""")
-        passengers = int(row.get("total_passengers") or 0)
-
-        # 平均准点率
-        row2 = await bj_query_one("""
-            SELECT AVG(punctuality_rate) AS avg_punct,
-                   SUM(fault_count) AS faults,
-                   SUM(actual_trains) AS trains
-            FROM bj_metro_train_ops
-            WHERE ops_date=(SELECT MAX(ops_date) FROM bj_metro_train_ops)""")
-
-        # 最新收入（万元）
-        row3 = await bj_query_one("""
-            SELECT SUM(ticket_revenue + ad_revenue + commercial_revenue) AS total_rev
-            FROM bj_metro_revenue
-            WHERE revenue_date=(SELECT MAX(revenue_date) FROM bj_metro_revenue)""")
-        total_rev_w = round((row3.get("total_rev") or 0) / 100 / 10000, 1)
-
-        row4 = await bj_query_one("SELECT COUNT(*) AS n FROM bj_metro_lines WHERE status='Operating'")
-
+            SELECT
+              (SELECT SUM(inbound_count)
+               FROM bj_metro_daily_flow
+               WHERE flow_date=(SELECT MAX(flow_date) FROM bj_metro_daily_flow)
+              ) AS total_passengers,
+              (SELECT AVG(punctuality_rate)
+               FROM bj_metro_train_ops
+               WHERE ops_date=(SELECT MAX(ops_date) FROM bj_metro_train_ops)
+              ) AS avg_punct,
+              (SELECT SUM(fault_count)
+               FROM bj_metro_train_ops
+               WHERE ops_date=(SELECT MAX(ops_date) FROM bj_metro_train_ops)
+              ) AS faults,
+              (SELECT SUM(actual_trains)
+               FROM bj_metro_train_ops
+               WHERE ops_date=(SELECT MAX(ops_date) FROM bj_metro_train_ops)
+              ) AS trains,
+              (SELECT SUM(ticket_revenue + ad_revenue + commercial_revenue)
+               FROM bj_metro_revenue
+               WHERE revenue_date=(SELECT MAX(revenue_date) FROM bj_metro_revenue)
+              ) AS total_rev,
+              (SELECT COUNT(*)
+               FROM bj_metro_lines WHERE status='Operating'
+              ) AS active_lines""")
+        passengers  = int(row.get("total_passengers") or 0)
+        total_rev_w = round((row.get("total_rev") or 0) / 100 / 10000, 1)
         return {
             "daily_passengers_w": round(passengers / 10000, 1),
-            "punctuality_rate":   round(float(row2.get("avg_punct") or 0.994), 4),
+            "punctuality_rate":   round(float(row.get("avg_punct") or 0.994), 4),
             "daily_revenue_w":    total_rev_w,
-            "fault_count":        int(row2.get("faults") or 0),
-            "active_lines":       int(row4.get("n") or 0),
-            "active_trains":      int(row2.get("trains") or 0),
+            "fault_count":        int(row.get("faults") or 0),
+            "active_lines":       int(row.get("active_lines") or 0),
+            "active_trains":      int(row.get("trains") or 0),
         }
 
     async def flow_trend_today(self) -> Dict:
