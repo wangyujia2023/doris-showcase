@@ -1,5 +1,18 @@
 import { onBeforeUnmount } from 'vue'
-import { init } from 'echarts/core'
+import { use, init } from 'echarts/core'
+import { BarChart, LineChart, PieChart, RadarChart } from 'echarts/charts'
+import {
+  GridComponent, TooltipComponent, LegendComponent,
+  MarkLineComponent, DataZoomComponent,
+} from 'echarts/components'
+import { CanvasRenderer } from 'echarts/renderers'
+
+use([
+  BarChart, LineChart, PieChart, RadarChart,
+  GridComponent, TooltipComponent, LegendComponent,
+  MarkLineComponent, DataZoomComponent,
+  CanvasRenderer,
+])
 
 export function useDomChart() {
   const charts = new Map()
