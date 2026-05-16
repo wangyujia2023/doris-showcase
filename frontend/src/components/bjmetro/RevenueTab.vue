@@ -82,7 +82,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, nextTick } from 'vue'
 import { Loading } from '@element-plus/icons-vue'
 import { bjMetroApi } from '@/api'
 import { t } from '@/i18n'
@@ -113,6 +113,7 @@ onMounted(async () => {
     revTrend.value      = rt.data || []
     ticketTypes.value   = tt.data || []
     revenueByLine.value = rb.data || []
+    await nextTick()
     renderRevTrend(); renderTicketType(); renderByLineChart()
   } catch (e) {
     error.value = e.message || 'Failed to load revenue data'

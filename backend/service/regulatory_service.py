@@ -123,7 +123,7 @@ class RegInitService:
                                 await cur.execute(stmt)
                                 executed += 1
                             except Exception as e:
-                                print(f"init skip: {e}")
+                                logger.warning(f"init skip: {e}")
                                 skipped += 1
                     finally:
                         await cur.execute(f"USE {settings.DORIS_DATABASE}")

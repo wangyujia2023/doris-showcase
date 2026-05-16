@@ -241,7 +241,8 @@ UPDATE user_wide SET log_tags = AI_CLASSIFY(
             if tags:
                 tags_json = json.dumps(list(dict.fromkeys(tags)), ensure_ascii=False)
                 await execute_write(
-                    f"UPDATE user_wide SET log_tags = '{tags_json}' WHERE user_id = {u['user_id']}"
+                    "UPDATE user_wide SET log_tags = %s WHERE user_id = %s",
+                    (tags_json, int(u['user_id']))
                 )
                 tagged += 1
         return tagged

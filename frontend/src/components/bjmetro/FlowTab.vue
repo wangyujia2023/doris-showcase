@@ -72,7 +72,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, nextTick } from 'vue'
 import { Loading } from '@element-plus/icons-vue'
 import { bjMetroApi } from '@/api'
 import { t } from '@/i18n'
@@ -117,6 +117,7 @@ onMounted(async () => {
     trend30d.value   = trend.data || []
     hotStations.value= hs.data || []
     odPairs.value    = od.data || []
+    await nextTick()
     renderHourly(); renderTrend(); renderHotStations()
   } catch (e) {
     error.value = e.message || 'Failed to load flow data'
