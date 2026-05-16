@@ -307,7 +307,9 @@ class BJMetroEquipmentService:
                    SUM(CASE WHEN severity='Warning'  THEN 1 ELSE 0 END) AS warning,
                    SUM(CASE WHEN severity='Information' THEN 1 ELSE 0 END) AS info
             FROM bj_metro_fault_log
-            WHERE fault_time >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+            WHERE fault_time >= DATE_SUB(
+                (SELECT MAX(fault_time) FROM bj_metro_fault_log),
+                INTERVAL 30 DAY)
             GROUP BY DATE(fault_time) ORDER BY date""")
         return {"data": rows}
 
