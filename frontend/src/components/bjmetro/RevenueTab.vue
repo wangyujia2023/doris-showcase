@@ -113,12 +113,14 @@ onMounted(async () => {
     revTrend.value      = rt.data || []
     ticketTypes.value   = tt.data || []
     revenueByLine.value = rb.data || []
-    await nextTick()
-    renderRevTrend(); renderTicketType(); renderByLineChart()
   } catch (e) {
     error.value = e.message || 'Failed to load revenue data'
   } finally {
     loading.value = false
+  }
+  if (!error.value) {
+    await nextTick()
+    renderRevTrend(); renderTicketType(); renderByLineChart()
   }
 })
 

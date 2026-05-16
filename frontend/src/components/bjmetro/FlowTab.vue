@@ -117,12 +117,14 @@ onMounted(async () => {
     trend30d.value   = trend.data || []
     hotStations.value= hs.data || []
     odPairs.value    = od.data || []
-    await nextTick()
-    renderHourly(); renderTrend(); renderHotStations()
   } catch (e) {
     error.value = e.message || 'Failed to load flow data'
   } finally {
     loading.value = false
+  }
+  if (!error.value) {
+    await nextTick()
+    renderHourly(); renderTrend(); renderHotStations()
   }
 })
 

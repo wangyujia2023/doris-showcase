@@ -139,12 +139,14 @@ onMounted(async () => {
     maintLog.value  = ml.data || []
     faultTrend.value= ft.data || []
     deviceMttr.value= dm.data || []
-    await nextTick()
-    renderDist(); renderByLine(); renderTrend(); renderMttr()
   } catch (e) {
     error.value = e.message || 'Failed to load equipment data'
   } finally {
     loading.value = false
+  }
+  if (!error.value) {
+    await nextTick()
+    renderDist(); renderByLine(); renderTrend(); renderMttr()
   }
 })
 

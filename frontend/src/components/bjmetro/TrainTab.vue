@@ -123,12 +123,14 @@ onMounted(async () => {
     punctTrend.value = pt.data || []
     faultTypes.value = ft.data || []
     trainList.value  = tl.data || []
-    await nextTick()
-    renderPunctTrend(); renderFaultPie(); renderDelayByLine(); renderPunctRank()
   } catch (e) {
     error.value = e.message || 'Failed to load train data'
   } finally {
     loading.value = false
+  }
+  if (!error.value) {
+    await nextTick()
+    renderPunctTrend(); renderFaultPie(); renderDelayByLine(); renderPunctRank()
   }
 })
 
